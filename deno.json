@@ -1,6 +1,10 @@
 {
+  "imports": {
+    "@std/path": "jsr:@std/path@^1",
+    "jszip": "npm:jszip@3"
+  },
   "tasks": {
-    "pack": "deno run --allow-read --allow-write pack-ext.js .",
+    "pack": "deno run --allow-read --allow-write --allow-env=READABLE_STREAM pack-ext.js .",
     "fmt": "deno fmt"
   },
   "fmt": {

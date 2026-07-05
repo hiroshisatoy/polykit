@@ -1,5 +1,5 @@
-import { dirname, fromFileUrl, join, relative } from "jsr:@std/path";
-import JSZip from "npm:jszip@3";
+import { dirname, fromFileUrl, join, relative } from "@std/path";
+import JSZip from "jszip";
 
 const EXCLUDE_PREFIXES = ["__", ".", "tests"];
 const EXCLUDE_BASENAMES = new Set([

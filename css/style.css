@@ -534,54 +534,6 @@ li.consistency-header-index {
   font-size: 14px;
 }
 
-#polykit-settings-panel1 {
-  flex-direction: column;
-  flex-wrap: wrap;
-  box-sizing: content-box;
-  display: none;
-  animation: fadein 0.8s;
-
-  & table {
-    margin-top: 10px;
-  }
-
-  @media screen and (min-width: 1920px) {
-    & table {
-      width: 50%;
-    }
-
-    & fieldset {
-      width: 49%;
-    }
-  }
-
-  @media screen and (min-width: 1200px) {
-    flex-direction: row;
-    width: 100%;
-
-    & fieldset {
-      width: 39%;
-    }
-
-    & table {
-      width: 60%;
-    }
-
-    & label {
-      max-width: 750px;
-    }
-  }
-}
-
-#polykit-settings-panel2 {
-  position: relative;
-  flex-direction: column;
-  align-items: center;
-  box-sizing: content-box;
-  display: none;
-  animation: fadein 0.8s;
-}
-
 .polykit-close-settings {
   position: absolute;
   right: 0;
@@ -707,6 +659,54 @@ li.consistency-header-index {
       background-color: #0073aa;
       color: white;
     }
+  }
+
+  #polykit-settings-panel1 {
+    flex-direction: column;
+    flex-wrap: wrap;
+    box-sizing: content-box;
+    display: none;
+    animation: fadein 0.8s;
+
+    & table {
+      margin-top: 10px;
+    }
+
+    @media screen and (min-width: 1920px) {
+      & table {
+        width: 50%;
+      }
+
+      & fieldset {
+        width: 49%;
+      }
+    }
+
+    @media screen and (min-width: 1200px) {
+      flex-direction: row;
+      width: 100%;
+
+      & fieldset {
+        width: 39%;
+      }
+
+      & table {
+        width: 60%;
+      }
+
+      & label {
+        max-width: 750px;
+      }
+    }
+  }
+
+  #polykit-settings-panel2 {
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: content-box;
+    display: none;
+    animation: fadein 0.8s;
   }
 
   .polykit-settings__radio {
