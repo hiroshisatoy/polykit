@@ -1,0 +1,9 @@
+{
+  "tasks": {
+    "pack": "deno run --allow-read --allow-write pack-ext.js .",
+    "fmt": "deno fmt"
+  },
+  "fmt": {
+      "include": ["css/**/*.css", "js/**/*.js"]
+  }
+}

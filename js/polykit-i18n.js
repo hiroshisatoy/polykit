@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /**
  * PolyKit UI strings from languages/{locale}/polykit.json (published by init.js).
@@ -11,30 +11,32 @@
  * @returns {void}
  */
 function polykit_bootstrap_i18n() {
-	if ( window.polykit_strings && Object.keys( window.polykit_strings ).length > 0 ) {
-		return;
-	}
-	const element = document.getElementById( 'polykit-i18n-data' );
-	if ( ! element || ! element.textContent ) {
-		return;
-	}
-	try {
-		const data = JSON.parse( element.textContent );
-		window.polykit_strings = data.polykit_strings || {};
-		window.polykit_gp_strings = data.polykit_gp_strings || {};
-		window.polykit_ui_locale = data.polykit_ui_locale || 'ja';
-	} catch ( _error ) {
-		window.polykit_strings = window.polykit_strings || {};
-		window.polykit_gp_strings = window.polykit_gp_strings || {};
-	}
+  if (
+    window.polykit_strings && Object.keys(window.polykit_strings).length > 0
+  ) {
+    return;
+  }
+  const element = document.getElementById("polykit-i18n-data");
+  if (!element || !element.textContent) {
+    return;
+  }
+  try {
+    const data = JSON.parse(element.textContent);
+    window.polykit_strings = data.polykit_strings || {};
+    window.polykit_gp_strings = data.polykit_gp_strings || {};
+    window.polykit_ui_locale = data.polykit_ui_locale || "ja";
+  } catch (_error) {
+    window.polykit_strings = window.polykit_strings || {};
+    window.polykit_gp_strings = window.polykit_gp_strings || {};
+  }
 }
 
 polykit_bootstrap_i18n();
 
-function polykit_t( key, ...args ) {
-	let text = ( window.polykit_strings || {} )[ key ] || key;
-	args.forEach( ( arg ) => {
-		text = text.replace( '%s', arg ).replace( '%d', arg );
-	} );
-	return text;
+function polykit_t(key, ...args) {
+  let text = (window.polykit_strings || {})[key] || key;
+  args.forEach((arg) => {
+    text = text.replace("%s", arg).replace("%d", arg);
+  });
+  return text;
 }
