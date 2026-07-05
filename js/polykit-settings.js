@@ -60,16 +60,34 @@ function polykit_generate_settings_panel() {
 			},
 		},
 		{
-			'title':    polykit_t( 'ja_style_title' ),
+			'title':    polykit_t( 'ja_style_width_title' ),
 			'settings': {
-				'ja_fullwidth_ascii':      polykit_t( 'setting_ja_fullwidth_ascii' ),
-				'ja_fullwidth_number':     polykit_t( 'setting_ja_fullwidth_number' ),
-				'ja_space_before_half':    polykit_t( 'setting_ja_space_before_half' ),
-				'ja_space_around_mixed':   polykit_t( 'setting_ja_space_around_mixed' ),
-				'ja_paren_space_outside':  polykit_t( 'setting_ja_paren_space_outside' ),
-				'ja_paren_space_inside':   polykit_t( 'setting_ja_paren_space_inside' ),
-				'ja_terminology':          polykit_t( 'setting_ja_terminology' ),
-				'ja_straight_quotes':      polykit_t( 'setting_ja_straight_quotes' ),
+				'ja_fullwidth_ascii':     polykit_t( 'setting_ja_fullwidth_ascii' ),
+				'ja_fullwidth_number':    polykit_t( 'setting_ja_fullwidth_number' ),
+				'ja_space_before_half':   polykit_t( 'setting_ja_space_before_half' ),
+				'ja_space_around_mixed': polykit_t( 'setting_ja_space_around_mixed' ),
+				'ja_space_after_comma': polykit_t( 'setting_ja_space_after_comma' ),
+				'ja_colon_spacing':       polykit_t( 'setting_ja_colon_spacing' ),
+				'ja_digit_spacing':       polykit_t( 'setting_ja_digit_spacing' ),
+			},
+		},
+		{
+			'title':    polykit_t( 'ja_style_paren_title' ),
+			'settings': {
+				'ja_paren_space_outside': polykit_t( 'setting_ja_paren_space_outside' ),
+				'ja_paren_space_inside':  polykit_t( 'setting_ja_paren_space_inside' ),
+			},
+		},
+		{
+			'title':    polykit_t( 'ja_style_terminology_title' ),
+			'settings': {
+				'ja_terminology': polykit_t( 'setting_ja_terminology' ),
+			},
+		},
+		{
+			'title':    polykit_t( 'ja_style_quotes_title' ),
+			'settings': {
+				'ja_straight_quotes': polykit_t( 'setting_ja_straight_quotes' ),
 			},
 		},
 		{
@@ -263,6 +281,9 @@ const polykit_setting_defaults = {
 	ja_fullwidth_number: true,
 	ja_space_before_half: true,
 	ja_space_around_mixed: true,
+	ja_space_after_comma: true,
+	ja_colon_spacing: true,
+	ja_digit_spacing: true,
 	ja_paren_space_outside: true,
 	ja_paren_space_inside: true,
 	ja_terminology: true,

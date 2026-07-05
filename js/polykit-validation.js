@@ -77,7 +77,7 @@ function polykit_search_glossary_on_translation( e, selector ) {
 						words_with_warning.push( glossary_word );
 						reset = `${reset}“<b>${glossary_word_translations[index].translation}</b>“, `;
 						const diff = glossary_word_occurrence - translation_word_occurrence;
-						count = `${diff} time${diff > 1 ? 's' : ''}`;
+						count = polykit_t( 'glossary_count', diff );
 					} else {
 						reset = '';
 						return false;
@@ -90,10 +90,10 @@ function polykit_search_glossary_on_translation( e, selector ) {
 					if ( glossary_word_translations.length > 1 ) {
 						message = polykit_t( 'missing_glossary_any' );
 					}
-					const form = translations.length > 1 ? ( original_index === SINGULAR ? ' for singular' : ' for plural' ) : '';
+					const form = translations.length > 1 ? ( original_index === SINGULAR ? polykit_t( 'glossary_form_singular' ) : polykit_t( 'glossary_form_plural' ) ) : '';
 					let is_within_URL = polykit_check_for_URL(glossary_word, translatedText);
 					if (is_within_URL == false) {
-						jQuery('.textareas', $editor).prepend(polykit_get_warning(`${message} (${reset}) for the term “<i>${term}</i>“ ${count}${form}.`, discard));
+						jQuery('.textareas', $editor).prepend(polykit_get_warning(polykit_t( 'missing_glossary_detail', message, reset, term, count, form ), discard));
 					}
 					else {
 						howmany--

@@ -62,6 +62,7 @@
 		"polykit_notranslate": true,
 		"polykit_non_breaking_space_highlight": true,
 		"polykit_occurrences": true,
+		"polykit_paren_needs_outside_space": true,
 		"polykit_pagination": true,
 		"polykit_quicklinks": true,
 		"polykit_run_review": true,
