@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "PolyKit",
+  "version": "1.0.0",
+  "description": "translate.wordpress.org 向け日本語翻訳ツールキット",
+  "homepage_url": "https://github.com/wp-polyglots/wp-polyglots-ja-extension",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "background": {
+    "service_worker": "js/background.js"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "js/init.js"
+      ],
+      "css": [
+        "css/style.css"
+      ],
+      "matches": [
+        "*://translate.wordpress.org/*"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "*://translate.wordpress.org/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "js/glotdict-locales.js",
+        "js/glotdict.js",
+        "js/glotdict-functions.js",
+        "js/glotdict-hotkey.js",
+        "js/glotdict-validation.js",
+        "js/glotdict-ja-validation.js",
+        "js/glotdict-ja-i18n.js",
+        "js/glotdict-notices.js",
+        "js/glotdict-bulk.js",
+        "js/glotdict-column.js",
+        "js/glotdict-meta.js",
+        "js/glotdict-consistency.js",
+        "js/glotdict-settings.js",
+        "js/keymaster.js",
+        "js/jquery.bind-first.js",
+        "js/dompurify.js",
+        "CHANGELOG.md",
+        "icons/icon-48.png",
+        "css/style.css",
+        "js/init.js"
+      ],
+      "matches": [
+        "*://translate.wordpress.org/*"
+      ]
+    }
+  ]
+}
