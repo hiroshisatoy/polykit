@@ -12,7 +12,7 @@ function gd_hotkeys() {
 	};
 	key( 'ctrl+shift+enter', () => {
 		if ( jQuery( '.editor:visible' ).length > 0 ) {
-			jQuery( '.editor:visible .discard-glotdict' ).trigger( 'click' );
+			jQuery( '.editor:visible .discard-polykit' ).trigger( 'click' );
 			jQuery( '.editor:visible .discard-warning' ).trigger( 'click' );
 			jQuery( '.editor:visible .translation-actions button.translation-actions__save' ).addClass( 'forcesubmit' ).trigger( 'click' );
 		} else {
@@ -119,12 +119,12 @@ function gd_hotkeys() {
 		return false;
 	} );
 	key( 'ctrl+d', () => {
-		jQuery( '.editor:visible .discard-glotdict' ).trigger( 'click' );
+		jQuery( '.editor:visible .discard-polykit' ).trigger( 'click' );
 		jQuery( '.editor:visible .discard-warning' ).trigger( 'click' );
 		return false;
 	} );
 	key( 'ctrl+shift+d', () => {
-		jQuery( '.discard-glotdict' ).trigger( 'click' );
+		jQuery( '.discard-polykit' ).trigger( 'click' );
 		jQuery( '.discard-warning' ).trigger( 'click' );
 		return false;
 	} );

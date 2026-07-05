@@ -235,7 +235,7 @@ function gd_generate_settings_panel() {
 		changelog.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( gd_ja_t( 'welcome_enjoy' ) ) );
 	} else {
 		const link = document.createElement( 'A' );
-		link.href = 'https://github.com/wp-polyglots/wp-polyglots-ja-extension/blob/main/CHANGELOG.md';
+		link.href = 'https://github.com/hiroshisatoy/polykit/blob/main/CHANGELOG.md';
 		link.textContent = 'Check the Changelog!';
 		changelog.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( gd_extension.changelog ) );
 		changelog.appendChild( link );

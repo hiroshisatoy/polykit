@@ -224,7 +224,7 @@ function gd_validate_visible( e ) {
  * @returns {String}
  */
 function gd_get_discard_link( selector ) {
-	return ` <a href="#" class="discard-glotdict" data-row="${jQuery( selector ).attr( 'row' )}">${gd_ja_t( 'discard' )}</a>`;
+	return ` <a href="#" class="discard-polykit" data-row="${jQuery( selector ).attr( 'row' )}">${gd_ja_t( 'discard' )}</a>`;
 }
 
 /**

@@ -1,14 +1,14 @@
-.box.has-glotdict {
+.box.has-polykit {
     border-left-width: 2px !important;
     border-left-color: blue !important;
 }
 
-table.translations tr.preview.has-glotdict th,
-table.translations tr.preview.has-glotdict .original {
+table.translations tr.preview.has-polykit th,
+table.translations tr.preview.has-polykit .original {
     position: relative;
 }
 
-table.translations tr.preview.has-glotdict .original::before {
+table.translations tr.preview.has-polykit .original::before {
     content: "";
     display: inline-block;
     width: 2px;
@@ -19,11 +19,11 @@ table.translations tr.preview.has-glotdict .original::before {
     margin-top: -.5em;
 }
 
-table.translations tr.preview.has-glotdict th+.priority+.original::before {
+table.translations tr.preview.has-polykit th+.priority+.original::before {
     margin-left: calc(-.5em - 49px);
 }
 
-table.translations tr.preview.has-glotdict.has-warnings th+.priority+.original::before {
+table.translations tr.preview.has-polykit.has-warnings th+.priority+.original::before {
     margin-left: calc(-.5em - 50px);
 }
 
@@ -55,7 +55,7 @@ is not appied before action buttons are rendered
 }
 
 
-.discard-glotdict {
+.discard-polykit {
     float: right;
 }
 

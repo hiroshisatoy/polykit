@@ -15,7 +15,7 @@ function gd_selected_count() {
 		let untranslated_selectedcount = 0;
 		let nowarnings_selectedcount = 0;
 		let warnings_selectedcount = 0;
-		let glotdict_selectedcount = 0;
+		let polykit_selectedcount = 0;
 		jQuery( 'tbody .checkbox :checkbox:checked' ).each( function( index ) {
 			const row = jQuery( this ).closest( 'tr.preview' );
 			if ( row.hasClass( 'status-current' ) ) {
@@ -42,8 +42,8 @@ function gd_selected_count() {
 			if ( row.hasClass( 'has-warnings' ) ) {
 				warnings_selectedcount++;
 			}
-			if ( row.hasClass( 'has-glotdict' ) ) {
-				glotdict_selectedcount++;
+			if ( row.hasClass( 'has-polykit' ) ) {
+				polykit_selectedcount++;
 			}
 		} );
 		const selected_strings_text = [];
@@ -105,13 +105,13 @@ function gd_selected_count() {
 			warnings_string_text += ' with warnings';
 			selected_strings_text.push( warnings_string_text );
 		}
-		if ( glotdict_selectedcount > 0 ) {
-			let glotdict_string_text = `${glotdict_selectedcount} string`;
-			if ( glotdict_selectedcount > 1 ) {
-				glotdict_string_text += 's';
+		if ( polykit_selectedcount > 0 ) {
+			let polykit_string_text = `${polykit_selectedcount} string`;
+			if ( polykit_selectedcount > 1 ) {
+				polykit_string_text += 's';
 			}
-			glotdict_string_text += ' with Glossary terms';
-			selected_strings_text.push( glotdict_string_text );
+			polykit_string_text += ' with Glossary terms';
+			selected_strings_text.push( polykit_string_text );
 		}
 		jQuery( '#gd-notices-container' ).append( `<div id="gd-checked-count" class="notice">${checked_count}${checked_count > 1 ? ' rows are ' : ' row is '} selected.</div>` );
 		if ( Array.isArray( selected_strings_text ) && selected_strings_text.length > 0 ) {

@@ -1,6 +1,6 @@
 'use strict';
 
-const glotdict_version = '1.0.1';
+const polykit_version = '1.0.1';
 
 // action = 'install', 'update', 'chrome_update', or 'shared_module_update'
 const gd_extension_storage = ( null !== localStorage.getItem( 'polykit_extension_status' ) ) ? JSON.parse( localStorage.getItem( 'polykit_extension_status' ) ) : '';
@@ -57,7 +57,7 @@ if ( window.gd_filter_bar.length > 0 ) {
 		jQuery( '.preview .action' ).trigger( 'click' );
 	}
 
-	jQuery( "<div class='box has-glotdict'></div><div>" + gd_ja_t( 'legend_glossary' ) + "</div>" ).appendTo( '#legend' );
+	jQuery( "<div class='box has-polykit'></div><div>" + gd_ja_t( 'legend_glossary' ) + "</div>" ).appendTo( '#legend' );
 	jQuery( "<div class='box has-old-string'></div><div>" + gd_ja_t( 'legend_old' ) + "</div>" ).appendTo( '#legend' );
 	jQuery( "<div class='box has-original-copy'></div><div>" + gd_ja_t( 'legend_original_copy' ) + "</div>" ).appendTo( '#legend' );
 
@@ -82,7 +82,7 @@ jQuery( '.glossary-word' ).contextmenu( function( e ) {
 	return false;
 } );
 
-jQuery( '.gp-content' ).on( 'click', '.discard-glotdict', function( e ) {
+jQuery( '.gp-content' ).on( 'click', '.discard-polykit', function( e ) {
 	const $this = jQuery( this );
 	const row = $this.data( 'row' );
 	jQuery( `#editor-${row}` ).data( 'discard', 'true' );

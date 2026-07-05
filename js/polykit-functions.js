@@ -52,16 +52,16 @@ function gd_list_locales_cached() {
  * @returns Array
  */
 function gd_locales() {
-	window.glotdict_locales = [ 'ja' ];
+	window.polykit_locales = [ 'ja' ];
 	const locales_date_cache = localStorage.getItem( 'polykit_locales_date' );
 	if ( null === locales_date_cache || locales_date_cache !== gd_today() ) {
 		jQuery.ajax( {
-			url:      `https://codeat.co/glotdict/dictionaries/${glotdict_version}.json`,
+			url:      `https://codeat.co/glotdict/dictionaries/${polykit_version}.json`,
 			dataType: 'text',
 			cache:    false,
 		} ).done( ( data ) => {
 			localStorage.setItem( 'polykit_locales', data );
-			window.glotdict_locales = JSON.parse( data );
+			window.polykit_locales = JSON.parse( data );
 			localStorage.setItem( 'polykit_locales_date', gd_today() );
 		} );
 	}
@@ -70,9 +70,9 @@ function gd_locales() {
 		if ( 'string' === typeof temp_value ) {
 			temp_value = JSON.parse( temp_value );
 		}
-		window.glotdict_locales = Object.keys( temp_value );
+		window.polykit_locales = Object.keys( temp_value );
 	}
-	return window.glotdict_locales;
+	return window.polykit_locales;
 }
 
 /**
@@ -81,14 +81,14 @@ function gd_locales() {
  * @returns string
  */
 function gd_get_lang() {
-	if ( 'undefined' === typeof window.glotdict_lang ) {
+	if ( 'undefined' === typeof window.polykit_lang ) {
 		const lang = localStorage.getItem( 'polykit_language' );
 		if ( '' === lang || null === lang ) {
 			return 'ja';
 		}
-		window.glotdict_lang = sanitize_value( lang );
+		window.polykit_lang = sanitize_value( lang );
 	}
-	return window.glotdict_lang;
+	return window.polykit_lang;
 }
 
 /**
@@ -123,7 +123,7 @@ function gd_add_project_links() {
 function gd_add_glossary_links( glossary_word ) {
 	const word = jQuery( glossary_word );
 	if ( glossary_word.closest( 'tr.preview' ) ) {
-		glossary_word.closest( 'tr.preview' ).classList.add( 'has-glotdict' );
+		glossary_word.closest( 'tr.preview' ).classList.add( 'has-polykit' );
 	}
 	word.wrap( `<a href="https://translate.wordpress.org/consistency?search=${word.text()}&amp;set=${gd_get_lang_consistency()}%2Fdefault" target="_blank" rel="noreferrer noopener"></a>` );
 }
@@ -211,8 +211,8 @@ function gd_add_scroll_buttons() {
  */
 function gd_locales_selector() {
 	const lang = gd_get_lang();
-	window.gd_filter_bar.append( `<span class="separator">•</span><div class="gd-language-picker-container${( '' === lang || false === lang ) ? ' empty-locale' : ''}"><label for="gd-language-picker">ロケール</label><select id="gd-language-picker" class="glotdict_language"></select></div>` );
-	jQuery( '.glotdict_language' ).append( jQuery( '<option></option>' ) );
+	window.gd_filter_bar.append( `<span class="separator">•</span><div class="gd-language-picker-container${( '' === lang || false === lang ) ? ' empty-locale' : ''}"><label for="gd-language-picker">ロケール</label><select id="gd-language-picker" class="polykit_language"></select></div>` );
+	jQuery( '.polykit_language' ).append( jQuery( '<option></option>' ) );
 	const gd_locales_array = gd_locales();
 	var browserlanguage = Intl.DateTimeFormat().resolvedOptions().locale;
 	browserlanguage = browserlanguage.replace('-', '_');
@@ -221,10 +221,10 @@ function gd_locales_selector() {
 		if ( lang === value || ( lang === 'ja' && value === 'ja' ) || ( lang === '' && value === 'ja' ) || ( lang === '' && browserlanguage === value ) ) {
 			new_option.attr( 'selected', true );
 		}
-		jQuery( '.glotdict_language' ).append( new_option );
+		jQuery( '.polykit_language' ).append( new_option );
 	} );
-	jQuery( '.glotdict_language' ).change( () => {
-		localStorage.setItem( 'polykit_language', jQuery( '.glotdict_language option:selected' ).text() );
+	jQuery( '.polykit_language' ).change( () => {
+		localStorage.setItem( 'polykit_language', jQuery( '.polykit_language option:selected' ).text() );
 		localStorage.setItem( 'polykit_glossary_date', '' );
 		gd_locales();
 		location.reload();
