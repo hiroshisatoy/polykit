@@ -3,21 +3,21 @@
 const polykit_version = '1.0.1';
 
 // action = 'install', 'update', 'chrome_update', or 'shared_module_update'
-const gd_extension_storage = ( null !== localStorage.getItem( 'polykit_extension_status' ) ) ? JSON.parse( localStorage.getItem( 'polykit_extension_status' ) ) : '';
-const gd_extension = {
-	changelog:       ( '' !== gd_extension_storage ) ? gd_extension_storage.changelog : '',
-	currentVersion:  ( '' !== gd_extension_storage ) ? gd_extension_storage.currentVersion : '0',
-	previousVersion: ( '' !== gd_extension_storage ) ? gd_extension_storage.previousVersion : '0',
-	reason:          ( '' !== gd_extension_storage ) ? gd_extension_storage.reason : '',
+const polykit_extension_storage = ( null !== localStorage.getItem( 'polykit_extension_status' ) ) ? JSON.parse( localStorage.getItem( 'polykit_extension_status' ) ) : '';
+const polykit_extension = {
+	changelog:       ( '' !== polykit_extension_storage ) ? polykit_extension_storage.changelog : '',
+	currentVersion:  ( '' !== polykit_extension_storage ) ? polykit_extension_storage.currentVersion : '0',
+	previousVersion: ( '' !== polykit_extension_storage ) ? polykit_extension_storage.previousVersion : '0',
+	reason:          ( '' !== polykit_extension_storage ) ? polykit_extension_storage.reason : '',
 };
-const gd_has_been_updated = gd_extension.currentVersion !== gd_extension.previousVersion;
-const gd_setting = document.querySelector( '.gd_setting' );
-if ( gd_setting && gd_has_been_updated ) {
-	gd_setting.click();
-	document.querySelector( '#gd_settings_tab2' ).click();
+const polykit_has_been_updated = polykit_extension.currentVersion !== polykit_extension.previousVersion;
+const polykit_setting = document.querySelector( '.polykit-setting' );
+if ( polykit_setting && polykit_has_been_updated ) {
+	polykit_setting.click();
+	document.querySelector( '#polykit-settings-tab2' ).click();
 }
 
-const gd_glossary = {
+const polykit_glossary = {
 	glossary_url: '',
 	handbook_url: '',
 	guide:        {
@@ -29,20 +29,20 @@ const gd_glossary = {
 
 // Create notice container at the beginning since notices are added in AJAX
 const translations = document.querySelector( '#translations' );
-const gd_notices_container = document.createElement( 'DIV' );
-gd_notices_container.id = 'gd-notices-container';
-translations && translations.before( gd_notices_container );
+const polykit_notices_container = document.createElement( 'DIV' );
+polykit_notices_container.id = 'polykit-notices-container';
+translations && translations.before( polykit_notices_container );
 
-gd_current_locale_first();
+polykit_current_locale_first();
 
-window.gd_filter_bar = jQuery( '.filter-toolbar form div:first' );
-gd_get_glossary_global_data();
+window.polykit_filter_bar = jQuery( polykit_get_filters_toolbar_row() );
+polykit_get_glossary_global_data();
 
-if ( window.gd_filter_bar.length > 0 ) {
-	gd_hotkeys();
+if ( window.polykit_filter_bar.length > 0 ) {
+	polykit_hotkeys();
 	// Fix for PTE align
 	if ( jQuery( '#bulk-actions-toolbar-top' ).length > 0 ) {
-		gd_add_column();
+		polykit_add_column();
 		if ( 0 === jQuery( '#bulk-actions-toolbar-bottom' ).length ) {
 			jQuery( '#bulk-actions-toolbar-top' ).clone().css( 'float', 'none' ).insertBefore( '#legend' );
 			jQuery( 'form.filters-toolbar.bulk-actions' ).submit( function() {
@@ -57,21 +57,21 @@ if ( window.gd_filter_bar.length > 0 ) {
 		jQuery( '.preview .action' ).trigger( 'click' );
 	}
 
-	jQuery( "<div class='box has-polykit'></div><div>" + gd_ja_t( 'legend_glossary' ) + "</div>" ).appendTo( '#legend' );
-	jQuery( "<div class='box has-old-string'></div><div>" + gd_ja_t( 'legend_old' ) + "</div>" ).appendTo( '#legend' );
-	jQuery( "<div class='box has-original-copy'></div><div>" + gd_ja_t( 'legend_original_copy' ) + "</div>" ).appendTo( '#legend' );
+	jQuery( "<div class='box has-polykit'></div><div>" + polykit_t( 'legend_glossary' ) + "</div>" ).appendTo( '#legend' );
+	jQuery( "<div class='box has-old-string'></div><div>" + polykit_t( 'legend_old' ) + "</div>" ).appendTo( '#legend' );
+	jQuery( "<div class='box has-original-copy'></div><div>" + polykit_t( 'legend_original_copy' ) + "</div>" ).appendTo( '#legend' );
 
-	document.querySelectorAll( '.glossary-word' ).forEach( gd_add_glossary_links );
+	document.querySelectorAll( '.glossary-word' ).forEach( polykit_add_glossary_links );
 
-	gd_mark_old_strings();
+	polykit_mark_old_strings();
 
-	jQuery( $gp.editor.table ).onFirst( 'click', 'button.translation-actions__save:not(.forcesubmit)', gd_validate_visible );
+	jQuery( $gp.editor.table ).onFirst( 'click', 'button.translation-actions__save:not(.forcesubmit)', polykit_validate_visible );
 }
 
-gd_add_project_links();
-gd_add_review_button();
-gd_add_scroll_buttons();
-gd_add_meta();
+polykit_add_project_links();
+polykit_add_review_button();
+polykit_add_scroll_buttons();
+polykit_add_meta();
 
 jQuery( '.glossary-word' ).contextmenu( function( e ) {
 	const info = jQuery( this ).data( 'translations' );
@@ -98,45 +98,47 @@ jQuery( '.gp-content' ).on( 'click', '.discard-polykit', function( e ) {
 	return false;
 } );
 
-if ( gd_user.is_on_translations ) {
-	$gp.editor.current && gd_get_setting( 'autocopy_string_on_translation_opened' ) && gd_copy_visible_original_string();
+if ( polykit_user.is_on_translations ) {
+	$gp.editor.current && polykit_get_setting( 'autocopy_string_on_translation_opened' ) && polykit_copy_visible_original_string();
 	$gp.editor.show = ( function( original ) {
 		return function() {
 			original.apply( $gp.editor, arguments );
-			gd_do_consistency( $gp.editor.current[ 0 ].querySelector( '.gd-consistency' ) );
-			gd_get_setting( 'autocopy_string_on_translation_opened' ) && gd_copy_visible_original_string();
+			polykit_do_consistency( $gp.editor.current[ 0 ].querySelector( '.polykit-consistency' ) );
+			polykit_get_setting( 'autocopy_string_on_translation_opened' ) && polykit_copy_visible_original_string();
 		};
 	}( $gp.editor.show ) );
 }
 
-jQuery( '.gp-content' ).on( 'click', '.gd-review:not(.gd-review-done)', function( e ) {
-	jQuery( this ).val( gd_ja_t( 'review_in_progress' ) );
-	gd_run_review();
-	jQuery( this ).val( gd_ja_t( 'review_complete' ) ).removeClass( 'gd-review' ).addClass( 'gd-review-done' ).attr( 'disabled', 'disabled' );
+jQuery( '.gp-content' ).on( 'click', '.polykit-review:not(.polykit-review-done)', function( e ) {
+	jQuery( this ).val( polykit_t( 'review_in_progress' ) );
+	polykit_run_review();
+	jQuery( this ).val( polykit_t( 'review_complete' ) ).removeClass( 'polykit-review' ).addClass( 'polykit-review-done' ).attr( 'disabled', 'disabled' );
 } );
 
-gd_selected_count();
+polykit_selected_count();
 
-gd_non_breaking_space_highlight();
+polykit_non_breaking_space_highlight();
 
-gd_curly_apostrophe_highlight();
+polykit_curly_apostrophe_highlight();
 
-const gd_to_top = document.createElement( 'A' );
-gd_to_top.id = 'gd-back-to-top';
-gd_to_top.textContent = '↑';
-gd_to_top.title = 'Back to top  🚀';
-document.body.appendChild( gd_to_top );
+const polykit_to_top = document.createElement( 'A' );
+polykit_to_top.id = 'polykit-back-to-top';
+polykit_to_top.textContent = '↑';
+polykit_to_top.title = polykit_t( 'back_to_top' );
+document.body.appendChild( polykit_to_top );
 
-gd_tag_target_when_source_outside_viewport( '#masthead', 'body', 'gd-header-is-hidden' );
+polykit_tag_target_when_source_outside_viewport( '#masthead', 'body', 'polykit-header-is-hidden' );
 
-gd_to_top.addEventListener( 'click', ( e ) => {
+polykit_to_top.addEventListener( 'click', ( e ) => {
 	e.preventDefault();
-	gd_scroll_to_top();
+	polykit_scroll_to_top();
 } );
 
-gd_user.is_connected && gd_build_sticky_header();
+polykit_user.is_connected && polykit_build_sticky_header();
 
-gd_wait_table_alter();
-gd_localize_date();
-gd_anonymous();
-gd_pagination();
+polykit_init_glotpress_l10n();
+
+polykit_wait_table_alter();
+polykit_localize_date();
+polykit_anonymous();
+polykit_pagination();

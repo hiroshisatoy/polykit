@@ -3,7 +3,7 @@
  *
  * @returns void
  */
-function gd_hotkeys() {
+function polykit_hotkeys() {
 	jQuery( $gp.editor.table ).off( 'keydown', 'tr.editor textarea', $gp.editor.hooks.keydown );
 	key.filter = function( event ) {
 		const tagName = ( event.target || event.srcElement ).tagName;
@@ -16,7 +16,7 @@ function gd_hotkeys() {
 			jQuery( '.editor:visible .discard-warning' ).trigger( 'click' );
 			jQuery( '.editor:visible .translation-actions button.translation-actions__save' ).addClass( 'forcesubmit' ).trigger( 'click' );
 		} else {
-			alert( gd_ja_t( 'alert_no_editor' ) );
+			alert( polykit_t( 'alert_no_editor' ) );
 		}
 		return false;
 	} );
@@ -24,7 +24,7 @@ function gd_hotkeys() {
 		if ( jQuery( '.editor:visible' ).length > 0 ) {
 			jQuery( '.editor:visible .translation-actions button.translation-actions__save' ).trigger( 'click' );
 		} else {
-			alert( gd_ja_t( 'alert_no_editor' ) );
+			alert( polykit_t( 'alert_no_editor' ) );
 		}
 		return false;
 	} );
@@ -38,7 +38,7 @@ function gd_hotkeys() {
 		if ( jQuery( '.editor:visible .translation-actions button.translation-actions__save' ).length > 0 ) {
 			jQuery( '.editor:visible .translation-actions button.translation-actions__save' ).trigger( 'click' );
 		} else {
-			alert( gd_ja_t( 'alert_no_approve' ) );
+			alert( polykit_t( 'alert_no_approve' ) );
 		}
 		return false;
 	} );
@@ -65,7 +65,7 @@ function gd_hotkeys() {
 		if ( jQuery( '.editor:visible .meta button.reject' ).length > 0 ) {
 			jQuery( '.editor:visible .meta button.reject' ).trigger( 'click' );
 		} else {
-			alert( gd_ja_t( 'alert_no_reject' ) );
+			alert( polykit_t( 'alert_no_reject' ) );
 		}
 		return false;
 	} );
@@ -137,7 +137,7 @@ function gd_hotkeys() {
 		return false;
 	} );
 	key( 'alt+c', () => {
-		document.querySelectorAll( '.gd-consistency' ).forEach( ( el ) => { gd_do_consistency( el ); } );
+		document.querySelectorAll( '.polykit-consistency' ).forEach( ( el ) => { polykit_do_consistency( el ); } );
 		return false;
 	} );
 }

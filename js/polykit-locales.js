@@ -1,4 +1,4 @@
-const gd_locales_slugs = {
+const polykit_locales_slugs = {
 	af:          'af',
 	am:          'am',
 	arg:         'an',

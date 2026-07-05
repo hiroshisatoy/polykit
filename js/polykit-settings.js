@@ -1,4 +1,4 @@
-const gd_user = {
+const polykit_user = {
 	is_translator:      false,
 	is_editor:          false,
 	is_connected:       false,
@@ -7,151 +7,151 @@ const gd_user = {
 };
 
 if ( ( 'undefined' !== typeof $gp_editor_options ) && '' === $gp_editor_options.can_approve ) {
-	document.body.classList.add( 'gd-user-is-translator', 'gd-on-translations' );
-	gd_user.is_translator = true;
-	gd_user.is_on_translations = true;
+	document.body.classList.add( 'polykit-user-is-translator', 'polykit-on-translations' );
+	polykit_user.is_translator = true;
+	polykit_user.is_on_translations = true;
 }
 if ( ( 'undefined' !== typeof $gp_editor_options ) && '1' === $gp_editor_options.can_approve ) {
-	document.body.classList.add( 'gd-user-is-editor', 'gd-on-translations' );
-	gd_user.is_editor = true;
-	gd_user.is_on_translations = true;
+	document.body.classList.add( 'polykit-user-is-editor', 'polykit-on-translations' );
+	polykit_user.is_editor = true;
+	polykit_user.is_on_translations = true;
 }
-gd_user.is_connected = document.querySelector( 'body.logged-in' ) !== null;
+polykit_user.is_connected = document.querySelector( 'body.logged-in' ) !== null;
 
-document.querySelector( '#menu-headline-nav' ).insertAdjacentHTML( 'beforeend', '<li class="gd_setting" style="cursor:pointer;"><a> PolyKit</a></li>' );
-document.querySelector( '.gd_setting' ).prepend( document.querySelector( '.gd_icon' ) );
-document.querySelector( '.gd_icon' ).style.display = '';
+document.querySelector( '#menu-headline-nav' ).insertAdjacentHTML( 'beforeend', '<li class="polykit-setting" style="cursor:pointer;"><a> PolyKit</a></li>' );
+document.querySelector( '.polykit-setting' ).prepend( document.querySelector( '.polykit-icon' ) );
+document.querySelector( '.polykit-icon' ).style.display = '';
 
-const gd_settings_menu = document.querySelector( '.gd_setting' );
-gd_settings_menu && gd_settings_menu.addEventListener( 'click', () => {
-	if ( document.body.classList.contains( 'gd-settings-on-screen' ) && '0' !== gd_extension.previousVersion ) {
-		gd_extension.previousVersion = gd_extension.currentVersion;
-		localStorage.setItem( 'polykit_extension_status', JSON.stringify( gd_extension ) );
+const polykit_settings_menu = document.querySelector( '.polykit-setting' );
+polykit_settings_menu && polykit_settings_menu.addEventListener( 'click', () => {
+	if ( document.body.classList.contains( 'polykit-settings-on-screen' ) && '0' !== polykit_extension.previousVersion ) {
+		polykit_extension.previousVersion = polykit_extension.currentVersion;
+		localStorage.setItem( 'polykit_extension_status', JSON.stringify( polykit_extension ) );
 	}
-	document.body.classList.toggle( 'gd-settings-on-screen' );
-	gd_generate_settings_panel();
+	document.body.classList.toggle( 'polykit-settings-on-screen' );
+	polykit_generate_settings_panel();
 } );
 
-function gd_generate_settings_panel() {
-	const gd_settings = document.querySelector( '.gd_settings' );
-	if ( null !== gd_settings ) {
-		gd_settings.style.display = ( 'none' === gd_settings.style.display ) ? '' : 'none';
+function polykit_generate_settings_panel() {
+	const polykit_settings = document.querySelector( '.polykit-settings' );
+	if ( null !== polykit_settings ) {
+		polykit_settings.style.display = ( 'none' === polykit_settings.style.display ) ? '' : 'none';
 		return;
 	}
 
 	// Use [[[ code ]]] markdown for symbols and add * at the end of the setting's description if needed.
 	const settings_data = [
 		{
-			'title':    gd_ja_t( 'hide_warnings_title' ),
+			'title':    polykit_t( 'hide_warnings_title' ),
 			'settings': {
-				'no_glossary_term_check': gd_ja_t( 'setting_no_glossary_term_check' ),
-				'no_initial_uppercase':   gd_ja_t( 'setting_no_initial_uppercase' ),
-				'no_initial_space':       gd_ja_t( 'setting_no_initial_space' ),
-				'no_trailing_space':      gd_ja_t( 'setting_no_trailing_space' ),
-				'no_final_dot':           gd_ja_t( 'setting_no_final_dot' ),
-				'no_final_other_dots':    gd_ja_t( 'setting_no_final_other_dots' ),
+				'no_glossary_term_check': polykit_t( 'setting_no_glossary_term_check' ),
+				'no_initial_uppercase':   polykit_t( 'setting_no_initial_uppercase' ),
+				'no_initial_space':       polykit_t( 'setting_no_initial_space' ),
+				'no_trailing_space':      polykit_t( 'setting_no_trailing_space' ),
+				'no_final_dot':           polykit_t( 'setting_no_final_dot' ),
+				'no_final_other_dots':    polykit_t( 'setting_no_final_other_dots' ),
 			},
 		},
 		{
-			'title':    gd_ja_t( 'show_warnings_title' ),
+			'title':    polykit_t( 'show_warnings_title' ),
 			'settings': {
-				'curly_apostrophe_warning': gd_ja_t( 'setting_curly_apostrophe_warning' ),
-				'localized_quote_warning':  gd_ja_t( 'setting_localized_quote_warning' ),
+				'curly_apostrophe_warning': polykit_t( 'setting_curly_apostrophe_warning' ),
+				'localized_quote_warning':  polykit_t( 'setting_localized_quote_warning' ),
 			},
 		},
 		{
-			'title':    gd_ja_t( 'ja_style_title' ),
+			'title':    polykit_t( 'ja_style_title' ),
 			'settings': {
-				'ja_fullwidth_ascii':      gd_ja_t( 'setting_ja_fullwidth_ascii' ),
-				'ja_fullwidth_number':     gd_ja_t( 'setting_ja_fullwidth_number' ),
-				'ja_space_before_half':    gd_ja_t( 'setting_ja_space_before_half' ),
-				'ja_space_around_mixed':   gd_ja_t( 'setting_ja_space_around_mixed' ),
-				'ja_paren_space_outside':  gd_ja_t( 'setting_ja_paren_space_outside' ),
-				'ja_paren_space_inside':   gd_ja_t( 'setting_ja_paren_space_inside' ),
-				'ja_terminology':          gd_ja_t( 'setting_ja_terminology' ),
-				'ja_straight_quotes':      gd_ja_t( 'setting_ja_straight_quotes' ),
+				'ja_fullwidth_ascii':      polykit_t( 'setting_ja_fullwidth_ascii' ),
+				'ja_fullwidth_number':     polykit_t( 'setting_ja_fullwidth_number' ),
+				'ja_space_before_half':    polykit_t( 'setting_ja_space_before_half' ),
+				'ja_space_around_mixed':   polykit_t( 'setting_ja_space_around_mixed' ),
+				'ja_paren_space_outside':  polykit_t( 'setting_ja_paren_space_outside' ),
+				'ja_paren_space_inside':   polykit_t( 'setting_ja_paren_space_inside' ),
+				'ja_terminology':          polykit_t( 'setting_ja_terminology' ),
+				'ja_straight_quotes':      polykit_t( 'setting_ja_straight_quotes' ),
 			},
 		},
 		{
-			'title':    gd_ja_t( 'others_title' ),
+			'title':    polykit_t( 'others_title' ),
 			'settings': {
-				'no_non_breaking_space':                    gd_ja_t( 'setting_no_non_breaking_space' ),
-				'autocopy_string_on_translation_opened':    gd_ja_t( 'setting_autocopy' ),
-				'autosubmit_bulk_copy_from_original':       gd_ja_t( 'setting_autosubmit_bulk' ),
-				'force_autosubmit_bulk_copy_from_original': gd_ja_t( 'setting_force_autosubmit_bulk' ),
+				'no_non_breaking_space':                    polykit_t( 'setting_no_non_breaking_space' ),
+				'autocopy_string_on_translation_opened':    polykit_t( 'setting_autocopy' ),
+				'autosubmit_bulk_copy_from_original':       polykit_t( 'setting_autosubmit_bulk' ),
+				'force_autosubmit_bulk_copy_from_original': polykit_t( 'setting_force_autosubmit_bulk' ),
 			},
 		},
 	];
 
 	const hotkeys = {
-		[gd_ja_t( 'hk_glossary_rightclick' )]: 'Right click on a Glossary term',
-		[gd_ja_t( 'hk_space_boundary' )]: 'Ctrl+Shift+X',
-		[gd_ja_t( 'hk_wrap_corner' )]: 'Ctrl+Shift+[',
-		[gd_ja_t( 'hk_wrap_double_corner' )]: 'Ctrl+Shift+]',
-		[gd_ja_t( 'hk_approve' )]: 'Ctrl+Shift+A',
-		[gd_ja_t( 'hk_cancel' )]: 'Ctrl+Shift+Z',
-		[gd_ja_t( 'hk_copy_original' )]: 'Ctrl+Shift+B',
-		[gd_ja_t( 'hk_dismiss_current' )]: 'Ctrl+D',
-		[gd_ja_t( 'hk_dismiss_all' )]: 'Ctrl+Shift+D',
-		[gd_ja_t( 'hk_force_save' )]: 'Ctrl+Shift+Enter',
-		[gd_ja_t( 'hk_fuzzy' )]: 'Ctrl+Shift+F',
-		[gd_ja_t( 'hk_consistency' )]: 'Alt+C',
-		[gd_ja_t( 'hk_next' )]: 'Page Down',
-		[gd_ja_t( 'hk_prev' )]: 'Page Up',
-		[gd_ja_t( 'hk_reject' )]: 'Ctrl+Shift+R',
-		[gd_ja_t( 'hk_save' )]: 'Ctrl+Enter',
+		[polykit_t( 'hk_glossary_rightclick' )]: polykit_t( 'hk_glossary_rightclick' ),
+		[polykit_t( 'hk_space_boundary' )]: 'Ctrl+Shift+X',
+		[polykit_t( 'hk_wrap_corner' )]: 'Ctrl+Shift+[',
+		[polykit_t( 'hk_wrap_double_corner' )]: 'Ctrl+Shift+]',
+		[polykit_t( 'hk_approve' )]: 'Ctrl+Shift+A',
+		[polykit_t( 'hk_cancel' )]: 'Ctrl+Shift+Z',
+		[polykit_t( 'hk_copy_original' )]: 'Ctrl+Shift+B',
+		[polykit_t( 'hk_dismiss_current' )]: 'Ctrl+D',
+		[polykit_t( 'hk_dismiss_all' )]: 'Ctrl+Shift+D',
+		[polykit_t( 'hk_force_save' )]: 'Ctrl+Shift+Enter',
+		[polykit_t( 'hk_fuzzy' )]: 'Ctrl+Shift+F',
+		[polykit_t( 'hk_consistency' )]: 'Alt+C',
+		[polykit_t( 'hk_next' )]: 'Page Down',
+		[polykit_t( 'hk_prev' )]: 'Page Up',
+		[polykit_t( 'hk_reject' )]: 'Ctrl+Shift+R',
+		[polykit_t( 'hk_save' )]: 'Ctrl+Enter',
 	};
 
 	const container = document.createElement( 'DIV' );
-	container.classList.add( 'gd_settings' );
+	container.classList.add( 'polykit-settings' );
 
 	const input1 = document.createElement( 'INPUT' );
-	input1.classList.add( 'gd_settings__radio' );
+	input1.classList.add( 'polykit-settings__radio' );
 	input1.type = 'radio';
 	input1.name = 'group';
 
 	const input2 = input1.cloneNode( true );
 	const input3 = input1.cloneNode( true );
-	input1.id = 'gd_settings__radio1';
+	input1.id = 'polykit-settings__radio1';
 	input1.checked = 'checked';
-	input2.id = 'gd_settings__radio2';
-	input3.id = 'gd_settings__radio3';
+	input2.id = 'polykit-settings__radio2';
+	input3.id = 'polykit-settings__radio3';
 
 	container.append( input1, input2, input3 );
 
 	const tabs = document.createElement( 'DIV' );
-	tabs.classList.add( 'gd_settings_tabs' );
+	tabs.classList.add( 'polykit-settings-tabs' );
 	const tab1 = document.createElement( 'LABEL' );
-	tab1.classList.add( 'gd_settings_tab' );
+	tab1.classList.add( 'polykit-settings-tab' );
 	const tab2 = tab1.cloneNode( true );
 	const tab3 = tab1.cloneNode( true );
-	tab1.id = 'gd_settings_tab1';
-	tab1.htmlFor = 'gd_settings__radio1';
-	tab1.textContent = gd_ja_t( 'settings_tab' );
-	tab2.id = 'gd_settings_tab2';
-	tab2.htmlFor = 'gd_settings__radio2';
-	tab2.textContent = 'install' === gd_extension.reason ? gd_ja_t( 'welcome_tab_install' ) : gd_ja_t( 'welcome_tab_update' );
-	tab3.id = 'gd_settings_tab3';
-	tab3.htmlFor = 'gd_settings__radio3';
-	tab3.textContent = gd_ja_t( 'gte_tools_tab' );
+	tab1.id = 'polykit-settings-tab1';
+	tab1.htmlFor = 'polykit-settings__radio1';
+	tab1.textContent = polykit_t( 'settings_tab' );
+	tab2.id = 'polykit-settings-tab2';
+	tab2.htmlFor = 'polykit-settings__radio2';
+	tab2.textContent = 'install' === polykit_extension.reason ? polykit_t( 'welcome_tab_install' ) : polykit_t( 'welcome_tab_update' );
+	tab3.id = 'polykit-settings-tab3';
+	tab3.htmlFor = 'polykit-settings__radio3';
+	tab3.textContent = polykit_t( 'gte_tools_tab' );
 	container.appendChild( tabs ).append( tab1, tab2, tab3 );
 
 	const panels = document.createElement( 'DIV' );
-	panels.classList.add( 'gd_settings_panels' );
+	panels.classList.add( 'polykit-settings-panels' );
 	const panel1 = document.createElement( 'DIV' );
-	panel1.classList.add( 'gd_settings_panel' );
+	panel1.classList.add( 'polykit-settings-panel' );
 	const panel2 = panel1.cloneNode( true );
 	const panel3 = panel1.cloneNode( true );
-	panel1.id = 'gd_settings_panel1';
-	panel2.id = 'gd_settings_panel2';
-	panel3.id = 'gd_settings_panel3';
+	panel1.id = 'polykit-settings-panel1';
+	panel2.id = 'polykit-settings-panel2';
+	panel3.id = 'polykit-settings-panel3';
 	panels.append( panel1, panel2, panel3 );
 	container.appendChild( panels );
 
 	const fragment = document.createDocumentFragment();
 	const subfragment = document.createDocumentFragment();
 	const asterisk = document.createElement( 'SPAN' );
-	asterisk.classList.add( 'gd_asterisk' );
+	asterisk.classList.add( 'polykit-asterisk' );
 	asterisk.textContent = '*';
 	settings_data.forEach( category => {
 		fragment.appendChild( document.createElement( 'H3' ) ).appendChild( document.createTextNode( category.title ) );
@@ -162,7 +162,7 @@ function gd_generate_settings_panel() {
 			const label = document.createElement( 'LABEL' );
 			input.type = 'checkbox';
 			input.id = `polykit_${setting_slug}`;
-			input.checked = gd_get_setting( setting_slug ) ? 'checked' : '';
+			input.checked = polykit_get_setting( setting_slug ) ? 'checked' : '';
 
 			input.addEventListener( 'click', ( event ) => {
 				localStorage.setItem( 'polykit_' + setting_slug, event.target.checked );
@@ -192,8 +192,8 @@ function gd_generate_settings_panel() {
 	const fieldset = document.createElement( 'FIELDSET' );
 	fieldset.appendChild( fragment ) && panel1.appendChild( fieldset );
 
-	fragment.appendChild( document.createElement( 'TH' ) ).appendChild( document.createTextNode( gd_ja_t( 'hotkey_action' ) ) );
-	fragment.appendChild( document.createElement( 'TH' ) ).appendChild( document.createTextNode( gd_ja_t( 'hotkey_key' ) ) );
+	fragment.appendChild( document.createElement( 'TH' ) ).appendChild( document.createTextNode( polykit_t( 'hotkey_action' ) ) );
+	fragment.appendChild( document.createElement( 'TH' ) ).appendChild( document.createTextNode( polykit_t( 'hotkey_key' ) ) );
 	Object.entries( hotkeys ).forEach( hotkey => {
 		const [ key, value ] = hotkey;
 		const tr = document.createElement( 'TR' );
@@ -206,50 +206,50 @@ function gd_generate_settings_panel() {
 	const caution_note = document.createElement( 'SPAN' );
 	caution_note.style.fontWeight = 'bold';
 	caution_note.style.margin = '1em 0 .2em';
-	caution_note.append( asterisk, gd_ja_t( 'caution_note' ) );
+	caution_note.append( asterisk, polykit_t( 'caution_note' ) );
 	panel1.appendChild( caution_note );
 
 	const changelog = document.createElement( 'DIV' );
-	changelog.classList.add( 'gd_changelog' );
+	changelog.classList.add( 'polykit-changelog' );
 	const closeSettings = document.createElement( 'A' );
-	closeSettings.classList.add( 'gd-close-settings' );
-	closeSettings.textContent = gd_ja_t( 'close' );
+	closeSettings.classList.add( 'polykit-close-settings' );
+	closeSettings.textContent = polykit_t( 'close' );
 	closeSettings.addEventListener( 'click', () => {
-		gd_settings_menu.click();
+		polykit_settings_menu.click();
 	} );
-	const currentVersion = '0' === gd_extension.currentVersion ? '' : gd_extension.currentVersion;
-	const panel2Title = 'install' === gd_extension.reason ? gd_ja_t( 'welcome_install_title', currentVersion ) : gd_ja_t( 'welcome_update_title', currentVersion );
+	const currentVersion = '0' === polykit_extension.currentVersion ? '' : polykit_extension.currentVersion;
+	const panel2Title = 'install' === polykit_extension.reason ? polykit_t( 'welcome_install_title', currentVersion ) : polykit_t( 'welcome_update_title', currentVersion );
 	changelog.appendChild( document.createElement( 'H3' ) ).appendChild( document.createTextNode( panel2Title ) );
-	if ( 'install' === gd_extension.reason ) {
-		changelog.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( gd_ja_t( 'welcome_install_intro' ) ) );
+	if ( 'install' === polykit_extension.reason ) {
+		changelog.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( polykit_t( 'welcome_install_intro' ) ) );
 		const ul = document.createElement( 'UL' );
 		const advices = {
-			1: gd_ja_t( 'welcome_advice_1' ),
-			2: gd_ja_t( 'welcome_advice_2' ),
-			3: gd_ja_t( 'welcome_advice_3' ),
+			1: polykit_t( 'welcome_advice_1' ),
+			2: polykit_t( 'welcome_advice_2' ),
+			3: polykit_t( 'welcome_advice_3' ),
 		};
 		Object.values( advices ).forEach( advice => {
 			ul.appendChild( document.createElement( 'LI' ) ).appendChild( document.createTextNode( advice ) );
 		} );
 		changelog.appendChild( ul );
-		changelog.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( gd_ja_t( 'welcome_enjoy' ) ) );
+		changelog.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( polykit_t( 'welcome_enjoy' ) ) );
 	} else {
 		const link = document.createElement( 'A' );
 		link.href = 'https://github.com/hiroshisatoy/polykit/blob/main/CHANGELOG.md';
-		link.textContent = 'Check the Changelog!';
-		changelog.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( gd_extension.changelog ) );
+		link.textContent = polykit_t( 'check_changelog' );
+		changelog.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( polykit_extension.changelog ) );
 		changelog.appendChild( link );
 	}
 	panel2.append( closeSettings, changelog );
 
 
 	const quickLinks = document.createElement( 'DIV' );
-	quickLinks.classList.add( 'gd_settings_quicklinks' );
-	quickLinks.innerHTML = `<p><a href="https://ja.wordpress.org/team/handbook/translation/" target="_blank" rel="noreferrer noopener">${gd_ja_t( 'handbook_link' )}</a> | <a href="https://ja.wordpress.org/team/handbook/translation/translation-style-guide/" target="_blank" rel="noreferrer noopener">${gd_ja_t( 'style_guide_link' )}</a> | <a href="https://translate.wordpress.org/locale/ja/default/glossary/" target="_blank" rel="noreferrer noopener">${gd_ja_t( 'glossary_link' )}</a></p>`;
+	quickLinks.classList.add( 'polykit-settings-quicklinks' );
+	quickLinks.innerHTML = `<p><a href="https://ja.wordpress.org/team/handbook/translation/" target="_blank" rel="noreferrer noopener">${polykit_t( 'handbook_link' )}</a> | <a href="https://ja.wordpress.org/team/handbook/translation/translation-style-guide/" target="_blank" rel="noreferrer noopener">${polykit_t( 'style_guide_link' )}</a> | <a href="https://translate.wordpress.org/locale/ja/default/glossary/" target="_blank" rel="noreferrer noopener">${polykit_t( 'glossary_link' )}</a></p>`;
 	panel1.insertBefore( quickLinks, panel1.firstChild );
 
 
-	gd_user.is_connected && gd_user.is_gte && gd_set_panel3_settings( panel3 );
+	polykit_user.is_connected && polykit_user.is_gte && polykit_set_panel3_settings( panel3 );
 
 	document.querySelector( '.gp-content' ).prepend( container );
 }
@@ -269,7 +269,7 @@ const polykit_setting_defaults = {
 	ja_straight_quotes: true,
 };
 
-function gd_get_setting( key ) {
+function polykit_get_setting( key ) {
 	const storageKey = `polykit_${key}`;
 	const stored = localStorage.getItem( storageKey );
 	if ( null === stored ) {
@@ -284,52 +284,52 @@ function gd_get_setting( key ) {
  * @returns void
  * @param panel3 Target div element for 3rd panel
  */
-function gd_set_panel3_settings( panel3 ) {
+function polykit_set_panel3_settings( panel3 ) {
 	const fragment3 = document.createDocumentFragment();
-	fragment3.appendChild( document.createElement( 'H3' ) ).appendChild( document.createTextNode( 'Locale specific settings' ) );
-	fragment3.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( 'GlotDict links to the Locale Glossary in the filters toolbar, so it\'s highly recommended that your locale has a Glossary.' ) );
+	fragment3.appendChild( document.createElement( 'H3' ) ).appendChild( document.createTextNode( polykit_t( 'gte_locale_settings' ) ) );
+	fragment3.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( polykit_t( 'gte_glossary_recommend' ) ) );
 	const styleGuide = document.createElement( 'DIV' );
 	fragment3.appendChild( styleGuide );
-	styleGuide.classList.add( 'gd-settings-tab3__style-guide' );
-	styleGuide.appendChild( document.createElement( 'H4' ) ).appendChild( document.createTextNode( 'Customize Style Guide link' ) );
-	styleGuide.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( 'By default, Style Guide links to the locale handbook - locale.wordpress.org/team/handbook - also a recommended resource for your team. However, as a GTE you can customize this link to point to a certain resource your team uses, such as a sub-page of the handbook or even an external page.' ) );
-	styleGuide.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( 'To do so, fill in this form, click on  “Generate HTML”, then copy and paste it into the Description field of your locale glossary.' ) );
+	styleGuide.classList.add( 'polykit-settings-tab3__style-guide' );
+	styleGuide.appendChild( document.createElement( 'H4' ) ).appendChild( document.createTextNode( polykit_t( 'gte_style_guide_customize' ) ) );
+	styleGuide.appendChild( document.createElement( 'DIV' ) ).appendChild( document.createTextNode( polykit_t( 'gte_style_guide_default_desc' ) ) );
+	styleGuide.appendChild( document.createElement( 'P' ) ).appendChild( document.createTextNode( polykit_t( 'gte_style_guide_form_desc' ) ) );
 	const styleGuideForm = document.createDocumentFragment();
 
 	const styleGuideURLLabel = document.createElement( 'LABEL' );
-	styleGuideURLLabel.htmlFor = 'gd-styleguide-url';
-	styleGuideURLLabel.classList.add( 'gd-settings-label' );
-	styleGuideURLLabel.textContent = 'Enter an URL for the Style Guide link:';
+	styleGuideURLLabel.htmlFor = 'polykit-styleguide-url';
+	styleGuideURLLabel.classList.add( 'polykit-settings-label' );
+	styleGuideURLLabel.textContent = polykit_t( 'gte_style_guide_url_label' );
 
 	const styleGuideURLInput = document.createElement( 'INPUT' );
 	styleGuideURLInput.type = 'text';
 	styleGuideURLInput.size = 100;
-	styleGuideURLInput.name = 'gd-styleguide-url';
-	styleGuideURLInput.id = 'gd-styleguide-url';
+	styleGuideURLInput.name = 'polykit-styleguide-url';
+	styleGuideURLInput.id = 'polykit-styleguide-url';
 	styleGuideURLInput.placeholder = 'https://en-gb.wordpress.org/translations/';
 	styleGuideURLInput.setAttribute( 'style', 'width: 98%!important' );
 
 	const styleGuideMenuLabel = document.createElement( 'LABEL' );
-	styleGuideMenuLabel.htmlFor = 'gd-styleguide-menu';
-	styleGuideMenuLabel.classList.add( 'gd-settings-label' );
-	styleGuideMenuLabel.textContent = 'Enter a title for the Style Guide link:';
+	styleGuideMenuLabel.htmlFor = 'polykit-styleguide-menu';
+	styleGuideMenuLabel.classList.add( 'polykit-settings-label' );
+	styleGuideMenuLabel.textContent = polykit_t( 'gte_style_guide_title_label' );
 
 	const styleGuideMenuInput = document.createElement( 'INPUT' );
 	styleGuideMenuInput.type = 'text';
 	styleGuideMenuInput.size = 30;
-	styleGuideMenuInput.name = 'gd-styleguide-menu';
-	styleGuideMenuInput.id = 'gd-styleguide-menu';
-	styleGuideMenuInput.placeholder = 'Style guide';
+	styleGuideMenuInput.name = 'polykit-styleguide-menu';
+	styleGuideMenuInput.id = 'polykit-styleguide-menu';
+	styleGuideMenuInput.placeholder = polykit_t( 'gte_style_guide_title_placeholder' );
 
 	const styleGuideGeneratorButton = document.createElement( 'BUTTON' );
-	styleGuideGeneratorButton.id = 'gd-styleguide-btn';
+	styleGuideGeneratorButton.id = 'polykit-styleguide-btn';
 	styleGuideGeneratorButton.type = 'button';
 	styleGuideGeneratorButton.style.margin = '10px 0';
-	styleGuideGeneratorButton.textContent = 'Generate HTML';
+	styleGuideGeneratorButton.textContent = polykit_t( 'generate_html' );
 
 	const styleGuideHTMLCode = document.createElement( 'TEXTAREA' );
-	styleGuideHTMLCode.id = 'gd-styleguide-html';
-	styleGuideHTMLCode.placeholder = 'Copy and paste this generated HTML in the Description field of your locale glossary.';
+	styleGuideHTMLCode.id = 'polykit-styleguide-html';
+	styleGuideHTMLCode.placeholder = polykit_t( 'gte_style_guide_html_placeholder' );
 	styleGuideHTMLCode.rows = 5;
 	styleGuideHTMLCode.setAttribute( 'style', 'width: 98%!important' );
 
@@ -343,6 +343,6 @@ function gd_set_panel3_settings( panel3 ) {
 		if ( '' === styleGuideURLInput.value || '' === styleGuideMenuInput.value ) {
 			return;
 		}
-		styleGuideHTMLCode.value = `<a href="${styleGuideURLInput.value}" id="gd-guide-link" data-title="${styleGuideMenuInput.value}">${styleGuideMenuInput.value}</a>`;
+		styleGuideHTMLCode.value = `<a href="${styleGuideURLInput.value}" id="polykit-guide-link" data-title="${styleGuideMenuInput.value}">${styleGuideMenuInput.value}</a>`;
 	} );
 }

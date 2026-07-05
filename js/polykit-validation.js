@@ -3,14 +3,14 @@
  *
  * @returns void
  */
-function gd_run_review() {
+function polykit_run_review() {
 	let review_count = 0;
 	let review_error_count = 0;
-	jQuery( '#gd-review-count' ).remove();
+	jQuery( '#polykit-review-count' ).remove();
 	jQuery( 'tr.preview' ).each( function() {
 		const $preview = jQuery( this );
 		const editor = `#editor-${$preview.attr( 'row' )}:not(.untranslated)`;
-		const howmany = gd_validate( '', editor );
+		const howmany = polykit_validate( '', editor );
 		if ( howmany > 0 ) {
 			review_error_count += howmany;
 		}
@@ -18,9 +18,9 @@ function gd_run_review() {
 	} );
 	if ( review_count ) {
 		if ( review_error_count ) {
-			jQuery( '#gd-notices-container' ).append( `<div id="gd-review-count" class="notice reviewed warned">${gd_ja_t( 'review_warned', review_count, review_error_count )}</div>` );
+			jQuery( '#polykit-notices-container' ).append( `<div id="polykit-review-count" class="notice reviewed warned">${polykit_t( 'review_warned', review_count, review_error_count )}</div>` );
 		} else {
-			jQuery( '#gd-notices-container' ).append( `<div id="gd-review-count" class="notice reviewed">${gd_ja_t( 'review_clean', review_count )}</div>` );
+			jQuery( '#polykit-notices-container' ).append( `<div id="polykit-review-count" class="notice reviewed">${polykit_t( 'review_clean', review_count )}</div>` );
 		}
 	}
 }
@@ -33,15 +33,15 @@ function gd_run_review() {
  *
  * @returns void
  */
-function gd_search_glossary_on_translation( e, selector ) {
+function polykit_search_glossary_on_translation( e, selector ) {
 	const SINGULAR = 0;
 	const PLURAL = 1;
 
 	let howmany = 0;
-	if ( gd_get_setting( 'no_glossary_term_check' ) ) {
+	if ( polykit_get_setting( 'no_glossary_term_check' ) ) {
 		return howmany;
 	}
-	const discard = gd_get_discard_link( selector );
+	const discard = polykit_get_discard_link( selector );
 
 	jQuery( selector ).each( function() {
 		const $editor = jQuery( this );
@@ -72,7 +72,7 @@ function gd_search_glossary_on_translation( e, selector ) {
 					if ( 'N/A' === glossary_word_translations[index].translation ) {
 						return true;
 					}
-					const translation_word_occurrence = gd_occurrences( translation.value, glossary_word_translations[index].translation );
+					const translation_word_occurrence = polykit_occurrences( translation.value, glossary_word_translations[index].translation );
 					if ( translation_word_occurrence < glossary_word_occurrence ) {
 						words_with_warning.push( glossary_word );
 						reset = `${reset}“<b>${glossary_word_translations[index].translation}</b>“, `;
@@ -86,14 +86,14 @@ function gd_search_glossary_on_translation( e, selector ) {
 				if ( reset !== '' ) {
 					howmany++;
 					reset = reset.slice( 0, -2 );
-					let message = gd_ja_t( 'missing_glossary' );
+					let message = polykit_t( 'missing_glossary' );
 					if ( glossary_word_translations.length > 1 ) {
-						message = gd_ja_t( 'missing_glossary_any' );
+						message = polykit_t( 'missing_glossary_any' );
 					}
 					const form = translations.length > 1 ? ( original_index === SINGULAR ? ' for singular' : ' for plural' ) : '';
-					let is_within_URL = gd_check_for_URL(glossary_word, translatedText);
+					let is_within_URL = polykit_check_for_URL(glossary_word, translatedText);
 					if (is_within_URL == false) {
-						jQuery('.textareas', $editor).prepend(gd_get_warning(`${message} (${reset}) for the term “<i>${term}</i>“ ${count}${form}.`, discard));
+						jQuery('.textareas', $editor).prepend(polykit_get_warning(`${message} (${reset}) for the term “<i>${term}</i>“ ${count}${form}.`, discard));
 					}
 					else {
 						howmany--
@@ -105,7 +105,7 @@ function gd_search_glossary_on_translation( e, selector ) {
 		} );
 	} );
 	if ( howmany !== 0 ) {
-		gd_stoppropagation( e );
+		polykit_stoppropagation( e );
 	}
 	return howmany;
 }
@@ -118,16 +118,16 @@ function gd_search_glossary_on_translation( e, selector ) {
  *
  * @returns void
  */
-function gd_validate( e, selector ) {
+function polykit_validate( e, selector ) {
 	let howmany = 0;
 	if ( 'undefined' === typeof jQuery( selector ).data( 'discard' ) ) {
 		jQuery( '.polykit-warning', selector ).remove();
 		howmany += jQuery( '.warning:not(.polykit-warning):has(> a.discard-warning)', selector ).length;
-		howmany += gd_search_glossary_on_translation( e, selector );
+		howmany += polykit_search_glossary_on_translation( e, selector );
 		const newtext = jQuery( 'textarea', selector ).val();
-		const discard = gd_get_discard_link( selector );
+		const discard = polykit_get_discard_link( selector );
 		if ( 'undefined' === typeof newtext || '' === newtext ) {
-			jQuery( '.textareas', selector ).prepend( gd_get_warning( gd_ja_t( 'empty_translation' ), discard ) );
+			jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'empty_translation' ), discard ) );
 			howmany++;
 			return;
 		}
@@ -139,77 +139,77 @@ function gd_validate( e, selector ) {
 		const firstcharnewtext = newtext.charAt( 0 );
 		const last_dot = [ ';', '.', '!', ':', '、', '。', '؟', '？', '！' ];
 		if ( hellipseoriginaltext ) {
-			if ( ! gd_get_setting( 'no_final_dot' ) ) {
+			if ( ! polykit_get_setting( 'no_final_dot' ) ) {
 				if ( '...' === jQuery( 'textarea', selector ).val().slice( -3 ) || ( lastcharnewtext !== ';' && lastcharnewtext !== '.' && lastcharnewtext !== '…' ) ) {
-					jQuery( '.textareas', selector ).prepend( gd_get_warning( gd_ja_t( 'missing_ellipsis' ), discard ) );
+					jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'missing_ellipsis' ), discard ) );
 					howmany++;
 				}
 			}
 		} else {
-			if ( ! gd_get_setting( 'no_final_other_dots' ) ) {
+			if ( ! polykit_get_setting( 'no_final_other_dots' ) ) {
 				if ( jQuery.inArray( lastcharoriginaltext, last_dot ) >= 0 && -1 === jQuery.inArray( lastcharnewtext, last_dot ) ) {
-					jQuery( '.textareas', selector ).prepend( gd_get_warning( gd_ja_t( 'missing_end_punct' ), discard ) );
+					jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'missing_end_punct' ), discard ) );
 					howmany++;
 				}
 			}
 		}
-		if ( ! gd_get_setting( 'no_initial_uppercase' ) ) {
-			if ( gd_is_uppercase( firstcharoriginaltext ) && ! gd_is_uppercase( firstcharnewtext ) ) {
-				jQuery( '.textareas', selector ).prepend( gd_get_warning( `The translation is missing an initial uppercase letter as "<i>${firstcharnewtext}</i>" is an initial uppercase letter present on the original string.`, discard ) );
+		if ( ! polykit_get_setting( 'no_initial_uppercase' ) ) {
+			if ( polykit_is_uppercase( firstcharoriginaltext ) && ! polykit_is_uppercase( firstcharnewtext ) ) {
+				jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'missing_initial_uppercase', firstcharnewtext ), discard ) );
 				howmany++;
 			}
 		}
-		if ( ! gd_get_setting( 'no_initial_space' ) ) {
+		if ( ! polykit_get_setting( 'no_initial_space' ) ) {
 			if ( ( ' ' === firstcharoriginaltext && firstcharnewtext !== ' ' ) || ( ' ' === firstcharoriginaltext && firstcharnewtext !== ' ' ) ) {
-				jQuery( '.textareas', selector ).prepend( gd_get_warning( gd_ja_t( 'missing_initial_space' ), discard ) );
+				jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'missing_initial_space' ), discard ) );
 				howmany++;
 			}
 		}
-		if ( ! gd_get_setting( 'no_trailing_space' ) ) {
+		if ( ! polykit_get_setting( 'no_trailing_space' ) ) {
 			if ( ( ' ' === lastcharoriginaltext && lastcharnewtext !== ' ' ) || ( ' ' === lastcharoriginaltext && lastcharnewtext !== ' ' ) ) {
-				jQuery( '.textareas', selector ).prepend( gd_get_warning( gd_ja_t( 'missing_trailing_space' ), discard ) );
+				jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'missing_trailing_space' ), discard ) );
 				howmany++;
 			}
 		}
-		if ( gd_get_setting( 'curly_apostrophe_warning' ) ) {
+		if ( polykit_get_setting( 'curly_apostrophe_warning' ) ) {
 			if ( newtext.indexOf( "'" ) > -1 ) {
-				jQuery( '.textareas', selector ).prepend( gd_get_warning( 'The translation is using straight apostrophes instead of curly ones. Please check them against your Locale guidelines.', discard ) );
+				jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'curly_apostrophe_warning_msg' ), discard ) );
 				howmany++;
 			}
 		}
-		if ( gd_get_setting( 'localized_quote_warning' ) ) {
+		if ( polykit_get_setting( 'localized_quote_warning' ) ) {
 			let check_quotes = newtext;
-			check_quotes = check_quotes.replace( /([^>"]*)"(?=[^<]*>)/g, '$1#GDATTR#' );
+			check_quotes = check_quotes.replace( /([^>"]*)"(?=[^<]*>)/g, '$1#POLYKITATTR#' );
 			if ( check_quotes.indexOf( '"' ) > -1 ) {
-				jQuery( '.textareas', selector ).prepend( gd_get_warning( 'The translation is using straight quotes instead of typographic ones. Please check them against your Locale guidelines.', discard ) );
+				jQuery( '.textareas', selector ).prepend( polykit_get_warning( polykit_t( 'localized_quote_warning_msg' ), discard ) );
 				howmany++;
 			}
-			check_quotes = check_quotes.replace( /#GDATTR#/g, '"' );
+			check_quotes = check_quotes.replace( /#POLYKITATTR#/g, '"' );
 		}
-		howmany += gd_validate_ja( e, selector, newtext, discard );
+		howmany += polykit_validate_locale( e, selector, newtext, discard );
 	}
 	if ( howmany !== 0 ) {
 		jQuery( selector ).removeClass( 'no-warnings' ).addClass( 'has-warnings' );
 		const previewSelector = `#preview-${jQuery( selector ).attr( 'row' )}`;
 		jQuery( previewSelector ).removeClass( 'no-warnings' ).addClass( 'has-warnings' );
-		gd_stoppropagation( e );
+		polykit_stoppropagation( e );
 	}
 	return howmany;
 }
 
-function gd_validate_visible( e ) {
+function polykit_validate_visible( e ) {
 	if ( jQuery( this ).hasClass( 'forcesubmit' ) ) {return;}
 	const selector = '.editor:visible';
-	const howmany = gd_validate( e, selector );
+	const howmany = polykit_validate( e, selector );
 	if ( typeof howmany !== 'undefined' && howmany !== 0 ) {
-		const msg = gd_ja_t( 'submission_blocked' );
+		const msg = polykit_t( 'submission_blocked' );
 		$gp.notices.error( msg );
 	} else {
 		const interval = setInterval( () => {
 			const $notice = jQuery( '#gp-js-message' );
 			if ( ! $notice.hasClass( 'gp-js-notice' ) ) {
 				if ( $notice.hasClass( 'gp-js-success' ) ) {
-					gd_non_breaking_space_highlight();
+					polykit_non_breaking_space_highlight();
 				}
 				clearInterval( interval );
 			}
@@ -223,8 +223,8 @@ function gd_validate_visible( e ) {
  * @param {String} selector
  * @returns {String}
  */
-function gd_get_discard_link( selector ) {
-	return ` <a href="#" class="discard-polykit" data-row="${jQuery( selector ).attr( 'row' )}">${gd_ja_t( 'discard' )}</a>`;
+function polykit_get_discard_link( selector ) {
+	return ` <a href="#" class="discard-polykit" data-row="${jQuery( selector ).attr( 'row' )}">${polykit_t( 'discard' )}</a>`;
 }
 
 /**
@@ -234,6 +234,6 @@ function gd_get_discard_link( selector ) {
  * @param {String} discard
  * @returns {String}
  */
-function gd_get_warning( text, discard ) {
-	return `<div class="warning secondary polykit-warning"><strong>${gd_ja_t( 'warning_label' )}</strong> ${text}</strong>${discard}</div>`;
+function polykit_get_warning( text, discard ) {
+	return `<div class="warning secondary polykit-warning"><strong>${polykit_t( 'warning_label' )}</strong> ${text}</strong>${discard}</div>`;
 }

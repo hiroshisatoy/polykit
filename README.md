@@ -1,11 +1,15 @@
 # PolyKit
 
-translate.wordpress.org 向けの日本語翻訳特化ブラウザ拡張機能です。[GlotDict](https://github.com/Mte90/GlotDict) をベースに、日本語コミュニティの翻訳ワークフロー向けに再構成しています。
+translate.wordpress.org 向けの日本語翻訳特化ブラウザ拡張機能です。
+
+## 由来
+
+PolyKit は [GlotDict](https://github.com/Mte90/GlotDict) をベースにしたフォークです。元プロジェクトの翻訳支援機能を引き継ぎつつ、日本語コミュニティの翻訳ワークフロー向けに再構成しています。
 
 ## 機能
 
 - 日本語スタイルガイドに基づく翻訳チェック（半角/全角、スペース、括弧、訳語統一など）
-- 用語集チェック、Consistency 候補、Review ボタン
+- 用語集チェック、Consistency 候補、レビューボタン
 - クイック Approve / Reject / Fuzzy
 - 文字数カウント（日本語向け）
 - 日本語ハンドブック・スタイルガイド・用語集へのクイックリンク
@@ -39,4 +43,4 @@ Chrome は **Manifest V3** 対応が必要です（`manifest.json` は MV3 形�
 
 ## ライセンス
 
-GPL-2.0（GlotDict 由来）
+GPL-2.0。GlotDict 由来のコードを含みます（[Mte90/GlotDict](https://github.com/Mte90/GlotDict)）。

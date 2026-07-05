@@ -1,70 +1,70 @@
-function gd_add_meta() {
+function polykit_add_meta() {
 	jQuery( '#translations tr.editor' ).each( function() {
-		gd_add_string_counts( this );
+		polykit_add_string_counts( this );
 	} );
 }
 
-function gd_add_string_counts( row ) {
-	if ( jQuery( '.meta .gd-counts', row ).length ) {
-		jQuery( '.meta .gd-counts', row ).remove();
+function polykit_add_string_counts( row ) {
+	if ( jQuery( '.meta .polykit-counts', row ).length ) {
+		jQuery( '.meta .polykit-counts', row ).remove();
 	}
 	if ( jQuery( '.original', row ).length ) {
-		jQuery( '.meta dl:last-of-type', row ).before( '<div class="gd-counts" style="margin-top: 20px;"></div>' );
+		jQuery( '.meta dl:last-of-type', row ).before( '<div class="polykit-counts" style="margin-top: 20px;"></div>' );
 
 		if ( jQuery( '.original', row ).length > 1 ) {
 			// Plurals
 			jQuery( '.original', row ).each( function() {
 				const parts = jQuery( this ).parent().text().split( ':' );
 				const type = parts[0];
-				gd_add_count( row, jQuery( this ), 'original-count', `${type} String` );
+				polykit_add_count( row, jQuery( this ), 'original-count', `${type} ${polykit_t( 'meta_original' )}` );
 			} );
 			if ( jQuery( '.textareas', row ).length > 2 ) {
 				// Multi-Plural
 				jQuery( '.textareas', row ).each( function( index ) {
-					gd_add_plural_definition( row, index, 'plural-heading' );
+					polykit_add_plural_definition( row, index, 'plural-heading' );
 					if ( jQuery( this ).find( '.translation' ).text().trim().length ) {
-						gd_add_count( row, jQuery( this ).find( '.translation' ), `translated-count-${index}`, 'Translated String' );
+						polykit_add_count( row, jQuery( this ).find( '.translation' ), `translated-count-${index}`, polykit_t( 'meta_translated' ) );
 					}
 
-					gd_add_count( row, jQuery( this ).find( 'textarea.foreign-text' ), `current-count-${index}`, 'Current String' );
+					polykit_add_count( row, jQuery( this ).find( 'textarea.foreign-text' ), `current-count-${index}`, polykit_t( 'meta_current' ) );
 
 					jQuery( this ).on( 'change keyup paste focus', 'textarea.foreign-text', function() {
-						gd_update_count( row, jQuery( this ), `current-count-${index}`, true );
+						polykit_update_count( row, jQuery( this ), `current-count-${index}`, true );
 					} );
 				} );
 			} else {
 				// Singular + Plural
 				jQuery( '.textareas', row ).each( function( index ) {
-					let prefix = 'Singular ';
-					if ( index > 0 ) {prefix = 'Plural ';}
+					let prefix = `${polykit_t( 'meta_singular' )} `;
+					if ( index > 0 ) {prefix = `${polykit_t( 'meta_plural' )} `;}
 					if ( jQuery( this ).find( '.translation' ).text().trim().length ) {
-						gd_add_count( row, jQuery( this ).find( '.translation' ), `translated-count-${index}`, `${prefix}Translated` );
+						polykit_add_count( row, jQuery( this ).find( '.translation' ), `translated-count-${index}`, `${prefix}${polykit_t( 'meta_translated' )}` );
 					}
 
-					gd_add_count( row, jQuery( this ).find( 'textarea.foreign-text' ), `current-count-${index}`, `${prefix}Current` );
+					polykit_add_count( row, jQuery( this ).find( 'textarea.foreign-text' ), `current-count-${index}`, `${prefix}${polykit_t( 'meta_current' )}` );
 
 					jQuery( this ).on( 'change keyup paste focus', 'textarea.foreign-text', function() {
-						gd_update_count( row, jQuery( this ), `current-count-${index}`, true );
+						polykit_update_count( row, jQuery( this ), `current-count-${index}`, true );
 					} );
 				} );
 			}
 		} else {
 			// Singular
-			gd_add_count( row, jQuery( '.original', row ), 'original-count', 'Original String' );
+			polykit_add_count( row, jQuery( '.original', row ), 'original-count', polykit_t( 'meta_original' ) );
 			if ( jQuery( '.translation', row ).text().trim().length ) {
-				gd_add_count( row, jQuery( '.translation', row ), 'translated-count', 'Translated String' );
+				polykit_add_count( row, jQuery( '.translation', row ), 'translated-count', polykit_t( 'meta_translated' ) );
 			}
 
-			gd_add_count( row, jQuery( '.textareas textarea.foreign-text', row ), 'current-count', 'Current String' );
+			polykit_add_count( row, jQuery( '.textareas textarea.foreign-text', row ), 'current-count', polykit_t( 'meta_current' ) );
 
 			jQuery( row ).on( 'change keyup paste focus', '.textareas textarea.foreign-text', function() {
-				gd_update_count( row, jQuery( this ), 'current-count', true );
+				polykit_update_count( row, jQuery( this ), 'current-count', true );
 			} );
 		}
 	}
 }
 
-function gd_add_count( row, element, countclass, label, textarea = false ) {
+function polykit_add_count( row, element, countclass, label, textarea = false ) {
 	let string = '';
 	if ( textarea ) {
 		string = element.val();
@@ -81,10 +81,10 @@ function gd_add_count( row, element, countclass, label, textarea = false ) {
 			wordCount = 1;
 		}
 	}
-	jQuery( '.gd-counts', row ).append( `<dl class="${countclass}"><dt>${label}:</dt><dd><span class="characters">${characterCount} ${gd_ja_t( 'characters' )}</span> (<span class="words">${wordCount} ${gd_ja_t( 'words_ref' )}</span>)</dl>` );
+	jQuery( '.polykit-counts', row ).append( `<dl class="${countclass}"><dt>${label}:</dt><dd><span class="characters">${characterCount} ${polykit_t( 'characters' )}</span> (<span class="words">${wordCount} ${polykit_t( 'words_ref' )}</span>)</dl>` );
 }
 
-function gd_update_count( row, element, countclass, textarea = false ) {
+function polykit_update_count( row, element, countclass, textarea = false ) {
 	let string = '';
 	if ( textarea ) {
 		string = element.val();
@@ -101,19 +101,19 @@ function gd_update_count( row, element, countclass, textarea = false ) {
 			wordCount = 1;
 		}
 	}
-	jQuery( `.gd-counts .${countclass} dd .characters`, row ).text( `${characterCount} ${gd_ja_t( 'characters' )}` );
-	jQuery( `.gd-counts .${countclass} dd .words`, row ).text( `${wordCount} ${gd_ja_t( 'words_ref' )}` );
+	jQuery( `.polykit-counts .${countclass} dd .characters`, row ).text( `${characterCount} ${polykit_t( 'characters' )}` );
+	jQuery( `.polykit-counts .${countclass} dd .words`, row ).text( `${wordCount} ${polykit_t( 'words_ref' )}` );
 }
 
-function gd_add_plural_definition( row, index, pluralclass ) {
+function polykit_add_plural_definition( row, index, pluralclass ) {
 	const definition = jQuery( `.translation-form-list button[data-plural-index="${index}"]`, row ).attr( 'aria-label' );
-	jQuery( '.gd-counts', row ).append( `<dl class="${pluralclass}" style="margin-top: 20px;"><dt>Plural:</dt><dd>${definition}</dl>` );
+	jQuery( '.polykit-counts', row ).append( `<dl class="${pluralclass}" style="margin-top: 20px;"><dt>${polykit_t( 'meta_plural_label' )}</dt><dd>${definition}</dl>` );
 }
 
-function gd_localize_date( current_editor = '.editor' ) {
+function polykit_localize_date( current_editor = '.editor' ) {
 	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 	const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-	const localized_date = gd_create_element( 'span', { 'class': 'localized_date' } );
+	const localized_date = polykit_create_element( 'span', { 'class': 'localized_date' } );
 	document.querySelectorAll( `${current_editor} .editor-panel__right .meta dd` ).forEach( ( dd ) => {
 		if ( 19 === dd.textContent.indexOf( ' UTC' ) ) {
 			const date_data = dd.textContent.split( ' ', 3 );
