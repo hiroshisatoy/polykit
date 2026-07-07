@@ -1,5 +1,6 @@
 {
   "extension_name": "PolyKit",
+  "toolbar_extensions_toggle": "PolyKit",
   "settings_tab": "PolyKit 設定",
   "welcome_tab_install": "ようこそ",
   "welcome_tab_update": "更新情報",
@@ -14,7 +15,7 @@
   "hotkey_action": "操作",
   "hotkey_key": "ショートカット",
   "caution_note": "※ 付きの機能は慎重にご利用ください。",
-  "welcome_install_title": "PolyKit %s へようこそ!",
+  "welcome_install_title": "PolyKit %s へようこそ !",
   "welcome_update_title": "PolyKit %s の更新内容",
   "welcome_install_intro": "翻訳を始める前に、以下をご確認ください:",
   "welcome_advice_1": "翻訳ページ上部でロケールを「日本語」に設定してください。",
