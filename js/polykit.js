@@ -16,7 +16,7 @@ const polykit_has_been_updated = polykit_extension.currentVersion !== polykit_ex
 const polykit_setting = document.querySelector(".polykit-setting");
 if (polykit_setting && polykit_has_been_updated) {
 	polykit_setting.click();
-	document.querySelector("#polykit-settings-tab2").click();
+	document.querySelector("#polykit-settings-tab-welcome")?.click();
 }
 
 const polykit_glossary = {

@@ -47,24 +47,68 @@ function polykit_get_source_terminology_warnings(original, text) {
 	return warnings;
 }
 
+const polykit_no_space_adjacent_chars = "『」「」。、";
+
 /**
- * 1-4 に反する、全角文字と半角英字の境界を返す。
+ * 数字とコロンを除く半角文字かどうか（1-4）。
+ *
+ * @param {string} ch
+ * @returns {boolean}
+ */
+function polykit_is_halfwidth_non_digit_char(ch) {
+	if (":" === ch || /[0-9]/.test(ch)) {
+		return false;
+	}
+	return /[A-Za-z!-/;-@\[-`{-~\uFF61-\uFF9F]/.test(ch);
+}
+
+/**
+ * 全角文字かどうか（1-4）。
+ *
+ * @param {string} ch
+ * @returns {boolean}
+ */
+function polykit_is_fullwidth_char(ch) {
+	return /[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(ch);
+}
+
+/**
+ * 直前直後の文字の間にスペースが必要か（1-4）。
+ *
+ * @param {string} before
+ * @param {string} after
+ * @returns {boolean}
+ */
+function polykit_mixed_boundary_needs_space(before, after) {
+	if (/[\s\u00A0\u3000]/.test(before) || /[\s\u00A0\u3000]/.test(after)) {
+		return false;
+	}
+	if (
+		polykit_no_space_adjacent_chars.includes(before) ||
+		polykit_no_space_adjacent_chars.includes(after)
+	) {
+		return false;
+	}
+	return (polykit_is_fullwidth_char(before) &&
+		polykit_is_halfwidth_non_digit_char(after)) ||
+		(polykit_is_halfwidth_non_digit_char(before) &&
+			polykit_is_fullwidth_char(after));
+}
+
+/**
+ * 1-4 に反する、数字を除く半角文字と全角文字の境界を返す。
  * 1-9 により、半角数字の前後は検査対象に含めない。
+ * コロン (:) の前後は ja_colon_spacing に任せる。
  *
  * @param {string} masked 検査対象からコードなどを除外した訳文。
  * @returns {string} 問題のある境界。該当しない場合は空文字。
  */
 function polykit_get_unspaced_mixed_boundary(masked) {
-	const patterns = [
-		/[\u3040-\u9FFF\u3000-\u303F][A-Za-z]/,
-		/[A-Za-z][\u3040-\u9FFF]/,
-	];
-	const boundary_exceptions = /[『「、。』」：]/;
-
-	for (const pattern of patterns) {
-		const match = masked.match(pattern);
-		if (match && !boundary_exceptions.test(match[0])) {
-			return match[0];
+	for (let i = 1; i < masked.length; i++) {
+		const before = masked[i - 1];
+		const after = masked[i];
+		if (polykit_mixed_boundary_needs_space(before, after)) {
+			return before + after;
 		}
 	}
 
@@ -140,9 +184,10 @@ function polykit_validate_locale(e, selector, original, text, discard) {
 		}
 	}
 
-	if (polykit_get_setting("ja_space_before_half")) {
-		// 半角文字同士 (Ready?) は 1-4 のスペース規則の対象外。
-		const bad = masked.match(/[\u3040-\u9FFF」』][!?]/g);
+	if (polykit_get_setting("ja_space_before_half") &&
+		!polykit_get_setting("ja_space_around_mixed")) {
+		// 1-2: ! ? の前のスペース。1-4 が有効なときはそちらに任せる。
+		const bad = masked.match(/[\u3040-\u9FFF][!?]/g);
 		if (bad) {
 			jQuery(".textareas", selector).prepend(
 				polykit_get_warning(polykit_t("ja_space_before_half", bad[0]), discard),

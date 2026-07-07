@@ -95,15 +95,11 @@ function polykit_hotkeys() {
 		const start = textarea.selectionStart;
 		const end = textarea.selectionEnd;
 		const text = textarea.value;
-		let insert = " ";
+		const insert = " ";
 		if (start > 0 && end < text.length) {
 			const before = text.charAt(start - 1);
 			const after = text.charAt(end);
-			const needsBefore = /[\u3040-\u9FFF]/.test(before) &&
-				/[A-Za-z0-9]/.test(after);
-			const needsAfter = /[A-Za-z0-9]/.test(before) &&
-				/[\u3040-\u9FFF]/.test(after);
-			if (needsBefore || needsAfter) {
+			if (polykit_mixed_boundary_needs_space(before, after)) {
 				textarea.value = text.slice(0, start) + insert + text.slice(end);
 				textarea.selectionStart = textarea.selectionEnd = start + insert.length;
 			}

@@ -47,3 +47,39 @@ assert.strictEqual(
 	context.polykit_get_unspaced_mixed_boundary( 'WordPressの使い方' ),
 	'sの'
 );
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( 'WordPress の使い方' ),
+	''
+);
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( 'こんにちは、username さん。' ),
+	''
+);
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( 'こんにちは、usernameさん。' ),
+	'eさ'
+);
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( '準備ができましたか?' ),
+	'か?'
+);
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( '準備ができましたか ?' ),
+	''
+);
+assert.strictEqual(
+	context.polykit_get_unspaced_mixed_boundary( 'ユーザー ID: username' ),
+	''
+);
+assert.strictEqual(
+	context.polykit_mixed_boundary_needs_space( 'ー', 'I' ),
+	true
+);
+assert.strictEqual(
+	context.polykit_mixed_boundary_needs_space( '、', 'u' ),
+	false
+);
+assert.strictEqual(
+	context.polykit_mixed_boundary_needs_space( 's', 'の' ),
+	true
+);
