@@ -675,6 +675,11 @@ li.consistency-header-index {
 			background-color: #0073aa;
 			color: white;
 		}
+
+		& .polykit-settings-table tr:hover td {
+			background-color: hsl(198deg 43% 88%);
+			color: inherit;
+		}
 	}
 
 	/* タブ 1番目の内容 */
@@ -684,6 +689,87 @@ li.consistency-header-index {
 		box-sizing: content-box;
 		display: none;
 		animation: fadein 0.8s;
+
+		& .polykit-settings-group {
+			margin-bottom: 1.25em;
+			padding: 0.75em 1em 0.5em;
+			border-radius: 4px;
+			background: hsl(198deg 43% 93%);
+			border-left: 4px solid #0073aa;
+
+			&.polykit-settings-group--ja-style {
+				background: hsl(42deg 60% 95%);
+				border-left-color: #dba617;
+			}
+
+			&.polykit-settings-group--tools {
+				background: hsl(198deg 20% 95%);
+				border-left-color: #646970;
+			}
+		}
+
+		& .polykit-settings-group__title {
+			margin: 0 0 0.35em;
+			font-size: 1.15em;
+			color: #1d2327;
+		}
+
+		& .polykit-settings-group__intro {
+			margin: 0 0 0.75em;
+			font-size: 13px;
+			color: #50575e;
+			line-height: 1.5;
+		}
+
+		& .polykit-settings-group h3:first-of-type {
+			padding-top: 0;
+		}
+
+		& .polykit-settings-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-bottom: 1em;
+			font-size: 14px;
+
+			& th,
+			& td {
+				padding: 8px 10px;
+				vertical-align: top;
+				border-bottom: 1px solid hsl(198deg 43% 78%);
+				text-align: left;
+			}
+
+			& th {
+				font-weight: bold;
+				background-color: hsl(198deg 43% 81%);
+			}
+
+			& tbody tr:hover td {
+				background-color: hsl(198deg 43% 88%);
+				color: inherit;
+			}
+
+			&__desc {
+				width: 68%;
+			}
+
+			&__control {
+				width: 32%;
+				white-space: nowrap;
+				text-align: center;
+			}
+
+			&__text {
+				width: 100%;
+				max-width: 320px;
+				box-sizing: border-box;
+				text-align: left;
+			}
+
+			&__desc-text {
+				display: inline;
+			}
+		}
 
 		& table {
 			margin-top: 10px;
@@ -763,11 +849,18 @@ li.consistency-header-index {
 }
 
 .gp-content .polykit-settings-panels {
-	& input[type=checkbox],
-	& input[type=radio] {
+	& label input[type=checkbox],
+	& label input[type=radio] {
 		margin-right: 6px;
 		margin-left: -20px;
 		vertical-align: -1px;
+	}
+
+	& .polykit-settings-table input[type=checkbox],
+	& .polykit-settings-table input[type=radio],
+	& .polykit-settings-table input[type=text] {
+		margin: 0;
+		vertical-align: middle;
 	}
 }
 
@@ -1111,4 +1204,167 @@ code {
 			}
 		}
 	}
+}
+
+/* WPGPTools-derived features */
+.polykit-ignore-warnings {
+	margin: 0.5em 0;
+	padding: 0.5em;
+	background: #fff8e5;
+	border: 1px solid #f0c36d;
+	border-radius: 3px;
+}
+
+.polykit-checks-list {
+	margin: 0.5em 0;
+	font-size: 12px;
+}
+
+.polykit-check-warnings-list.has_warning {
+	color: #b32d2e;
+}
+
+.polykit-check-notices-list {
+	color: #646970;
+}
+
+.polykit-check-preview {
+	margin-right: 4px;
+	font-size: 14px;
+}
+
+.polykit-check-preview.warning {
+	color: #b32d2e;
+}
+
+.polykit-check-preview.notice {
+	color: #2271b1;
+}
+
+.polykit-check-highlight {
+	background: #fff3cd;
+	border-bottom: 1px dashed #dba617;
+}
+
+tr.preview.polykit-has-check-warning {
+	outline: 1px solid #f0a0a0;
+}
+
+tr.preview.polykit-has-check-notice {
+	outline: 1px solid #a0c4f0;
+}
+
+.polykit-check-filters {
+	margin-right: 1em;
+	font-size: 13px;
+}
+
+.polykit-check-filters a {
+	text-decoration: none;
+}
+
+.polykit-check-warning-labels-row,
+.polykit-check-notice-labels-row {
+	font-size: 11px;
+	margin-top: 2px;
+}
+
+.polykit-search {
+	margin-top: 1em;
+	padding: 0.5em;
+	background: #f6f7f7;
+	border-radius: 3px;
+}
+
+.polykit-search label {
+	margin-right: 0.5em;
+	font-size: 12px;
+}
+
+.polykit-search-word {
+	min-width: 120px;
+}
+
+.polykit-search-plugin-slug.hidden {
+	display: none;
+}
+
+.polykit-search-error {
+	color: #b32d2e;
+	font-size: 12px;
+}
+
+.polykit-get-gt {
+	display: inline-block;
+	margin-top: 0.5em;
+}
+
+.polykit-results-notice {
+	padding: 0.5em 1em;
+	background: #f0f6fc;
+	border-left: 4px solid #2271b1;
+}
+
+.polykit-h-label {
+	display: inline-block;
+	margin: 2px 4px 2px 0;
+	padding: 2px 6px;
+	font-size: 11px;
+	background: #f0f0f1;
+	border-radius: 3px;
+	text-decoration: none;
+}
+
+.polykit-h-label.polykit-label-error {
+	background: #fce4e4;
+	color: #b32d2e;
+}
+
+.polykit_diff,
+.polykit_compared_to {
+	margin: 0.5em 0;
+	font-size: 12px;
+}
+
+.polykit-diff-added {
+	background: #d4edda;
+}
+
+.polykit-diff-removed {
+	background: #f8d7da;
+	text-decoration: line-through;
+}
+
+.identical-history {
+	color: #646970;
+	font-style: italic;
+}
+
+.polykit-bulk-warning,
+.polykit-bulk-danger {
+	margin: 1em 0;
+	padding: 0.75em;
+	background: #fff8e5;
+	border: 1px solid #f0c36d;
+	white-space: pre-wrap;
+}
+
+.polykit-bulk-buttons {
+	margin: 0.25em 0 1em;
+}
+
+.polykit-choose-alternative.chosen {
+	background: #2271b1;
+	color: #fff;
+}
+
+.polykit-bulk-instructions {
+	margin: 1em 0;
+	font-size: 13px;
+}
+
+.polykit-settings-label {
+	display: block;
+	margin: 0.75em 0 0.25em;
+	font-weight: 600;
 }

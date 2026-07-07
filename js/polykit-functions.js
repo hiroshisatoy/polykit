@@ -812,6 +812,8 @@ function polykit_wait_table_alter() {
 						polykit_consistency(editor_id);
 						polykit_notranslate(editor_id);
 						polykit_localize_date(editor_id);
+						polykit_search_init(editor_id);
+						polykit_google_translate_init(editor_id);
 					}
 				});
 			});

@@ -129,11 +129,17 @@ if (polykit_user.is_on_translations) {
 	$gp.editor.show = function (original) {
 		return function () {
 			original.apply($gp.editor, arguments);
-			polykit_do_consistency(
-				$gp.editor.current[0].querySelector(".polykit-consistency"),
-			);
-			polykit_get_setting("autocopy_string_on_translation_opened") &&
-				polykit_copy_visible_original_string();
+			const current = $gp.editor.current && $gp.editor.current[0];
+			if (current) {
+				polykit_do_consistency(
+					current.querySelector(".polykit-consistency"),
+				);
+				polykit_get_setting("autocopy_string_on_translation_opened") &&
+					polykit_copy_visible_original_string();
+				if (polykit_get_setting("editor_scroll_center")) {
+					current.scrollIntoView({ behavior: "smooth", block: "center" });
+				}
+			}
 		};
 	}($gp.editor.show);
 }
@@ -180,3 +186,7 @@ polykit_wait_table_alter();
 polykit_localize_date();
 polykit_anonymous();
 polykit_pagination();
+polykit_checks_init();
+polykit_search_events();
+polykit_history_init();
+polykit_bulk_consistency_init();

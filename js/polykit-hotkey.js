@@ -164,4 +164,44 @@ function polykit_hotkeys() {
 		});
 		return false;
 	});
+
+	document.addEventListener("keydown", (event) => {
+		if (!polykit_get_setting("shortcuts_alt")) {
+			return;
+		}
+		if (!event.altKey && !event.ctrlKey) {
+			return;
+		}
+		const key = event.key.toLowerCase();
+		if (!isNaN(parseInt(event.key, 10))) {
+			const num = parseInt(event.key, 10);
+			const suggestions = document.querySelectorAll(
+				".polykit-consistency .translation-suggestion.with-tooltip, .polykit-consistency .copy-suggestion",
+			);
+			if (suggestions[num - 1]) {
+				suggestions[num - 1].click();
+				event.preventDefault();
+			}
+			return;
+		}
+		switch (key) {
+		case "g":
+			document.querySelector(".editor:visible .polykit-get-gt")?.click();
+			event.preventDefault();
+			break;
+		case "n":
+			document.querySelector(
+				".editor:visible .polykit-notranslate-copy-all",
+			)?.click();
+			event.preventDefault();
+			break;
+		case "p":
+		case "s":
+			polykit_focus_search();
+			event.preventDefault();
+			break;
+		default:
+			break;
+		}
+	}, false);
 }

@@ -5,6 +5,8 @@ if (typeof $gp_editor_options !== "undefined") {
 	polykit_quicklinks();
 	polykit_consistency();
 	polykit_notranslate();
+	polykit_search_init();
+	polykit_google_translate_init();
 }
 
 function polykit_quicklinks(current_editor = ".editor") {

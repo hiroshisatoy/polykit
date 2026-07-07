@@ -308,6 +308,7 @@ function polykit_validate(e, selector) {
 			newtext,
 			discard,
 		);
+		howmany += polykit_validate_extra_checks(selector, discard);
 	}
 	if (howmany !== 0) {
 		jQuery(selector).removeClass("no-warnings").addClass("has-warnings");
@@ -319,7 +320,12 @@ function polykit_validate(e, selector) {
 }
 
 function polykit_validate_visible(e) {
-	if (jQuery(this).hasClass("forcesubmit")) return;
+	if (jQuery(this).hasClass("forcesubmit")) {
+		return;
+	}
+	if (document.querySelector(".editor:visible .polykit-ignore-warnings input:checked")) {
+		return;
+	}
 	const selector = ".editor:visible";
 	const howmany = polykit_validate(e, selector);
 	if (typeof howmany !== "undefined" && howmany !== 0) {
