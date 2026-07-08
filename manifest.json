@@ -18,7 +18,9 @@
         "js/init.js"
       ],
       "css": [
-        "css/style.css"
+        "css/common.css",
+        "css/translation.css",
+        "css/settings.css"
       ],
       "matches": [
         "*://translate.wordpress.org/*"
@@ -55,7 +57,9 @@
         "js/dompurify.js",
         "CHANGELOG.md",
         "icons/icon-48.png",
-        "css/style.css",
+        "css/common.css",
+        "css/translation.css",
+        "css/settings.css",
         "js/init.js"
       ],
       "matches": [
