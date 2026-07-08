@@ -1,6 +1,5 @@
 "use strict";
 
-let polykit_next_is_strict = true;
 let polykit_user_edited = false;
 
 const polykit_ignore_warnings_template = document.createElement("div");
@@ -237,6 +236,68 @@ function polykit_check_tag_spaces(translated) {
 }
 
 /**
+ * @param {HTMLElement[]} target
+ * @param {string[]} messages
+ * @returns {void}
+ */
+function polykit_push_messages_as_items(target, messages) {
+	messages.forEach((message) => {
+		const li = document.createElement("li");
+		if (message.includes("<")) {
+			li.innerHTML = message;
+		} else {
+			li.textContent = message;
+		}
+		target.push(li);
+	});
+}
+
+/**
+ * @param {string} original
+ * @param {string} translated
+ * @param {string} editor_id
+ * @param {number} form_index
+ * @returns {{ warning: HTMLElement[], notice: HTMLElement[], highlight_me: string[] }}
+ */
+function polykit_run_all_checks(original, translated, editor_id, form_index) {
+	const results = polykit_run_extra_checks(original, translated);
+	if ("" === translated) {
+		return results;
+	}
+	polykit_push_messages_as_items(
+		results.warning,
+		polykit_collect_general_warnings(original, translated),
+	);
+	polykit_push_messages_as_items(
+		results.warning,
+		polykit_collect_locale_warnings(original, translated),
+	);
+	polykit_push_messages_as_items(
+		results.warning,
+		polykit_collect_glossary_warnings(editor_id, form_index),
+	);
+	if (0 === form_index) {
+		polykit_push_messages_as_items(
+			results.warning,
+			polykit_collect_gp_warning_messages(editor_id),
+		);
+	}
+	return results;
+}
+
+/**
+ * @param {object} state
+ * @returns {number}
+ */
+function polykit_count_row_check_issues(state) {
+	let count = state.check_warnings.length;
+	if (polykit_get_setting("checks_block_notices")) {
+		count += state.check_notices.length;
+	}
+	return count;
+}
+
+/**
  * @param {string} original
  * @param {string} translated
  * @returns {{ warning: HTMLElement[], notice: HTMLElement[], highlight_me: string[] }}
@@ -354,6 +415,8 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		has_warning: false,
 		has_notice: false,
 		check_results: document.createDocumentFragment(),
+		check_warnings: [],
+		check_notices: [],
 		preview_class: "polykit-has-check-passed",
 		preview_status: polykit_create_element("span", {
 			class: "polykit-check-preview passed",
@@ -383,10 +446,14 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 	}
 
 	translated_forms.forEach((translated_form, translated_form_i) => {
-		const check_results = polykit_run_extra_checks(
+		const check_results = polykit_run_all_checks(
 			original_forms[original_form_i],
 			translated_form,
+			editor_id,
+			translated_form_i,
 		);
+		state.check_warnings.push(...check_results.warning);
+		state.check_notices.push(...check_results.notice);
 		const warnings_list = document.createElement("div");
 		const notices_list = warnings_list.cloneNode(false);
 		warnings_list.classList.add("polykit-check-warnings-list");
@@ -406,11 +473,11 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 			warnings_list.appendChild(document.createElement("ul")).appendChild(
 				warningsF.cloneNode(true),
 			);
-			const warnings_labels = document.createElement("ul");
-			warnings_labels.className = "polykit-check-warning-labels";
-			warnings_labels.appendChild(warningsF);
 			state.check_results.appendChild(warnings_list);
-			state.labels[translated_form_i].warnings = warnings_labels;
+			state.labels[translated_form_i].warnings = polykit_create_check_labels_group(
+				check_results.warning,
+				"warning",
+			);
 		} else {
 			warnings_list.textContent = polykit_t(
 				"check_warnings_ok",
@@ -435,11 +502,11 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 			notices_list.appendChild(document.createElement("ul")).appendChild(
 				noticesF.cloneNode(true),
 			);
-			const notices_labels = document.createElement("ul");
-			notices_labels.className = "polykit-check-notice-labels";
-			notices_labels.appendChild(noticesF);
 			state.check_results.appendChild(notices_list);
-			state.labels[translated_form_i].notices = notices_labels;
+			state.labels[translated_form_i].notices = polykit_create_check_labels_group(
+				check_results.notice,
+				"notice",
+			);
 		}
 
 		state.highlights[translated_form_i] = check_results.highlight_me;
@@ -472,6 +539,40 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 }
 
 /**
+ * @param {HTMLElement} el
+ * @param {"warning"|"notice"} type
+ * @returns {HTMLSpanElement}
+ */
+function polykit_create_check_label(el, type) {
+	const label = document.createElement("span");
+	label.className = `polykit-check-label polykit-check-label--${type}`;
+	if (el.innerHTML && el.innerHTML !== el.textContent) {
+		label.innerHTML = el.innerHTML;
+	} else {
+		label.textContent = el.textContent;
+	}
+	const full_text = label.textContent.trim();
+	if (full_text.length > 72) {
+		label.title = full_text;
+	}
+	return label;
+}
+
+/**
+ * @param {HTMLElement[]} items
+ * @param {"warning"|"notice"} type
+ * @returns {HTMLDivElement}
+ */
+function polykit_create_check_labels_group(items, type) {
+	const group = document.createElement("div");
+	group.className = `polykit-check-${type}-labels`;
+	items.forEach((item) => {
+		group.appendChild(polykit_create_check_label(item, type));
+	});
+	return group;
+}
+
+/**
  * @param {object} form_label
  * @param {number} form_i
  * @param {NodeListOf<Element>} translation_p_text
@@ -482,19 +583,25 @@ function polykit_add_check_labels(form_label, form_i, translation_p_text, highli
 	if (!translation_p_text[form_i]) {
 		return;
 	}
-	if ("" !== form_label.warnings || "" !== form_label.notices) {
-		const labels_w = document.createElement("div");
-		const labels_n = labels_w.cloneNode(false);
-		labels_w.className = "polykit-check-warning-labels-row";
-		labels_n.className = "polykit-check-notice-labels-row";
-		if ("" !== form_label.warnings) {
-			labels_w.appendChild(form_label.warnings);
+	if (form_label.warnings || form_label.notices) {
+		if (form_label.warnings) {
+			const labels_w = document.createElement("div");
+			labels_w.className = "polykit-check-warning-labels-row";
+			const heading_w = document.createElement("span");
+			heading_w.className = "polykit-check-labels-heading polykit-check-labels-heading--warning";
+			heading_w.textContent = polykit_t("check_label_warning");
+			labels_w.append(heading_w, form_label.warnings);
+			translation_p_text[form_i].insertAdjacentElement("afterend", labels_w);
 		}
-		if ("" !== form_label.notices) {
-			labels_n.appendChild(form_label.notices);
+		if (form_label.notices) {
+			const labels_n = document.createElement("div");
+			labels_n.className = "polykit-check-notice-labels-row";
+			const heading_n = document.createElement("span");
+			heading_n.className = "polykit-check-labels-heading polykit-check-labels-heading--notice";
+			heading_n.textContent = polykit_t("check_label_notice");
+			labels_n.append(heading_n, form_label.notices);
+			translation_p_text[form_i].insertAdjacentElement("afterend", labels_n);
 		}
-		translation_p_text[form_i].insertAdjacentElement("afterend", labels_n);
-		translation_p_text[form_i].insertAdjacentElement("afterend", labels_w);
 		if (highlights.length && highlights[form_i]) {
 			polykit_highlight_terms(
 				translation_p_text[form_i],
@@ -507,15 +614,29 @@ function polykit_add_check_labels(form_label, form_i, translation_p_text, highli
 
 /**
  * @param {string} editor_id
+ * @returns {boolean}
+ */
+function polykit_editor_save_warnings_ignored(editor_id) {
+	const editor = document.querySelector(editor_id);
+	return Boolean(
+		editor?.querySelector(".polykit-ignore-warnings input:checked"),
+	);
+}
+
+/**
+ * @param {string} editor_id
  * @param {string} preview_id
  * @returns {void}
  */
 function polykit_editor_checks_init(editor_id, preview_id) {
+	const editor = document.querySelector(editor_id);
+	if (!editor || editor.dataset.polykitChecksInit) {
+		return;
+	}
+	editor.dataset.polykitChecksInit = "true";
+
 	const ignore_box = polykit_ignore_warnings_template.cloneNode(true);
-	ignore_box.querySelector("input").addEventListener("click", (ev) => {
-		polykit_next_is_strict = !ev.target.checked;
-	});
-	const wrapper = document.querySelector(`${editor_id} .translation-wrapper`);
+	const wrapper = editor.querySelector(".translation-wrapper");
 	wrapper && wrapper.insertAdjacentElement("afterend", ignore_box);
 
 	document.querySelectorAll(
@@ -523,19 +644,19 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 	).forEach((btn) => {
 		btn.addEventListener("click", (e) => {
 			if (
-				!polykit_check_this_translation(editor_id, preview_id) &&
-				polykit_next_is_strict
+				!polykit_editor_save_warnings_ignored(editor_id) &&
+				!polykit_check_this_translation(editor_id, preview_id)
 			) {
 				e.preventDefault();
 				e.stopPropagation();
 				$gp.notices.error(polykit_t("check_fix_warnings_first"));
+				return;
 			}
-			document.querySelectorAll(".polykit-ignore-warnings input").forEach(
+			editor.querySelectorAll(".polykit-ignore-warnings input").forEach(
 				(el) => {
 					el.checked = false;
 				},
 			);
-			polykit_next_is_strict = true;
 			polykit_user_edited = false;
 		});
 	});
@@ -578,6 +699,11 @@ function polykit_display_check_results(editor_id, preview_id, state) {
 
 	const existing = editor.querySelector(".polykit-checks-list");
 	existing && existing.remove();
+	preview.querySelectorAll(
+		".polykit-check-warning-labels-row, .polykit-check-notice-labels-row",
+	).forEach((el) => {
+		el.remove();
+	});
 	const meta = editor.querySelector(
 		".editor-panel__right .panel-content .meta dl",
 	);
@@ -606,9 +732,6 @@ function polykit_display_check_results(editor_id, preview_id, state) {
  * @returns {void}
  */
 function polykit_check_all_translations() {
-	if (!polykit_get_setting("checks_enabled")) {
-		return;
-	}
 	document.querySelectorAll("#translations tbody tr.preview").forEach(
 		(translation_p) => {
 			if (translation_p.classList.contains("untranslated")) {
@@ -617,6 +740,9 @@ function polykit_check_all_translations() {
 			const preview_id = `#${translation_p.id}`;
 			const editor_id = preview_id.replace("preview", "editor");
 			polykit_editor_checks_init(editor_id, preview_id);
+			if (!polykit_get_setting("checks_enabled")) {
+				return;
+			}
 			const state = polykit_prepare_row_checks(editor_id, true);
 			polykit_display_check_results(editor_id, preview_id, state);
 		},
@@ -652,46 +778,6 @@ function polykit_checks_mutations() {
 }
 
 /**
- * Apply extra checks during polykit_validate save flow.
- *
- * @param {string} selector
- * @param {string} discard
- * @returns {number}
- */
-function polykit_validate_extra_checks(selector, discard) {
-	let howmany = 0;
-	const $editor = jQuery(selector);
-	const originals = jQuery(".original, .original-text", $editor);
-	const translations = jQuery("textarea.foreign-text", $editor);
-	let original_index = 0;
-	if (2 === originals.length && 1 === translations.length) {
-		original_index = 1;
-	}
-	translations.each((i, translation) => {
-		const originaltext = jQuery(originals[original_index]).text();
-		const results = polykit_run_extra_checks(originaltext, translation.value);
-		results.warning.forEach((item) => {
-			howmany++;
-			const text = item.textContent || item;
-			jQuery(".textareas", $editor).prepend(
-				polykit_get_warning(text, discard),
-			);
-		});
-		if (polykit_get_setting("checks_block_notices")) {
-			results.notice.forEach((item) => {
-				howmany++;
-				const text = item.textContent || item;
-				jQuery(".textareas", $editor).prepend(
-					polykit_get_warning(text, discard),
-				);
-			});
-		}
-		original_index = 1;
-	});
-	return howmany;
-}
-
-/**
  * @returns {void}
  */
 function polykit_update_check_filters() {
@@ -717,8 +803,8 @@ function polykit_update_check_filters() {
  * @returns {void}
  */
 function polykit_check_filters() {
-	const paging = document.querySelector(".paging");
-	if (!paging || document.querySelector(".polykit-check-filters")) {
+	const review_toolbar = polykit_ensure_review_toolbar();
+	if (!review_toolbar || document.querySelector(".polykit-check-filters")) {
 		return;
 	}
 	const filters = document.createElement("div");
@@ -738,7 +824,14 @@ function polykit_check_filters() {
 		class: "polykit-filter-all",
 	}, polykit_t("filter_all"));
 	filters.append(notices_link, " | ", warnings_link, " | ", all_link);
-	paging.insertAdjacentElement("afterbegin", filters);
+	const insert_before = review_toolbar.querySelector(
+		".separator, .polykit-toolbar-extensions",
+	);
+	if (insert_before) {
+		review_toolbar.insertBefore(filters, insert_before);
+	} else {
+		review_toolbar.appendChild(filters);
+	}
 
 	warnings_link.addEventListener("click", (e) => {
 		e.preventDefault();
@@ -769,6 +862,7 @@ function polykit_check_filters() {
 		});
 	});
 	polykit_update_check_filters();
+	polykit_wrap_review_paging_row();
 }
 
 /**

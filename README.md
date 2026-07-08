@@ -4,7 +4,8 @@ translate.wordpress.org 向けの日本語翻訳特化ブラウザ拡張機能�
 
 ## 由来
 
-PolyKit は [GlotDict](https://github.com/Mte90/GlotDict) をベースにしたフォークです。元プロジェクトの翻訳支援機能を引き継ぎつつ、日本語コミュニティの翻訳ワークフロー向けに再構成しています。
+PolyKit は [GlotDict](https://github.com/Mte90/GlotDict)
+をベースにしたフォークです。元プロジェクトの翻訳支援機能を引き継ぎつつ、日本語コミュニティの翻訳ワークフロー向けに再構成しています。
 
 ## 機能
 
@@ -20,7 +21,7 @@ PolyKit は [GlotDict](https://github.com/Mte90/GlotDict) をベースにした�
 Chrome は **Manifest V3** 対応が必要です（`manifest.json` は MV3 形式です）。
 
 ```bash
-./pack-ext.py ./
+deno task pack
 ```
 
 ### Chrome（推奨: フォルダを直接読み込み）

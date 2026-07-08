@@ -181,23 +181,21 @@ function polykit_hotkeys() {
 			return;
 		}
 		switch (key) {
-		case "g":
-			document.querySelector(".editor:visible .polykit-get-gt")?.click();
-			event.preventDefault();
-			break;
-		case "n":
-			document.querySelector(
-				".editor:visible .polykit-notranslate-copy-all",
-			)?.click();
-			event.preventDefault();
-			break;
-		case "p":
-		case "s":
-			polykit_focus_search();
-			event.preventDefault();
-			break;
-		default:
-			break;
+			case "g":
+				polykit_query_visible_editor(".polykit-get-gt")?.click();
+				event.preventDefault();
+				break;
+			case "n":
+				polykit_query_visible_editor(".polykit-notranslate-copy-all")?.click();
+				event.preventDefault();
+				break;
+			case "p":
+			case "s":
+				polykit_focus_search();
+				event.preventDefault();
+				break;
+			default:
+				break;
 		}
 	}, false);
 }

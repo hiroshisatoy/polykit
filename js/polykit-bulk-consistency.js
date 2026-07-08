@@ -17,8 +17,10 @@ function polykit_bulk_consistency_init() {
 		polykit_bulk_magic_reject();
 		return;
 	}
-	if (document.location.href.includes("consistency?search") ||
-		document.location.href.includes("consistency/?search")) {
+	if (
+		document.location.href.includes("consistency?search") ||
+		document.location.href.includes("consistency/?search")
+	) {
 		polykit_bulk_consistency_page();
 	}
 }

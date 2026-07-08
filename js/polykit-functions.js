@@ -146,6 +146,59 @@ function polykit_add_glossary_links(glossary_word) {
 }
 
 /**
+ * Ensure the review toolbar container exists next to the filter toolbar.
+ *
+ * @returns {HTMLElement|null}
+ */
+function polykit_ensure_review_toolbar() {
+	const existing = document.querySelector(".polykit-review-toolbar");
+	if (existing) {
+		return existing;
+	}
+	const filter_toolbar = polykit_get_filter_toolbar();
+	if (!filter_toolbar) {
+		return null;
+	}
+	const review_toolbar = document.createElement("div");
+	review_toolbar.className = "polykit-review-toolbar";
+	filter_toolbar.insertAdjacentElement("afterend", review_toolbar);
+	return review_toolbar;
+}
+
+/**
+ * Place review toolbar and top paging on one row (space-between).
+ *
+ * @returns {HTMLElement|null}
+ */
+function polykit_wrap_review_paging_row() {
+	const review_toolbar = document.querySelector(".polykit-review-toolbar");
+	const paging = document.querySelector(".paging");
+	if (!review_toolbar && !paging) {
+		return null;
+	}
+	const existing = review_toolbar?.closest(".polykit-review-paging-row") ||
+		paging?.closest(".polykit-review-paging-row");
+	if (existing) {
+		return existing;
+	}
+	const row = document.createElement("div");
+	row.className = "polykit-review-paging-row";
+	const parent = review_toolbar?.parentNode || paging?.parentNode;
+	if (!parent) {
+		return null;
+	}
+	const anchor = review_toolbar || paging;
+	parent.insertBefore(row, anchor);
+	if (review_toolbar) {
+		row.appendChild(review_toolbar);
+	}
+	if (paging) {
+		row.appendChild(paging);
+	}
+	return row;
+}
+
+/**
  * Add the review button
  * @returns void
  */
@@ -155,14 +208,8 @@ function polykit_add_review_button() {
 		jQuery(".discussions-table-head").length === 0 &&
 		!document.querySelector(".polykit-review")
 	) {
-		const filter_toolbar = polykit_get_filter_toolbar();
-		if (filter_toolbar) {
-			let review_toolbar = document.querySelector(".polykit-review-toolbar");
-			if (!review_toolbar) {
-				review_toolbar = document.createElement("div");
-				review_toolbar.className = "polykit-review-toolbar";
-				filter_toolbar.insertAdjacentElement("afterend", review_toolbar);
-			}
+		const review_toolbar = polykit_ensure_review_toolbar();
+		if (review_toolbar) {
 			const review_button = document.createElement("input");
 			review_button.type = "button";
 			review_button.className = "button polykit-review";
@@ -276,6 +323,25 @@ function polykit_get_filter_toolbar() {
 	return document.querySelector(
 		"#upper-filters-toolbar, form.filters-toolbar:not(.bulk-actions), .filter-toolbar",
 	);
+}
+
+/**
+ * Currently open translation editor row (GlotPress toggles display on .editor).
+ *
+ * @returns {HTMLElement|null}
+ */
+function polykit_get_visible_editor() {
+	return document.querySelector('.editor[style="display: table-row;"]') ||
+		document.querySelector(".editor:not([style])");
+}
+
+/**
+ * @param {string} selector
+ * @returns {Element|null}
+ */
+function polykit_query_visible_editor(selector) {
+	const editor = polykit_get_visible_editor();
+	return editor ? editor.querySelector(selector) : null;
 }
 
 /**
@@ -992,8 +1058,14 @@ function polykit_build_sticky_header() {
 	title && fragment.appendChild(title);
 	filter_toolbar && fragment.appendChild(filter_toolbar);
 	bulk_actions && fragment.appendChild(bulk_actions);
-	polykit_review_toolbar && fragment.appendChild(polykit_review_toolbar);
-	paging_top && fragment.appendChild(paging_top);
+	if (polykit_review_toolbar || paging_top) {
+		const review_paging_row = document.createElement("div");
+		review_paging_row.className = "polykit-review-paging-row";
+		polykit_review_toolbar &&
+			review_paging_row.appendChild(polykit_review_toolbar);
+		paging_top && review_paging_row.appendChild(paging_top);
+		fragment.appendChild(review_paging_row);
+	}
 	polykit_notices_container && fragment.appendChild(polykit_notices_container);
 
 	const polykit_sticky_header_container = document.createElement("DIV");

@@ -155,82 +155,106 @@ function polykit_paren_needs_outside_space(masked) {
 	return false;
 }
 
-function polykit_validate_locale(e, selector, original, text, discard) {
-	if ("ja" !== polykit_get_lang()) {
-		return 0;
+/**
+ * 1-1: 日本語文脈での半角「,」「.」句読点を検出する。
+ *
+ * @param {string} masked
+ * @returns {string} 検出した半角句読点（重複なし）。
+ */
+function polykit_get_halfwidth_japanese_punctuation_chars(masked) {
+	const found = [];
+	const cjk = /[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/;
+
+	if (
+		cjk.test(masked) && /,/.test(masked) &&
+		(/[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF],/.test(masked) ||
+			/,\s*[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/.test(masked))
+	) {
+		found.push(",");
 	}
-	let howmany = 0;
+	if (/[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]\.(?!\d)/.test(masked)) {
+		found.push(".");
+	}
+
+	return [...new Set(found)].join("");
+}
+
+/**
+ * 1-7 / 1-8: 閉じ丸括弧の直前に「。」がある。
+ *
+ * @param {string} masked
+ * @returns {boolean}
+ */
+function polykit_has_paren_period_before_close(masked) {
+	return /\。\)/.test(masked);
+}
+
+/**
+ * 日本語スタイルガイドの警告メッセージを収集する（DOM 非依存）。
+ *
+ * @param {string} original 原文。
+ * @param {string} text 訳文。
+ * @returns {string[]}
+ */
+function polykit_collect_locale_warnings(original, text) {
+	if ("ja" !== polykit_get_lang()) {
+		return [];
+	}
+	const warnings = [];
 	const masked = polykit_mask_locale_text(text);
 
+	if (polykit_get_setting("ja_japanese_punctuation")) {
+		const punctuation = polykit_get_halfwidth_japanese_punctuation_chars(masked);
+		if (punctuation) {
+			warnings.push(polykit_t("ja_japanese_punctuation", punctuation));
+		}
+	}
+
 	if (polykit_get_setting("ja_fullwidth_ascii")) {
-		// 数字は 1-3 の専用警告に任せ、同じ文字への二重警告を避ける。
 		const fullwidth = masked.match(/[！-／：-＠Ａ-Ｚ［-｀ａ-ｚ｛-～]/g);
 		if (fullwidth) {
 			const unique = [...new Set(fullwidth)].slice(0, 5).join("");
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_fullwidth_ascii", unique), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_fullwidth_ascii", unique));
 		}
 	}
 
 	if (polykit_get_setting("ja_fullwidth_number")) {
 		const nums = masked.match(/[０-９]+/g);
 		if (nums) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_fullwidth_number", nums[0]), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_fullwidth_number", nums[0]));
 		}
 	}
 
-	if (polykit_get_setting("ja_space_before_half") &&
-		!polykit_get_setting("ja_space_around_mixed")) {
-		// 1-2: ! ? の前のスペース。1-4 が有効なときはそちらに任せる。
+	if (
+		polykit_get_setting("ja_space_before_half") &&
+		!polykit_get_setting("ja_space_around_mixed")
+	) {
 		const bad = masked.match(/[\u3040-\u9FFF][!?]/g);
 		if (bad) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_space_before_half", bad[0]), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_space_before_half", bad[0]));
 		}
 	}
 
 	if (polykit_get_setting("ja_space_around_mixed")) {
 		const boundary = polykit_get_unspaced_mixed_boundary(masked);
 		if (boundary) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(
-					polykit_t("ja_space_around_mixed", boundary),
-					discard,
-				),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_space_around_mixed", boundary));
 		}
 	}
 
 	if (polykit_get_setting("ja_space_after_comma")) {
 		if (/、[ \u00A0\u3000]/.test(masked)) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_space_after_comma"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_space_after_comma"));
 		}
 	}
 
 	if (polykit_get_setting("ja_colon_spacing")) {
 		if (/[ \u00A0\u3000]:/.test(masked)) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_colon_before"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_colon_before"));
 		} else if (
 			/:(?!\s)[A-Za-z\u3040-\u9FFF]/.test(masked) && !/\d:\d/.test(masked)
 		) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_colon_after"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_colon_after"));
 		}
 	}
 
@@ -239,31 +263,25 @@ function polykit_validate_locale(e, selector, original, text, discard) {
 			/\d[ \u00A0\u3000]+[件個年月日時分秒回人文字列バージョン％%]/,
 		);
 		if (digit_space) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(
-					polykit_t("ja_digit_spacing", digit_space[0]),
-					discard,
-				),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_digit_spacing", digit_space[0]));
 		}
 	}
 
 	if (polykit_get_setting("ja_paren_space_outside")) {
 		if (polykit_paren_needs_outside_space(masked)) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_paren_space_outside"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_paren_space_outside"));
 		}
 	}
 
 	if (polykit_get_setting("ja_paren_space_inside")) {
 		if (/\(\s+|\s+\)/.test(masked)) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_paren_space_inside"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_paren_space_inside"));
+		}
+	}
+
+	if (polykit_get_setting("ja_paren_period_before_close")) {
+		if (polykit_has_paren_period_before_close(masked)) {
+			warnings.push(polykit_t("ja_paren_period_before_close"));
 		}
 	}
 
@@ -273,40 +291,34 @@ function polykit_validate_locale(e, selector, original, text, discard) {
 				continue;
 			}
 			if (text.includes(rule.wrong)) {
-				jQuery(".textareas", selector).prepend(
-					polykit_get_warning(
-						polykit_t("ja_terminology_wrong", rule.right, rule.wrong),
-						discard,
-					),
+				warnings.push(
+					polykit_t("ja_terminology_wrong", rule.right, rule.wrong),
 				);
-				howmany++;
 			}
 		}
 	}
 
-	if (polykit_get_setting("ja_source_terminology")) {
+	if (
+		polykit_get_setting("ja_view_terminology") ||
+		polykit_get_setting("ja_not_allowed_terminology") ||
+		polykit_get_setting("ja_sorry_terminology")
+	) {
 		for (
 			const warning of polykit_get_source_terminology_warnings(original, text)
 		) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t(warning), discard),
-			);
-			howmany++;
+			if (!polykit_get_setting(warning)) {
+				continue;
+			}
+			warnings.push(polykit_t(warning));
 		}
 	}
 
 	if (polykit_get_setting("ja_straight_quotes")) {
 		const check = text.replace(/([^>"]*)"(?=[^<]*>)/g, "$1\x01");
 		if (/[\u3040-\u9FFF]"/.test(check) || /"[\u3040-\u9FFF]/.test(check)) {
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(polykit_t("ja_straight_quotes"), discard),
-			);
-			howmany++;
+			warnings.push(polykit_t("ja_straight_quotes"));
 		}
 	}
 
-	if (howmany !== 0) {
-		polykit_stoppropagation(e);
-	}
-	return howmany;
+	return warnings;
 }

@@ -5,12 +5,13 @@
 	},
 	"tasks": {
 		"pack": "deno run --allow-read --allow-write --allow-env=READABLE_STREAM pack-ext.js .",
+		"test": "deno test --allow-read",
 		"fmt": "deno fmt"
 	},
 	"fmt": {
 		"lineWidth": 120,
 		"indentWidth": 4,
 		"useTabs": true,
-		"include": ["css/**/*.css", "js/**/*.js", "deno.json"]
+		"include": ["css/**/*.css", "js/**/*.js", "tests/**/*.js", "deno.json"]
 	}
 }

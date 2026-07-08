@@ -187,6 +187,7 @@ polykit_localize_date();
 polykit_anonymous();
 polykit_pagination();
 polykit_checks_init();
+polykit_wrap_review_paging_row();
 polykit_search_events();
 polykit_history_init();
 polykit_bulk_consistency_init();

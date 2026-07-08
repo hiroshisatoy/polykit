@@ -114,43 +114,47 @@ function polykit_generate_settings_panel() {
 		groupClass: "polykit-settings-group--ja-style",
 		categories: [
 			{
-				title: "ja_style_width_title",
+				title: "ja_style_section1_title",
 				controlColumn: "enabled",
 				settings: {
+					ja_japanese_punctuation: polykit_t(
+						"setting_ja_japanese_punctuation",
+					),
 					ja_fullwidth_ascii: polykit_t("setting_ja_fullwidth_ascii"),
-					ja_fullwidth_number: polykit_t("setting_ja_fullwidth_number"),
-					ja_space_before_half: polykit_t("setting_ja_space_before_half"),
-					ja_space_around_mixed: polykit_t("setting_ja_space_around_mixed"),
-					ja_space_after_comma: polykit_t("setting_ja_space_after_comma"),
-					ja_colon_spacing: polykit_t("setting_ja_colon_spacing"),
-					ja_digit_spacing: polykit_t("setting_ja_digit_spacing"),
 					curly_apostrophe_warning: polykit_t(
 						"setting_curly_apostrophe_warning",
 					),
-				},
-			},
-			{
-				title: "ja_style_paren_title",
-				controlColumn: "enabled",
-				settings: {
+					ja_space_before_half: polykit_t("setting_ja_space_before_half"),
+					ja_fullwidth_number: polykit_t("setting_ja_fullwidth_number"),
+					ja_space_around_mixed: polykit_t("setting_ja_space_around_mixed"),
+					ja_space_after_comma: polykit_t("setting_ja_space_after_comma"),
+					ja_colon_spacing: polykit_t("setting_ja_colon_spacing"),
 					ja_paren_space_outside: polykit_t("setting_ja_paren_space_outside"),
 					ja_paren_space_inside: polykit_t("setting_ja_paren_space_inside"),
+					ja_paren_period_before_close: polykit_t(
+						"setting_ja_paren_period_before_close",
+					),
+					ja_digit_spacing: polykit_t("setting_ja_digit_spacing"),
 				},
 			},
 			{
-				title: "ja_style_terminology_title",
-				controlColumn: "enabled",
-				settings: {
-					ja_terminology: polykit_t("setting_ja_terminology"),
-					ja_source_terminology: polykit_t("setting_ja_source_terminology"),
-				},
-			},
-			{
-				title: "ja_style_quotes_title",
+				title: "ja_style_section2_title",
 				controlColumn: "enabled",
 				settings: {
 					ja_straight_quotes: polykit_t("setting_ja_straight_quotes"),
 					localized_quote_warning: polykit_t("setting_localized_quote_warning"),
+				},
+			},
+			{
+				title: "ja_style_section3_title",
+				controlColumn: "enabled",
+				settings: {
+					ja_view_terminology: polykit_t("setting_ja_view_terminology"),
+					ja_not_allowed_terminology: polykit_t(
+						"setting_ja_not_allowed_terminology",
+					),
+					ja_sorry_terminology: polykit_t("setting_ja_sorry_terminology"),
+					ja_terminology: polykit_t("setting_ja_terminology"),
 				},
 			},
 		],
@@ -292,8 +296,11 @@ function polykit_generate_settings_panel() {
 							settings[key] = localStorage.getItem(key);
 						}
 					}
-					ev.target.href =
-						`javascript:(function(){const s=${JSON.stringify(settings)};Object.keys(s).forEach(k=>localStorage.setItem(k,s[k]));alert("${polykit_t("backup_restored")}");})();`;
+					ev.target.href = `javascript:(function(){const s=${
+						JSON.stringify(settings)
+					};Object.keys(s).forEach(k=>localStorage.setItem(k,s[k]));alert("${
+						polykit_t("backup_restored")
+					}");})();`;
 				});
 				backup_link.addEventListener("click", () => {
 					alert(polykit_t("backup_restore_hint"));
@@ -336,9 +343,7 @@ function polykit_generate_settings_panel() {
 			render: (panel) => {
 				const changelog = document.createElement("DIV");
 				changelog.classList.add("polykit-changelog");
-				const currentVersion = "0" === polykit_extension.currentVersion
-					? ""
-					: polykit_extension.currentVersion;
+				const currentVersion = "0" === polykit_extension.currentVersion ? "" : polykit_extension.currentVersion;
 				changelog.appendChild(document.createElement("H3")).appendChild(
 					document.createTextNode(
 						polykit_t("welcome_install_title", currentVersion),
@@ -375,7 +380,7 @@ function polykit_generate_settings_panel() {
 
 				const has_changelog = Boolean(
 					polykit_extension.changelog &&
-					"" !== polykit_extension.changelog.trim(),
+						"" !== polykit_extension.changelog.trim(),
 				);
 				if (has_changelog || "update" === polykit_extension.reason) {
 					changelog.appendChild(document.createElement("H3")).appendChild(
@@ -389,8 +394,7 @@ function polykit_generate_settings_panel() {
 						);
 					}
 					const link = document.createElement("A");
-					link.href =
-						"https://github.com/hiroshisatoy/polykit/blob/main/CHANGELOG.md";
+					link.href = "https://github.com/hiroshisatoy/polykit/blob/main/CHANGELOG.md";
 					link.textContent = polykit_t("check_changelog");
 					link.target = "_blank";
 					link.rel = "noreferrer noopener";
@@ -413,8 +417,14 @@ function polykit_generate_settings_panel() {
 function polykit_create_settings_close_button() {
 	const closeSettings = document.createElement("A");
 	closeSettings.classList.add("polykit-close-settings");
-	closeSettings.textContent = polykit_t("close");
-	closeSettings.addEventListener("click", () => {
+	closeSettings.href = "#";
+	const icon = document.createElement("SPAN");
+	icon.classList.add("polykit-close-settings__icon");
+	icon.setAttribute("aria-hidden", "true");
+	icon.textContent = "\u00D7";
+	closeSettings.append(icon, document.createTextNode(polykit_t("close")));
+	closeSettings.addEventListener("click", (event) => {
+		event.preventDefault();
 		polykit_settings_menu.click();
 	});
 	return closeSettings;
@@ -468,7 +478,7 @@ function polykit_build_settings_tabs(container, tab_defs) {
 		panels.appendChild(panel);
 
 		style_rules.push(
-			`#${radio.id}:checked ~ .polykit-settings-tabs #${tab.id}{background:#e5f5fa;color:#000;font-weight:bold;}`,
+			`#${radio.id}:checked ~ .polykit-settings-tabs #${tab.id}{background:var(--polykit-color-settings-tab-active-bg);color:var(--polykit-color-text);font-weight:600;border-color:var(--polykit-color-border);border-bottom:1px solid var(--polykit-color-settings-tab-active-bg);margin-bottom:-1px;}`,
 			`#${radio.id}:checked ~ .polykit-settings-panels #${panel.id}{display:flex;}`,
 		);
 	});
@@ -502,6 +512,7 @@ const polykit_setting_defaults = {
 	no_final_dot: true,
 	curly_apostrophe_warning: false,
 	localized_quote_warning: false,
+	ja_japanese_punctuation: true,
 	ja_fullwidth_ascii: true,
 	ja_fullwidth_number: true,
 	ja_space_before_half: true,
@@ -511,8 +522,11 @@ const polykit_setting_defaults = {
 	ja_digit_spacing: true,
 	ja_paren_space_outside: true,
 	ja_paren_space_inside: true,
+	ja_paren_period_before_close: true,
 	ja_terminology: true,
-	ja_source_terminology: true,
+	ja_view_terminology: true,
+	ja_not_allowed_terminology: true,
+	ja_sorry_terminology: true,
 	ja_straight_quotes: true,
 };
 
@@ -701,12 +715,26 @@ function polykit_append_setting_label_content(label, text) {
 function polykit_get_setting(key) {
 	const storageKey = `polykit_${key}`;
 	const stored = localStorage.getItem(storageKey);
-	if (null === stored) {
-		return Object.prototype.hasOwnProperty.call(polykit_setting_defaults, key)
-			? polykit_setting_defaults[key]
-			: false;
+	if (null !== stored) {
+		return "true" === stored;
 	}
-	return "true" === stored;
+	const legacy_source_terminology = {
+		ja_view_terminology: "ja_source_terminology",
+		ja_not_allowed_terminology: "ja_source_terminology",
+		ja_sorry_terminology: "ja_source_terminology",
+	};
+	if (Object.prototype.hasOwnProperty.call(legacy_source_terminology, key)) {
+		const legacy = localStorage.getItem(
+			`polykit_${legacy_source_terminology[key]}`,
+		);
+		if (null !== legacy) {
+			return "true" === legacy;
+		}
+	}
+	if (Object.prototype.hasOwnProperty.call(polykit_setting_defaults, key)) {
+		return polykit_setting_defaults[key];
+	}
+	return false;
 }
 
 /**

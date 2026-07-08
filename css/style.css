@@ -36,7 +36,9 @@
 	--polykit-color-surface-inactive: #888;
 	--polykit-color-toggle-on: #0085ba;
 	--polykit-color-toggle-hover: #7eb7d3;
-	--polykit-color-settings-tab: #23282d;
+	--polykit-color-settings-tab: #f0f0f1;
+	--polykit-color-settings-tab-active-bg: #fff;
+	--polykit-color-settings-panel-bg: #fff;
 	--polykit-color-layover: #0009;
 	--polykit-color-mark-blue: blue;
 	--polykit-color-mark-black: black;
@@ -57,15 +59,16 @@
 	--polykit-color-check-notice-outline: #a0c4f0;
 	--polykit-color-results-bg: #f0f6fc;
 	--polykit-color-label-error-bg: #fce4e4;
+	--polykit-color-label-notice-bg: #e8f4fc;
 	--polykit-color-diff-added: #d4edda;
 	--polykit-color-diff-removed: #f8d7da;
 	--polykit-color-copy-row-bg: #e5f5fa;
 
-	/* Settings table (HSL) */
-	--polykit-settings-table-header: hsl(198deg 43% 81%);
-	--polykit-settings-table-cell: hsl(198deg 43% 89%);
-	--polykit-settings-table-cell-hover: hsl(198deg 43% 88%);
-	--polykit-settings-table-border: hsl(198deg 43% 78%);
+	/* Settings table */
+	--polykit-settings-table-header: #f6f7f7;
+	--polykit-settings-table-cell: #fff;
+	--polykit-settings-table-cell-hover: #f0f6fc;
+	--polykit-settings-table-border: #dcdcde;
 
 	/* Spacing */
 	--polykit-space-2xs: 1px;
@@ -94,8 +97,6 @@
 	--polykit-space-settings-caret-top: 12px;
 	--polykit-space-settings-caret-right: 15px;
 	--polykit-space-settings-caret-size: 5px;
-	--polykit-space-close-icon-height: 14px;
-	--polykit-space-close-icon-top: 4px;
 
 	/* Sizes */
 	--polykit-size-border-accent: 2px;
@@ -177,8 +178,9 @@
 
 /*
  * CSS Nesting（https://triple-underscore.github.io/css-nesting-ja.html）
- * - 子孫は入子のみ（& 不要）
- * - 複合・疑似クラス・BEM 連結は & を使用（&.modifier, &:hover, &__element）
+ * - 子孫セレクタは入子のみ（& 不要）: .parent { .child { } }
+ * - 複合・疑似クラスは & を使用: &.modifier, &:hover
+ * - & の直後に識別子を続けてクラス名を作ることはできない → クラス名をそのまま書く
  */
 
 .gp-heading {
@@ -239,6 +241,90 @@ table.translations {
 		&.polykit-has-check-notice {
 			outline: 1px solid var(--polykit-color-check-notice-outline);
 		}
+
+		.polykit-check-preview {
+			margin-right: var(--polykit-space-sm);
+			font-size: var(--polykit-font-size-md);
+			line-height: 1;
+
+			&.warning {
+				color: var(--polykit-color-danger);
+			}
+
+			&.notice {
+				color: var(--polykit-color-info);
+			}
+		}
+
+		.polykit-check-highlight {
+			background: var(--polykit-color-warning-highlight);
+			border-bottom: 1px dashed var(--polykit-color-warning-highlight-border);
+		}
+
+		.polykit-check-warning-labels-row,
+		.polykit-check-notice-labels-row {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: flex-start;
+			gap: var(--polykit-space-sm);
+			margin: var(--polykit-space-sm) 0 0;
+			padding: 0;
+			line-height: var(--polykit-line-height-tight);
+		}
+
+		.polykit-check-labels-heading {
+			flex: 0 0 auto;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			min-width: 2.75em;
+			padding: 2px 6px;
+			font-size: var(--polykit-font-size-2xs);
+			font-weight: 600;
+			line-height: 1.3;
+			border-radius: var(--polykit-radius-pill);
+			white-space: nowrap;
+		}
+
+		.polykit-check-labels-heading--warning {
+			color: var(--polykit-color-danger);
+			background: var(--polykit-color-label-error-bg);
+			border: 1px solid color-mix(in srgb, var(--polykit-color-danger) 20%, transparent);
+		}
+
+		.polykit-check-labels-heading--notice {
+			color: var(--polykit-color-info);
+			background: var(--polykit-color-label-notice-bg);
+			border: 1px solid color-mix(in srgb, var(--polykit-color-info) 20%, transparent);
+		}
+
+		.polykit-check-warning-labels,
+		.polykit-check-notice-labels {
+			display: contents;
+		}
+
+		.polykit-check-label {
+			display: inline-block;
+			max-width: 100%;
+			padding: 2px 8px;
+			font-size: var(--polykit-font-size-2xs);
+			line-height: 1.4;
+			border-radius: var(--polykit-radius-pill);
+			border: 1px solid transparent;
+			word-break: break-word;
+		}
+
+		.polykit-check-label--warning {
+			color: var(--polykit-color-danger-dark);
+			background: var(--polykit-color-label-error-bg);
+			border-color: color-mix(in srgb, var(--polykit-color-danger) 22%, transparent);
+		}
+
+		.polykit-check-label--notice {
+			color: var(--polykit-color-info);
+			background: var(--polykit-color-label-notice-bg);
+			border-color: color-mix(in srgb, var(--polykit-color-info) 22%, transparent);
+		}
 	}
 
 	/*
@@ -247,9 +333,9 @@ table.translations {
 	*/
 	@media screen and (min-width: 601px) {
 		> thead > tr > th:nth-child(6),
-		> tbody > tr > td:nth-child(6),
-		> thead > tr > th.gp-column-inline-actions,
-		> tbody > tr > td.inline-actions {
+		 > tbody > tr > td:nth-child(6),
+		 > thead > tr > th.gp-column-inline-actions,
+		 > tbody > tr > td.inline-actions {
 			width: var(--polykit-size-inline-actions-width) !important;
 			padding: 0.5em 0.75em;
 
@@ -331,13 +417,40 @@ table.translations {
 	}
 }
 
+.polykit-review-paging-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5em;
+	width: 100%;
+	box-sizing: border-box;
+
+	.paging {
+		float: none;
+		margin: 0;
+	}
+}
+
 .polykit-review-toolbar {
 	display: inline-flex;
 	align-items: center;
 	flex-wrap: wrap;
-	gap: 0 0.2em;
+	gap: 0 0.5em;
 	vertical-align: middle;
-	margin: 0 5px;
+	margin: 0;
+
+	.polykit-check-filters {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0 0.2em;
+		font-size: var(--polykit-font-size-sm);
+
+		a {
+			text-decoration: none;
+		}
+	}
 }
 
 .polykit-toolbar-extensions {
@@ -345,11 +458,11 @@ table.translations {
 	position: relative;
 	vertical-align: middle;
 
-	&__trigger {
+	.polykit-toolbar-extensions__trigger {
 		margin: 0;
 	}
 
-	&__panel {
+	.polykit-toolbar-extensions__panel {
 		display: none;
 		position: absolute;
 		top: calc(100% + var(--polykit-size-border-toolbar));
@@ -377,7 +490,7 @@ table.translations {
 		}
 	}
 
-	&--open {
+	&.polykit-toolbar-extensions--open {
 		.polykit-toolbar-extensions__trigger {
 			background: var(--polykit-color-surface-muted);
 			border-color: var(--polykit-color-border-strong);
@@ -584,7 +697,7 @@ button {
 }
 
 .polykit-quicklinks {
-	&-copy {
+	.polykit-quicklinks-copy {
 		&.active {
 			color: var(--polykit-color-primary);
 
@@ -595,7 +708,7 @@ button {
 		}
 	}
 
-	&-plus {
+	.polykit-quicklinks-plus {
 		&.dashicons-plus {
 			margin: 0 10px;
 			vertical-align: middle;
@@ -633,26 +746,24 @@ button {
 	}
 }
 
-.consistency {
-	&-count {
-		padding: 0 4px;
-		font-size: 0.8em;
-		color: var(--polykit-color-danger-dark);
+.consistency-count {
+	padding: 0 4px;
+	font-size: 0.8em;
+	color: var(--polykit-color-danger-dark);
+}
+
+.consistency-header-index {
+	font-size: 0.9em;
+	color: grey;
+	border-bottom: 1px dashed var(--polykit-color-consistency-divider);
+
+	.copy-full-alternative,
+	.consistency-count {
+		float: right;
 	}
 
-	&-header-index {
-		font-size: 0.9em;
-		color: grey;
-		border-bottom: 1px dashed var(--polykit-color-consistency-divider);
-
-		.copy-full-alternative,
-		.consistency-count {
-			float: right;
-		}
-
-		.copy-full-alternative {
-			box-shadow: none !important;
-		}
+	.copy-full-alternative {
+		box-shadow: none !important;
 	}
 }
 
@@ -674,7 +785,7 @@ li.consistency-header-index {
 }
 
 .polykit-suggestions {
-	&-list {
+	.polykit-suggestions-list {
 		list-style: none;
 		padding-left: 0 !important;
 		max-height: var(--polykit-size-suggestions-max-height) !important;
@@ -704,7 +815,7 @@ li.consistency-header-index {
 	margin-bottom: var(--polykit-space-xl);
 	color: var(--polykit-color-text-muted);
 
-	&-copy-all {
+	.polykit-notranslate-copy-all {
 		float: right;
 	}
 
@@ -741,6 +852,19 @@ li.consistency-header-index {
 	.notranslate:hover .notranslate,
 	.notranslate:hover {
 		background-color: var(--polykit-color-notranslate-bg-hover);
+	}
+
+	.polykit-checks-list {
+		margin: 0.5em 0;
+		font-size: var(--polykit-font-size-xs);
+	}
+
+	.polykit-check-warnings-list.has_warning {
+		color: var(--polykit-color-danger);
+	}
+
+	.polykit-check-notices-list {
+		color: var(--polykit-color-text-secondary);
 	}
 }
 
@@ -826,8 +950,10 @@ li.consistency-header-index {
 		}
 	}
 
-	&-panels {
-		background: var(--polykit-color-accent-bg);
+	.polykit-settings-panels {
+		background: var(--polykit-color-settings-panel-bg);
+		border: 1px solid var(--polykit-color-border);
+		border-radius: 0 var(--polykit-radius-xs) var(--polykit-radius-xs) var(--polykit-radius-xs);
 		padding: var(--polykit-space-settings-panel);
 
 		fieldset,
@@ -890,8 +1016,8 @@ li.consistency-header-index {
 		}
 
 		tr:hover td {
-			background-color: var(--polykit-color-primary);
-			color: var(--polykit-color-white);
+			background-color: var(--polykit-settings-table-cell-hover);
+			color: inherit;
 		}
 
 		.polykit-settings-table {
@@ -909,30 +1035,32 @@ li.consistency-header-index {
 		}
 	}
 
-	&-tabs {
+	.polykit-settings-tabs {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--polykit-space-tab-gap);
 		max-width: 100%;
 	}
 
-	&__radio {
+	.polykit-settings__radio {
 		display: none !important;
 	}
 
-	&-tab {
+	.polykit-settings-tab {
 		cursor: pointer;
 		padding: var(--polykit-space-tab-padding-y) var(--polykit-space-tab-padding-x);
 		background: var(--polykit-color-settings-tab);
 		display: inline-block;
-		color: var(--polykit-color-white);
+		color: var(--polykit-color-text);
+		border: 1px solid var(--polykit-color-border);
+		border-bottom: none;
 		border-radius: var(--polykit-radius-xs) var(--polykit-radius-xs) 0 0;
 		font-weight: normal;
 		font-size: var(--polykit-font-size-sm);
 		line-height: var(--polykit-line-height-tight);
 	}
 
-	&-panel {
+	.polykit-settings-panel {
 		position: relative;
 		flex-direction: column;
 		flex-wrap: wrap;
@@ -944,7 +1072,7 @@ li.consistency-header-index {
 			font-size: var(--polykit-font-size-md);
 		}
 
-		&__title {
+		.polykit-settings-panel__title {
 			margin: 0 0 0.75em;
 			padding: 0 2em 0 0;
 			font-size: var(--polykit-font-size-settings-title);
@@ -980,35 +1108,39 @@ li.consistency-header-index {
 				background-color: var(--polykit-settings-table-header);
 			}
 
+			td {
+				background-color: var(--polykit-settings-table-cell);
+			}
+
 			tbody tr:hover td {
 				background-color: var(--polykit-settings-table-cell-hover);
 				color: inherit;
 			}
 
-			&__desc {
+			.polykit-settings-table__desc {
 				width: var(--polykit-size-settings-table-desc);
 			}
 
-			&__control {
+			.polykit-settings-table__control {
 				width: var(--polykit-size-settings-table-control);
 				white-space: nowrap;
 				text-align: center;
 			}
 
-			&__text {
+			.polykit-settings-table__text {
 				width: 100%;
 				max-width: var(--polykit-size-settings-table-text-max);
 				box-sizing: border-box;
 				text-align: left;
 			}
 
-			&__desc-text {
+			.polykit-settings-table__desc-text {
 				display: inline;
 			}
 		}
 	}
 
-	&-questions {
+	.polykit-settings-questions {
 		text-align: center;
 
 		p {
@@ -1022,7 +1154,7 @@ li.consistency-header-index {
 		}
 	}
 
-	&-label {
+	.polykit-settings-label {
 		display: block;
 		margin: 0.75em 0 0.25em;
 		font-weight: 600;
@@ -1030,33 +1162,28 @@ li.consistency-header-index {
 }
 
 .polykit-close-settings {
+	position: absolute;
+	top: var(--polykit-space-settings-panel);
+	right: var(--polykit-space-settings-panel);
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35em;
 	cursor: pointer;
-	width: fit-content;
-	margin-left: auto;
+	color: var(--polykit-color-text-muted);
+	text-decoration: none;
+	font-size: var(--polykit-font-size-sm);
+	line-height: 1;
+	z-index: 1;
 
-	&::before,
-	&::after {
-		position: absolute;
-		top: var(--polykit-space-close-icon-top);
-		left: 0;
-		content: ' ';
-		height: var(--polykit-space-close-icon-height);
-		width: var(--polykit-size-border-accent);
-		z-index: var(--polykit-z-below);
-		background-color: var(--polykit-color-primary);
+	&:hover,
+	&:focus {
+		color: var(--polykit-color-primary);
 	}
 
-	&:hover::before,
-	&:hover::after {
-		background-color: var(--polykit-color-primary-hover);
-	}
-
-	&::before {
-		transform: rotate(45deg);
-	}
-
-	&::after {
-		transform: rotate(-45deg);
+	.polykit-close-settings__icon {
+		font-size: 1.35em;
+		font-weight: 300;
+		line-height: 1;
 	}
 }
 
@@ -1105,14 +1232,14 @@ li.consistency-header-index {
 }
 
 .polykit-on-translations {
-	& .gp-content {
+	.gp-content {
 		max-width: 100%;
 
-		& input.button.polykit-review {
+		input.button.polykit-review {
 			margin: 0 5px;
 		}
 
-		& h2 {
+		h2 {
 			display: block !important;
 			width: 100% !important;
 			font-size: 19px !important;
@@ -1122,7 +1249,7 @@ li.consistency-header-index {
 			border-radius: 5px !important;
 			background-color: var(--polykit-overlay-primary-5) !important;
 
-			& a.glossary-link {
+			a.glossary-link {
 				font-size: 16px;
 				font-weight: 500;
 				margin-top: 0;
@@ -1148,7 +1275,7 @@ li.consistency-header-index {
 				font-size: 20px;
 				line-height: 21px;
 
-				& a.glossary-link {
+				a.glossary-link {
 					font-size: 17px;
 
 					&:last-child,
@@ -1161,7 +1288,7 @@ li.consistency-header-index {
 					}
 				}
 
-				& .glossary-links a.glossary-link:first-child {
+				.glossary-links a.glossary-link:first-child {
 					margin-right: 54px;
 				}
 			}
@@ -1170,7 +1297,7 @@ li.consistency-header-index {
 				font-size: 19px;
 				line-height: 21px;
 
-				& a.glossary-link {
+				a.glossary-link {
 					font-size: 15px;
 
 					&:last-child,
@@ -1190,13 +1317,13 @@ li.consistency-header-index {
 		}
 	}
 
-	& .site-title {
+	.site-title {
 		@media screen and (max-width: 1023.98px) {
 			font-size: 20px;
 		}
 	}
 
-	& .navigation-main {
+	.navigation-main {
 		@media screen and (max-width: 1023.98px) {
 			padding-right: 15px;
 		}
@@ -1204,16 +1331,13 @@ li.consistency-header-index {
 }
 
 #polykit-sticky-header {
-	& #polykit-sticky-header-container {
+	#polykit-sticky-header-container {
 		position: relative;
 		padding: var(--polykit-space-settings-panel);
 	}
 
-	& .paging {
-		margin-top: 0.5em !important;
-		position: absolute;
-		right: var(--polykit-space-settings-panel);
-		bottom: var(--polykit-space-settings-panel);
+	.polykit-review-paging-row {
+		margin-top: 0.5em;
 	}
 
 	/* くっついているときのスタイル */
@@ -1227,7 +1351,7 @@ li.consistency-header-index {
 		box-shadow: var(--polykit-shadow-md);
 		z-index: var(--polykit-z-sticky-header);
 
-		& #polykit-notices-container [id^="polykit-"].notice {
+		#polykit-notices-container [id^="polykit-"].notice {
 			display: inline-block;
 			padding: 0.3em 0.5em;
 			margin: 0 1em .4em 0;
@@ -1237,7 +1361,7 @@ li.consistency-header-index {
 }
 
 .polykit-header-is-hidden {
-	& #polykit-back-to-top {
+	#polykit-back-to-top {
 		display: inline-block;
 	}
 }
@@ -1265,7 +1389,7 @@ li.consistency-header-index {
 }
 
 .polykit-toggle {
-	&__input {
+	.polykit-toggle__input {
 		display: none !important;
 
 		&:checked + .polykit-toggle__label {
@@ -1281,7 +1405,7 @@ li.consistency-header-index {
 		}
 	}
 
-	&__label {
+	.polykit-toggle__label {
 		display: block;
 		position: relative;
 		box-sizing: border-box !important;
@@ -1324,7 +1448,7 @@ code {
 }
 
 .glossary-links {
-	& .glossary-link:first-child {
+	.glossary-link:first-child {
 		margin-right: 26px;
 
 		&::after {
@@ -1365,74 +1489,26 @@ code {
 	border-radius: var(--polykit-radius-xs);
 }
 
-.polykit-check {
-	&s-list {
-		margin: 0.5em 0;
-		font-size: var(--polykit-font-size-xs);
-	}
-
-	&-warnings-list.has_warning {
-		color: var(--polykit-color-danger);
-	}
-
-	&-notices-list {
-		color: var(--polykit-color-text-secondary);
-	}
-
-	&-preview {
-		margin-right: 4px;
-		font-size: var(--polykit-font-size-md);
-
-		&.warning {
-			color: var(--polykit-color-danger);
-		}
-
-		&.notice {
-			color: var(--polykit-color-info);
-		}
-	}
-
-	&-highlight {
-		background: var(--polykit-color-warning-highlight);
-		border-bottom: 1px dashed var(--polykit-color-warning-highlight-border);
-	}
-
-	&-filters {
-		margin-right: 1em;
-		font-size: var(--polykit-font-size-sm);
-
-		& a {
-			text-decoration: none;
-		}
-	}
-
-	&-warning-labels-row,
-	&-notice-labels-row {
-		font-size: var(--polykit-font-size-2xs);
-		margin-top: 2px;
-	}
-}
-
 .polykit-search {
 	margin-top: 1em;
 	padding: 0.5em;
 	background: var(--polykit-color-surface-panel);
 	border-radius: var(--polykit-radius-xs);
 
-	& label {
+	label {
 		margin-right: 0.5em;
 		font-size: var(--polykit-font-size-xs);
 	}
 
-	&-word {
+	.polykit-search-word {
 		min-width: var(--polykit-size-search-input-min);
 	}
 
-	&-plugin-slug.hidden {
+	.polykit-search-plugin-slug.hidden {
 		display: none;
 	}
 
-	&-error {
+	.polykit-search-error {
 		color: var(--polykit-color-danger);
 		font-size: var(--polykit-font-size-xs);
 	}
@@ -1465,17 +1541,17 @@ code {
 }
 
 .polykit {
-	&_diff,
-	&_compared_to {
+	.polykit_diff,
+	.polykit_compared_to {
 		margin: 0.5em 0;
 		font-size: var(--polykit-font-size-xs);
 	}
 
-	&-diff-added {
+	.polykit-diff-added {
 		background: var(--polykit-color-diff-added);
 	}
 
-	&-diff-removed {
+	.polykit-diff-removed {
 		background: var(--polykit-color-diff-removed);
 		text-decoration: line-through;
 	}
@@ -1487,8 +1563,8 @@ code {
 }
 
 .polykit-bulk {
-	&-warning,
-	&-danger {
+	.polykit-bulk-warning,
+	.polykit-bulk-danger {
 		margin: 1em 0;
 		padding: 0.75em;
 		background: var(--polykit-color-warning-bg);
@@ -1496,11 +1572,11 @@ code {
 		white-space: pre-wrap;
 	}
 
-	&-buttons {
+	.polykit-bulk-buttons {
 		margin: 0.25em 0 1em;
 	}
 
-	&-instructions {
+	.polykit-bulk-instructions {
 		margin: 1em 0;
 		font-size: var(--polykit-font-size-sm);
 	}

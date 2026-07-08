@@ -162,7 +162,9 @@ function polykit_do_search(term, plugin_slugs) {
 	if (settings.consistency) {
 		polykit_search_tabs.push(
 			window.open(
-				`https://${hostname}/consistency/?search=${encodeURIComponent(term)}&set=${current_locale}&polykit_consistencypage`,
+				`https://${hostname}/consistency/?search=${
+					encodeURIComponent(term)
+				}&set=${current_locale}&polykit_consistencypage`,
 				"_blank",
 			),
 		);
@@ -244,9 +246,7 @@ function polykit_search_events() {
 		event.preventDefault();
 		polykit_do_search(
 			form.elements.polykit_search_word.value,
-			form.elements.polykit_search_plugin_slug
-				? form.elements.polykit_search_plugin_slug.value
-				: "",
+			form.elements.polykit_search_plugin_slug ? form.elements.polykit_search_plugin_slug.value : "",
 		);
 	});
 
@@ -291,8 +291,7 @@ function polykit_google_translate_init(current_editor = ".editor") {
 			return;
 		}
 		const gt_string = encodeURIComponent(original.textContent);
-		const gt_url =
-			`https://translate.google.com/?sl=en&tl=${short_locale}&text=${gt_string}&op=translate`;
+		const gt_url = `https://translate.google.com/?sl=en&tl=${short_locale}&text=${gt_string}&op=translate`;
 		const link = polykit_create_element("a", {
 			class: "polykit-get-gt button",
 			href: gt_url,
@@ -309,6 +308,6 @@ function polykit_google_translate_init(current_editor = ".editor") {
  * @returns {void}
  */
 function polykit_focus_search() {
-	const field = document.querySelector(".editor:visible .polykit-search-word");
+	const field = polykit_query_visible_editor(".polykit-search-word");
 	field && field.focus();
 }
