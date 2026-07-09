@@ -1,6 +1,6 @@
 "use strict";
 
-// 日本語スタイルガイド「漢字よりひらがなを使う」の代表例。
+// 日本語スタイルガイド 3-6「漢字よりひらがなを使う」の代表例。
 // exclude に一致する訳文はルールごとスキップする。
 const polykit_locale_terminology_rules = [
 	{ wrong: "下さい", right: "ください", exclude: /差し下さい/ },
@@ -12,11 +12,27 @@ const polykit_locale_terminology_rules = [
 	{ wrong: "出来", right: "でき", exclude: /出来事|上出来|出来栄え/ },
 ];
 
+// 4-1 / 4-2: 長音記号の表記（スタイルガイドの例と WordPress 用語集の定訳）。
+const polykit_katakana_choon_rules = [
+	{ wrong: /ユーザ(?!ー|ビリティ)/, right: "ユーザー", label: "ユーザ" },
+	{ wrong: /サーバ(?!ー)/, right: "サーバー", label: "サーバ" },
+	{ wrong: /コンピュータ(?!ー)/, right: "コンピューター", label: "コンピュータ" },
+	{ wrong: /エディタ(?!ー)/, right: "エディター", label: "エディタ" },
+	{ wrong: /フォルダ(?!ー)/, right: "フォルダー", label: "フォルダ" },
+	{ wrong: /ブラウザ(?!ー)/, right: "ブラウザー", label: "ブラウザ" },
+	{ wrong: /アップローダ(?!ー)/, right: "アップローダー", label: "アップローダ" },
+	{ wrong: /ヘッダ(?!ー)/, right: "ヘッダー", label: "ヘッダ" },
+	{ wrong: /フッタ(?!ー)/, right: "フッター", label: "フッタ" },
+];
+
+// %d 系は半角数字に置換されるため「1」として 1-9 の検査対象に含める。
+// %s 系は内容が不明なため中立のセンチネルでマスクする。
 function polykit_mask_locale_text(text) {
 	return text
 		.replace(/<code\b[^>]*>[\s\S]*?<\/code>/gi, "\x01")
 		.replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/gi, "\x01")
-		.replace(/%(\d+\$)?[sd]/g, "\x01")
+		.replace(/%(\d+\$)?d/g, "1")
+		.replace(/%(\d+\$)?s/g, "\x01")
 		.replace(/<[^>]+>/g, "\x01")
 		.replace(/https?:\/\/\S+/g, "\x01");
 }
@@ -226,6 +242,9 @@ function polykit_collect_locale_warnings(original, text) {
 			const unique = [...new Set(fullwidth)].slice(0, 5).join("");
 			warnings.push(polykit_t("ja_fullwidth_ascii", unique));
 		}
+		if (/\u3000/.test(masked)) {
+			warnings.push(polykit_t("ja_fullwidth_space"));
+		}
 	}
 
 	if (polykit_get_setting("ja_fullwidth_number")) {
@@ -250,6 +269,10 @@ function polykit_collect_locale_warnings(original, text) {
 		if (boundary) {
 			warnings.push(polykit_t("ja_space_around_mixed", boundary));
 		}
+		// 1-4: 文字列最先頭のスペースは不要（原文自体が先頭スペースの場合を除く）。
+		if (/^[ \u00A0\u3000]/.test(text) && !/^[\s\u00A0\u3000]/.test(original)) {
+			warnings.push(polykit_t("ja_leading_space"));
+		}
 	}
 
 	if (polykit_get_setting("ja_space_after_comma")) {
@@ -269,8 +292,11 @@ function polykit_collect_locale_warnings(original, text) {
 	}
 
 	if (polykit_get_setting("ja_digit_spacing")) {
+		// 1-9: 半角数字と全角文字の間にはスペースを入れない（前後とも）。
 		const digit_space = masked.match(
-			/\d[ \u00A0\u3000]+[件個年月日時分秒回人文字列バージョン％%]/,
+			/\d[ \u00A0\u3000]+[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/,
+		) || masked.match(
+			/[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF][ \u00A0\u3000]+\d/,
 		);
 		if (digit_space) {
 			warnings.push(polykit_t("ja_digit_spacing", digit_space[0]));
@@ -328,7 +354,68 @@ function polykit_collect_locale_warnings(original, text) {
 		if (/[\u3040-\u9FFF]"/.test(check) || /"[\u3040-\u9FFF]/.test(check)) {
 			warnings.push(polykit_t("ja_straight_quotes"));
 		}
+		// 2-3: “” で囲まれた語が日本語の場合は「」を使う。
+		if (/[“”][^“”]*[\u3040-\u9FFF][^“”]*[“”]/.test(masked)) {
+			warnings.push(polykit_t("ja_curly_quotes_japanese"));
+		}
+	}
+
+	if (polykit_get_setting("ja_katakana_choon")) {
+		for (const rule of polykit_katakana_choon_rules) {
+			if (rule.wrong.test(text)) {
+				warnings.push(
+					polykit_t("ja_katakana_choon_wrong", rule.right, rule.label),
+				);
+			}
+		}
+	}
+
+	if (polykit_get_setting("ja_brand_names")) {
+		if (/ワードプレス/.test(text)) {
+			warnings.push(polykit_t("ja_brand_wordpress", "ワードプレス"));
+		}
+		const wrong_case = (masked.match(/wordpress/gi) || []).filter(
+			(match) => "WordPress" !== match,
+		);
+		if (wrong_case.length) {
+			warnings.push(polykit_t("ja_brand_wordpress", wrong_case[0]));
+		}
 	}
 
 	return warnings;
+}
+
+/**
+ * 日本語スタイルガイドの参考事項（Notice レベル）を収集する（DOM 非依存）。
+ * 例外が許容されるルールは保存をブロックしない Notice として扱う。
+ *
+ * @param {string} original 原文。
+ * @param {string} text 訳文。
+ * @returns {string[]}
+ */
+function polykit_collect_locale_notices(original, text) {
+	if ("ja" !== polykit_get_lang()) {
+		return [];
+	}
+	const notices = [];
+
+	// 3-1: 受動態はなるべく避ける。
+	if (polykit_get_setting("ja_passive_voice") && /されました/.test(text)) {
+		notices.push(polykit_t("ja_passive_voice"));
+	}
+
+	// 3-5: 不自然な「あなた」「あなたの」を避ける。
+	if (polykit_get_setting("ja_avoid_anata") && /あなた/.test(text)) {
+		notices.push(polykit_t("ja_avoid_anata"));
+	}
+
+	// 5: カタカナ複合語の中点は原則使用しない（例外あり）。
+	if (
+		polykit_get_setting("ja_nakaguro") &&
+		/[ァ-ヶー]・[ァ-ヶー]/.test(text)
+	) {
+		notices.push(polykit_t("ja_nakaguro"));
+	}
+
+	return notices;
 }

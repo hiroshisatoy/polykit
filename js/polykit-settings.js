@@ -159,6 +159,17 @@ function polykit_generate_settings_panel() {
 					),
 					ja_sorry_terminology: polykit_t("setting_ja_sorry_terminology"),
 					ja_terminology: polykit_t("setting_ja_terminology"),
+					ja_passive_voice: polykit_t("setting_ja_passive_voice"),
+					ja_avoid_anata: polykit_t("setting_ja_avoid_anata"),
+				},
+			},
+			{
+				title: "ja_style_section4_title",
+				controlColumn: "enabled",
+				settings: {
+					ja_katakana_choon: polykit_t("setting_ja_katakana_choon"),
+					ja_nakaguro: polykit_t("setting_ja_nakaguro"),
+					ja_brand_names: polykit_t("setting_ja_brand_names"),
 				},
 			},
 		],
@@ -535,6 +546,11 @@ const polykit_setting_defaults = {
 	ja_not_allowed_terminology: true,
 	ja_sorry_terminology: true,
 	ja_straight_quotes: true,
+	ja_katakana_choon: true,
+	ja_nakaguro: true,
+	ja_brand_names: true,
+	ja_passive_voice: true,
+	ja_avoid_anata: true,
 };
 
 /**

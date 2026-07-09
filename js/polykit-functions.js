@@ -20,6 +20,222 @@ function polykit_get_available_locales() {
 }
 
 /**
+ * Parse CSV text into rows of fields (handles quoted fields and escaped quotes).
+ *
+ * @param {string} text
+ * @returns {string[][]}
+ */
+function polykit_parse_csv(text) {
+	const rows = [];
+	let row = [];
+	let field = "";
+	let in_quotes = false;
+	for (let i = 0; i < text.length; i++) {
+		const ch = text[i];
+		if (in_quotes) {
+			if ('"' === ch) {
+				if ('"' === text[i + 1]) {
+					field += '"';
+					i++;
+				} else {
+					in_quotes = false;
+				}
+			} else {
+				field += ch;
+			}
+		} else if ('"' === ch) {
+			in_quotes = true;
+		} else if ("," === ch) {
+			row.push(field);
+			field = "";
+		} else if ("\n" === ch || "\r" === ch) {
+			if ("\r" === ch && "\n" === text[i + 1]) {
+				i++;
+			}
+			row.push(field);
+			if (row.length > 1 || "" !== row[0]) {
+				rows.push(row);
+			}
+			row = [];
+			field = "";
+		} else {
+			field += ch;
+		}
+	}
+	row.push(field);
+	if (row.length > 1 || "" !== row[0]) {
+		rows.push(row);
+	}
+	return rows;
+}
+
+/**
+ * GlotPress の用語集 CSV エクスポートから用語エントリーを組み立てる。
+ * 先頭列を用語、ロケールスラッグに一致するヘッダー列（なければ最終列）を訳語として扱う。
+ *
+ * @param {string} csv_text
+ * @param {string} source "locale" または "project"。
+ * @param {string} locale 訳語列の特定に使うロケールスラッグ。
+ * @returns {{ term: string, translations: string[], source: string }[]}
+ */
+function polykit_glossary_entries_from_csv(csv_text, source, locale) {
+	const rows = polykit_parse_csv(csv_text);
+	if (rows.length < 2) {
+		return [];
+	}
+	const header = rows[0].map((cell) => cell.trim().toLowerCase());
+	let translation_index = header.indexOf(String(locale || "").toLowerCase());
+	if (-1 === translation_index) {
+		translation_index = header.length - 1;
+	}
+	const by_term = new Map();
+	for (const row of rows.slice(1)) {
+		const term = (row[0] || "").trim();
+		const translation = (row[translation_index] || "").trim();
+		if (
+			!term || term.length < 2 || !translation ||
+			"n/a" === translation.toLowerCase()
+		) {
+			continue;
+		}
+		const key = term.toLowerCase();
+		if (!by_term.has(key)) {
+			by_term.set(key, { term, translations: [], source });
+		}
+		const entry = by_term.get(key);
+		if (!entry.translations.includes(translation)) {
+			entry.translations.push(translation);
+		}
+	}
+	return [...by_term.values()];
+}
+
+const polykit_custom_glossaries = { entries: [], loaded: false };
+
+/**
+ * @returns {{ term: string, translations: string[], source: string }[]}
+ */
+function polykit_get_custom_glossary_entries() {
+	return polykit_custom_glossaries.entries;
+}
+
+/**
+ * @returns {string} 現在のロケールの用語集 CSV エクスポート URL。
+ */
+function polykit_get_locale_glossary_export_url() {
+	let slug = polykit_get_locale_slug(polykit_get_lang(), "locale");
+	if (!slug) {
+		slug = "ja";
+	}
+	return `https://translate.wordpress.org/locale/${slug}/default/glossary/-export?format=csv`;
+}
+
+/**
+ * @returns {string} 現在のプロジェクトの用語集 CSV エクスポート URL。翻訳セットページ以外では空文字。
+ */
+function polykit_get_project_glossary_export_url() {
+	const parts = window.location.pathname.split("/").filter((part) => "" !== part);
+	// 例: projects / wp-plugins / foo / dev / ja / default
+	if (parts.length < 4 || "projects" !== parts[0]) {
+		return "";
+	}
+	const locale_slug = parts[parts.length - 2];
+	if (!Object.values(polykit_locales_slugs).includes(locale_slug)) {
+		return "";
+	}
+	return `${window.location.origin}/${parts.join("/")}/glossary/-export?format=csv`;
+}
+
+/**
+ * 用語集エントリーを取得する（localStorage に 24 時間キャッシュ）。
+ *
+ * @param {string} url
+ * @param {string} source
+ * @returns {Promise<{ term: string, translations: string[], source: string }[]>}
+ */
+async function polykit_fetch_glossary_entries(url, source) {
+	const cache_key = "polykit_glossary_cache";
+	const ttl = 24 * 60 * 60 * 1000;
+	let cache = {};
+	try {
+		cache = JSON.parse(localStorage.getItem(cache_key)) || {};
+	} catch (_error) {
+		cache = {};
+	}
+	const now = Date.now();
+	for (const key of Object.keys(cache)) {
+		if (!cache[key] || !cache[key].time || now - cache[key].time > ttl) {
+			delete cache[key];
+		}
+	}
+	if (cache[url] && Array.isArray(cache[url].entries)) {
+		return cache[url].entries;
+	}
+	let entries = [];
+	try {
+		const response = await fetch(url, { credentials: "same-origin" });
+		if (response.ok) {
+			const body = await response.text();
+			// 用語集が存在しない場合などに HTML が返ることがある。
+			if (!body.trimStart().startsWith("<")) {
+				entries = polykit_glossary_entries_from_csv(
+					body,
+					source,
+					polykit_get_locale_slug(polykit_get_lang(), "locale") || "ja",
+				);
+			}
+		}
+	} catch (_error) {
+		entries = [];
+	}
+	cache[url] = { time: now, entries };
+	try {
+		localStorage.setItem(cache_key, JSON.stringify(cache));
+	} catch (_error) {
+		// localStorage の容量制限時はキャッシュせず続行する。
+	}
+	return entries;
+}
+
+/**
+ * ロケール用語集とプロジェクト用語集を読み込み、チェックを再実行する。
+ * プロジェクト用語集の用語はロケール用語集より優先される。
+ *
+ * @returns {Promise<void>}
+ */
+async function polykit_load_custom_glossaries() {
+	if (
+		polykit_get_setting("no_glossary_term_check") ||
+		"undefined" === typeof $gp_editor_options ||
+		!document.querySelector("#translations")
+	) {
+		return;
+	}
+	const sources = [
+		{ url: polykit_get_locale_glossary_export_url(), source: "locale" },
+	];
+	const project_url = polykit_get_project_glossary_export_url();
+	if (project_url) {
+		sources.push({ url: project_url, source: "project" });
+	}
+	const merged = new Map();
+	for (const { url, source } of sources) {
+		const entries = await polykit_fetch_glossary_entries(url, source);
+		for (const entry of entries) {
+			merged.set(entry.term.toLowerCase(), entry);
+		}
+	}
+	polykit_custom_glossaries.entries = [...merged.values()];
+	polykit_custom_glossaries.loaded = true;
+	if (
+		polykit_custom_glossaries.entries.length &&
+		polykit_get_setting("checks_enabled")
+	) {
+		polykit_check_all_translations();
+	}
+}
+
+/**
  * Get the language saved in PolyKit
  *
  * @returns string

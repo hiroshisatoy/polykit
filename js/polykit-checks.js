@@ -276,6 +276,14 @@ function polykit_run_all_checks(original, translated, editor_id, form_index) {
 		results.warning,
 		polykit_collect_glossary_warnings(editor_id, form_index),
 	);
+	polykit_push_messages_as_items(
+		results.warning,
+		polykit_collect_custom_glossary_warnings(editor_id, original, translated),
+	);
+	polykit_push_messages_as_items(
+		results.notice,
+		polykit_collect_locale_notices(original, translated),
+	);
 	if (0 === form_index) {
 		polykit_push_messages_as_items(
 			results.warning,
