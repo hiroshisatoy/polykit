@@ -10,7 +10,18 @@
     "128": "icons/icon-128.png"
   },
   "background": {
-    "service_worker": "js/background.js"
+    "service_worker": "js/background.js",
+    "scripts": [
+      "js/background.js"
+    ]
+  },
+  "permissions": [
+    "storage"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "polykit@hiroshisatoy.github.io"
+    }
   },
   "content_scripts": [
     {

@@ -30,14 +30,18 @@ if (
 }
 polykit_user.is_connected = document.querySelector("body.logged-in") !== null;
 
-document.querySelector("#menu-headline-nav").insertAdjacentHTML(
-	"beforeend",
-	'<li class="polykit-setting" style="cursor:pointer;"><a> PolyKit</a></li>',
-);
-document.querySelector(".polykit-setting").prepend(
-	document.querySelector(".polykit-icon"),
-);
-document.querySelector(".polykit-icon").style.display = "";
+const polykit_headline_nav = document.querySelector("#menu-headline-nav");
+if (polykit_headline_nav) {
+	polykit_headline_nav.insertAdjacentHTML(
+		"beforeend",
+		'<li class="polykit-setting" style="cursor:pointer;"><a> PolyKit</a></li>',
+	);
+	const polykit_icon = document.querySelector(".polykit-icon");
+	if (polykit_icon) {
+		document.querySelector(".polykit-setting").prepend(polykit_icon);
+		polykit_icon.style.display = "";
+	}
+}
 
 const polykit_settings_menu = document.querySelector(".polykit-setting");
 polykit_settings_menu && polykit_settings_menu.addEventListener("click", () => {
@@ -256,7 +260,10 @@ function polykit_generate_settings_panel() {
 			slug: "tools",
 			label: polykit_t("tools_title"),
 			render: (panel) => {
-				if (polykit_user.is_gte) {
+				const has_bulk_consistency = tools_group.categories.some(
+					(category) => "bulk_consistency_title" === category.title,
+				);
+				if (polykit_user.is_gte && !has_bulk_consistency) {
 					tools_group.categories.unshift({
 						title: "bulk_consistency_title",
 						controlColumn: "enabled",

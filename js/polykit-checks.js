@@ -643,7 +643,11 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 		`${editor_id} .translation-actions__save, ${editor_id} .approve`,
 	).forEach((btn) => {
 		btn.addEventListener("click", (e) => {
-			if (
+			const force = btn.classList.contains("forcesubmit");
+			if (force) {
+				// One-shot bypass added by the force-save hotkey / bulk copy.
+				btn.classList.remove("forcesubmit");
+			} else if (
 				!polykit_editor_save_warnings_ignored(editor_id) &&
 				!polykit_check_this_translation(editor_id, preview_id)
 			) {
@@ -658,8 +662,28 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 				},
 			);
 			polykit_user_edited = false;
+			polykit_watch_save_success();
 		});
 	});
+}
+
+/**
+ * Refresh preview highlights once GlotPress reports a successful save.
+ *
+ * @returns {void}
+ */
+function polykit_watch_save_success() {
+	let tries = 0;
+	const interval = setInterval(() => {
+		const $notice = jQuery("#gp-js-message");
+		tries++;
+		if (!$notice.hasClass("gp-js-notice") || tries > 20) {
+			if ($notice.hasClass("gp-js-success")) {
+				polykit_non_breaking_space_highlight();
+			}
+			clearInterval(interval);
+		}
+	}, 500);
 }
 
 /**

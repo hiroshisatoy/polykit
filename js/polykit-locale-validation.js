@@ -1,9 +1,15 @@
 "use strict";
 
+// 日本語スタイルガイド「漢字よりひらがなを使う」の代表例。
+// exclude に一致する訳文はルールごとスキップする。
 const polykit_locale_terminology_rules = [
-	{ wrong: "下さい", right: "ください" },
+	{ wrong: "下さい", right: "ください", exclude: /差し下さい/ },
 	{ wrong: "全て", right: "すべて" },
 	{ wrong: "既に", right: "すでに" },
+	{ wrong: "更に", right: "さらに" },
+	{ wrong: "但し", right: "ただし" },
+	{ wrong: "予め", right: "あらかじめ" },
+	{ wrong: "出来", right: "でき", exclude: /出来事|上出来|出来栄え/ },
 ];
 
 function polykit_mask_locale_text(text) {
@@ -89,6 +95,10 @@ function polykit_mixed_boundary_needs_space(before, after) {
 	) {
 		return false;
 	}
+	// 丸括弧のスペースは 1-5 / 1-6 (ja_paren_space_outside / ja_paren_space_inside) に任せる。
+	if ("()".includes(before) || "()".includes(after)) {
+		return false;
+	}
 	return (polykit_is_fullwidth_char(before) &&
 		polykit_is_halfwidth_non_digit_char(after)) ||
 		(polykit_is_halfwidth_non_digit_char(before) &&
@@ -98,7 +108,7 @@ function polykit_mixed_boundary_needs_space(before, after) {
 /**
  * 1-4 に反する、数字を除く半角文字と全角文字の境界を返す。
  * 1-9 により、半角数字の前後は検査対象に含めない。
- * コロン (:) の前後は ja_colon_spacing に任せる。
+ * コロン (:) の前後は ja_colon_spacing に、丸括弧の前後は 1-5 / 1-6 の括弧ルールに任せる。
  *
  * @param {string} masked 検査対象からコードなどを除外した訳文。
  * @returns {string} 問題のある境界。該当しない場合は空文字。
@@ -287,7 +297,7 @@ function polykit_collect_locale_warnings(original, text) {
 
 	if (polykit_get_setting("ja_terminology")) {
 		for (const rule of polykit_locale_terminology_rules) {
-			if (rule.wrong === "下さい" && /差し下さい/.test(text)) {
+			if (rule.exclude && rule.exclude.test(text)) {
 				continue;
 			}
 			if (text.includes(rule.wrong)) {

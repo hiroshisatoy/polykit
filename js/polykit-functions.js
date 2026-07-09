@@ -11,68 +11,12 @@ function sanitize_value(value) {
 }
 
 /**
- * Get the today with the format dd/mm/yyyy used for the update daily check
+ * Get the list of locales available, bundled with the extension.
  *
- * @returns String
+ * @returns {string[]}
  */
-function polykit_today() {
-	const today = new Date();
-	let todayn = today.getDate();
-	if (1 === todayn.length) {
-		todayn = `0${todayn}`;
-	}
-	let monthn = today.getMonth() + 1;
-	if (1 === monthn.length) {
-		monthn = `0${monthn}`;
-	}
-	return `${todayn}/${monthn}/${today.getFullYear()}`;
-}
-
-/**
- * Get the the list of locales cached
- *
- * @returns Array
- */
-function polykit_list_locales_cached() {
-	let value = localStorage.getItem("polykit_locales");
-	if ("" === value || "undefined" === value) {
-		value = polykit_locales();
-	} else {
-		value = JSON.parse(value);
-	}
-	if ("string" === typeof value) {
-		value = JSON.parse(value);
-	}
-	return value;
-}
-
-/**
- * Get the list of locales avalaible
- *
- * @returns Array
- */
-function polykit_locales() {
-	window.polykit_locales = ["ja"];
-	const locales_date_cache = localStorage.getItem("polykit_locales_date");
-	if (null === locales_date_cache || locales_date_cache !== polykit_today()) {
-		jQuery.ajax({
-			url: `https://codeat.co/glotdict/dictionaries/${polykit_version}.json`,
-			dataType: "text",
-			cache: false,
-		}).done((data) => {
-			localStorage.setItem("polykit_locales", data);
-			window.polykit_locales = JSON.parse(data);
-			localStorage.setItem("polykit_locales_date", polykit_today());
-		});
-	}
-	if (locales_date_cache !== null) {
-		let temp_value = JSON.parse(localStorage.getItem("polykit_locales"));
-		if ("string" === typeof temp_value) {
-			temp_value = JSON.parse(temp_value);
-		}
-		window.polykit_locales = Object.keys(temp_value);
-	}
-	return window.polykit_locales;
+function polykit_get_available_locales() {
+	return Object.keys(polykit_locales_slugs);
 }
 
 /**
@@ -495,7 +439,7 @@ function polykit_locales_selector() {
 	picker_container.append(picker_label, picker_select);
 	group.append(picker_container);
 	jQuery(".polykit_language").append(jQuery("<option></option>"));
-	const polykit_locales_array = polykit_locales();
+	const polykit_locales_array = polykit_get_available_locales();
 	var browserlanguage = Intl.DateTimeFormat().resolvedOptions().locale;
 	browserlanguage = browserlanguage.replace("-", "_");
 	jQuery.each(polykit_locales_array, (key, value) => {
@@ -514,10 +458,8 @@ function polykit_locales_selector() {
 	jQuery(".polykit_language").change(() => {
 		localStorage.setItem(
 			"polykit_language",
-			jQuery(".polykit_language option:selected").text(),
+			jQuery(".polykit_language").val() || "",
 		);
-		localStorage.setItem("polykit_glossary_date", "");
-		polykit_locales();
 		location.reload();
 	});
 }
@@ -598,7 +540,7 @@ function polykit_extract_glossary_data(glossary_data) {
 	const glossary_description = glossary_data.replace(/(\r\n|\n|\r)/gm, "")
 		.match(/(?<=glossary-description">)(.*?)(?=<\/div>)/gmi);
 	if (Array.isArray(glossary_description) && glossary_description.length) {
-		const description_data = `<div>${glossary_description[0]}</div>}`;
+		const description_data = `<div>${glossary_description[0]}</div>`;
 		const html_document = new DOMParser().parseFromString(
 			description_data,
 			"text/html",
@@ -643,9 +585,6 @@ function polykit_add_official_links_to_filters() {
 		return;
 	}
 	group.append(polykit_guide_link);
-}
-
-function polykit_set_gte_settings() {
 }
 
 /**
@@ -754,18 +693,6 @@ function polykit_is_uppercase(myString) {
 }
 
 /**
- * Stop event propagation
- *
- * @param {Object} e
- * @returns {void}
- */
-function polykit_stoppropagation(e) {
-	if ("object" === typeof e) {
-		e.stopImmediatePropagation();
-	}
-}
-
-/**
  * Move the current locale first on Translate homepage.
  *
  * @returns {void}
@@ -805,16 +732,15 @@ function polykit_auto_hide_next_editor(editor) {
 		return;
 	}
 	const next_editor = preview.nextElementSibling;
-	const next_preview = next_editor.previousElementSibling;
 	if (
-		!next_editor || !next_preview ||
+		!next_editor ||
 		!next_editor.classList.contains("editor") ||
-		!next_preview.classList.contains("preview")
+		!preview.classList.contains("preview")
 	) {
 		return;
 	}
 	next_editor.style.display = "none";
-	next_preview.style.display = "table-row";
+	preview.style.display = "table-row";
 }
 
 /**
@@ -844,13 +770,13 @@ function polykit_wait_table_alter() {
 						row_is_editor && mutation.previousSibling &&
 						mutation.previousSibling.matches('[class*="status-"]')
 					) {
-						let status_before = "";
-						let status_after = "";
-						status_before = RegExp(/status-[a-z]*/).exec(
+						const status_before = /status-[a-z]*/.exec(
 							mutation.previousSibling.className,
-						)[0];
-						status_after = RegExp(/status-[a-z]*/).exec(addedNode.className)[0];
-						status_has_changed = status_before !== status_after;
+						);
+						const status_after = /status-[a-z]*/.exec(addedNode.className);
+						status_has_changed = null !== status_before &&
+							null !== status_after &&
+							status_before[0] !== status_after[0];
 					}
 
 					if (
@@ -1085,10 +1011,10 @@ function polykit_build_sticky_header() {
  * @returns {void}
  */
 function polykit_copy_visible_original_string() {
-	polykit_copy_to_clipboard(
-		document.querySelector('.editor[style="display: table-row;"] .original-raw')
-			.innerHTML,
-	);
+	const original = polykit_query_visible_editor(".original-raw");
+	if (original) {
+		polykit_copy_to_clipboard(original.textContent);
+	}
 }
 
 /**

@@ -1,7 +1,5 @@
 "use strict";
 
-const polykit_version = "1.0.1";
-
 // action = 'install', 'update', 'chrome_update', or 'shared_module_update'
 const polykit_extension_storage = (null !== localStorage.getItem("polykit_extension_status"))
 	? JSON.parse(localStorage.getItem("polykit_extension_status"))
@@ -80,12 +78,6 @@ if (window.polykit_filter_bar.length > 0) {
 	);
 
 	polykit_mark_old_strings();
-
-	jQuery($gp.editor.table).onFirst(
-		"click",
-		"button.translation-actions__save:not(.forcesubmit)",
-		polykit_validate_visible,
-	);
 }
 
 polykit_add_project_links();
@@ -98,26 +90,6 @@ jQuery(".glossary-word").contextmenu(function (e) {
 	jQuery(".editor:visible textarea:visible")
 		.val(jQuery(".editor:visible textarea:visible").val() + info[0].translation)
 		.focus();
-	e.preventDefault();
-	return false;
-});
-
-jQuery(".gp-content").on("click", ".discard-polykit", function (e) {
-	const $this = jQuery(this);
-	const row = $this.data("row");
-	jQuery(`#editor-${row}`).data("discard", "true");
-	$this.parent().remove();
-	if (0 === jQuery(`#editor-${row} .polykit-warning`).length) {
-		jQuery.removeData(`#editor-${row}`, "discard");
-	}
-	if (0 === jQuery(`#editor-${row} .warning`).length) {
-		jQuery(`#editor-${row}`).removeClass("has-warnings").addClass(
-			"no-warnings",
-		);
-		jQuery(`#preview-${row}`).removeClass("has-warnings").addClass(
-			"no-warnings",
-		);
-	}
 	e.preventDefault();
 	return false;
 });

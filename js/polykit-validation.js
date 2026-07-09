@@ -240,34 +240,6 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 }
 
 /**
- * チェック結果をエディターに .polykit-warning として描画する。
- *
- * @param {string} selector
- * @param {object} state
- * @param {string} discard
- * @returns {number}
- */
-function polykit_render_row_check_warnings(selector, state, discard) {
-	let howmany = 0;
-	const warnings = state.check_warnings || [];
-	const notices = state.check_notices || [];
-	const render = (items) => {
-		items.forEach((item) => {
-			const text = item.textContent || item.innerHTML || item;
-			jQuery(".textareas", selector).prepend(
-				polykit_get_warning(text, discard),
-			);
-			howmany++;
-		});
-	};
-	render(warnings);
-	if (polykit_get_setting("checks_block_notices")) {
-		render(notices);
-	}
-	return howmany;
-}
-
-/**
  * GlotPress 本体の「先頭大文字」警告かどうか。
  *
  * @param {Element} element
@@ -275,84 +247,4 @@ function polykit_render_row_check_warnings(selector, state, discard) {
  */
 function polykit_is_gp_initial_uppercase_warning(element) {
 	return /missing the initial uppercase/i.test(element.textContent);
-}
-
-/**
- * Validation is good to save time!
- *
- * @param {object} e The event.
- * @param {string} selector The selector.
- *
- * @returns void
- */
-function polykit_validate(e, selector) {
-	let howmany = 0;
-	if ("undefined" === typeof jQuery(selector).data("discard")) {
-		jQuery(".polykit-warning", selector).remove();
-		const discard = polykit_get_discard_link(selector);
-		const editor_id = selector.startsWith("#") ? selector : `#${jQuery(selector).attr("id")}`;
-		const preview_id = editor_id.replace("editor", "preview");
-		const state = polykit_prepare_row_checks(editor_id, false);
-		howmany += polykit_render_row_check_warnings(selector, state, discard);
-		if (jQuery(selector).is(":visible")) {
-			polykit_display_check_results(editor_id, preview_id, state);
-		}
-	}
-	if (howmany !== 0) {
-		jQuery(selector).removeClass("no-warnings").addClass("has-warnings");
-		const previewSelector = `#preview-${jQuery(selector).attr("row")}`;
-		jQuery(previewSelector).removeClass("no-warnings").addClass("has-warnings");
-		polykit_stoppropagation(e);
-	}
-	return howmany;
-}
-
-function polykit_validate_visible(e) {
-	if (jQuery(this).hasClass("forcesubmit")) {
-		return;
-	}
-	if (polykit_query_visible_editor(".polykit-ignore-warnings input:checked")) {
-		return;
-	}
-	const selector = ".editor:visible";
-	const howmany = polykit_validate(e, selector);
-	if (typeof howmany !== "undefined" && howmany !== 0) {
-		const msg = polykit_t("submission_blocked");
-		$gp.notices.error(msg);
-	} else {
-		const interval = setInterval(() => {
-			const $notice = jQuery("#gp-js-message");
-			if (!$notice.hasClass("gp-js-notice")) {
-				if ($notice.hasClass("gp-js-success")) {
-					polykit_non_breaking_space_highlight();
-				}
-				clearInterval(interval);
-			}
-		}, 500);
-	}
-}
-
-/**
- * Get the discard link
- *
- * @param {String} selector
- * @returns {String}
- */
-function polykit_get_discard_link(selector) {
-	return ` <a href="#" class="discard-polykit" data-row="${jQuery(selector).attr("row")}">${
-		polykit_t("discard")
-	}</a>`;
-}
-
-/**
- * Get the warning link
- *
- * @param {String} text
- * @param {String} discard
- * @returns {String}
- */
-function polykit_get_warning(text, discard) {
-	return `<div class="warning secondary polykit-warning"><strong>${
-		polykit_t("warning_label")
-	}</strong> ${text}</strong>${discard}</div>`;
 }

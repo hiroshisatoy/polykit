@@ -32,6 +32,35 @@ Deno.test("source terminology warnings", () => {
 	assert.deepStrictEqual(getWarnings("Open settings", "設定を開く"), []);
 });
 
+Deno.test("terminology rules with exclusions", () => {
+	const integration = {
+		polykit_get_lang: () => "ja",
+		polykit_get_setting: (key) => "ja_terminology" === key,
+		polykit_t: (key, ...args) => [key, ...args].join("|"),
+	};
+	vm.createContext(integration);
+	vm.runInContext(
+		Deno.readTextFileSync(new URL("../js/polykit-locale-validation.js", import.meta.url)),
+		integration,
+	);
+	const collect = (text) => Array.from(integration.polykit_collect_locale_warnings("", text));
+	assert.deepStrictEqual(collect("入力して下さい。"), [
+		"ja_terminology_wrong|ください|下さい",
+	]);
+	assert.deepStrictEqual(collect("入力してください。"), []);
+	assert.deepStrictEqual(collect("既に更新済みです。"), [
+		"ja_terminology_wrong|すでに|既に",
+	]);
+	assert.deepStrictEqual(collect("編集出来ます。"), [
+		"ja_terminology_wrong|でき|出来",
+	]);
+	assert.deepStrictEqual(collect("最近の出来事。"), []);
+	assert.deepStrictEqual(collect("但し書きは有効です。"), [
+		"ja_terminology_wrong|ただし|但し",
+	]);
+	assert.deepStrictEqual(collect("あらかじめご了承ください。"), []);
+});
+
 Deno.test("locale validation helpers", () => {
 	assert.strictEqual(
 		context.polykit_mask_locale_text("日本語<code>Ａ?</code>WordPress"),
@@ -67,6 +96,19 @@ Deno.test("locale validation helpers", () => {
 	);
 	assert.strictEqual(
 		context.polykit_get_unspaced_mixed_boundary("準備ができましたか ?"),
+		"",
+	);
+	// 1-6: 丸括弧の内側は密着が正しいので 1-4 の対象にしない。
+	assert.strictEqual(
+		context.polykit_get_unspaced_mixed_boundary("(例: WordPress) を選択"),
+		"",
+	);
+	assert.strictEqual(
+		context.polykit_get_unspaced_mixed_boundary("ファイル)"),
+		"",
+	);
+	assert.strictEqual(
+		context.polykit_get_unspaced_mixed_boundary("(ファイル"),
 		"",
 	);
 	assert.strictEqual(

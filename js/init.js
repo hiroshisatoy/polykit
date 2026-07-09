@@ -132,11 +132,14 @@ fetch(changelog)
 		chrome.runtime.sendMessage(
 			"polykit-status",
 			(response) => {
+				if (chrome.runtime.lastError) {
+					return;
+				}
 				const polykit_extension_storage = (null !== localStorage.getItem("polykit_extension_status"))
 					? JSON.parse(localStorage.getItem("polykit_extension_status"))
 					: "";
 				if (
-					"undefined" !== response &&
+					response &&
 					("install" === response["reason"] ||
 						"update" === response["reason"]) &&
 					polykit_extension_storage.currentVersion !==
@@ -159,9 +162,11 @@ fetch(changelog)
 	.catch(() => polykit_load_language_files().then(() => script(jsScripts)));
 
 // Add the icon
-const t = document.getElementsByTagName("header")[0];
-const s = document.createElement("img");
-s.src = chrome.runtime.getURL("icons/icon-48.png");
-s.style.display = "none";
-s.classList.add("polykit-icon");
-t.parentNode.insertBefore(s, t);
+const polykit_header = document.getElementsByTagName("header")[0];
+if (polykit_header) {
+	const polykit_icon = document.createElement("img");
+	polykit_icon.src = chrome.runtime.getURL("icons/icon-48.png");
+	polykit_icon.style.display = "none";
+	polykit_icon.classList.add("polykit-icon");
+	polykit_header.parentNode.insertBefore(polykit_icon, polykit_header);
+}

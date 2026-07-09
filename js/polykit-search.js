@@ -1,7 +1,6 @@
 "use strict";
 
 let polykit_search_tabs = [];
-const polykit_search_safe_limit = 25;
 
 /**
  * @returns {object}
