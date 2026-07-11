@@ -410,10 +410,17 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		check_warnings: [],
 		check_notices: [],
 		preview_class: "polykit-has-check-passed",
-		preview_status: polykit_create_element("span", {
-			class: "polykit-check-preview polykit-check-preview-status-passed",
-			title: polykit_t("check_all_passed"),
-		}, "✓"),
+		preview_status: (() => {
+			const status = polykit_create_element("span", {
+				class: "polykit-check-preview polykit-check-preview-status-passed",
+				title: polykit_t("check_all_passed"),
+			});
+			status.appendChild(polykit_create_element("span", {
+				class: "dashicons dashicons-yes-alt",
+				"aria-hidden": "true",
+			}));
+			return status;
+		})(),
 		labels: [],
 		highlights: [],
 		ignore_status: "none",

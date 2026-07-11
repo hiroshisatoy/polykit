@@ -57,6 +57,10 @@
 	--polykit-color-results-bg: #f0f6fc;
 	--polykit-color-label-error-bg: #fce4e4;
 	--polykit-color-label-notice-bg: #e8f4fc;
+	--polykit-color-label-passed-bg: #e6f6e8;
+	--polykit-color-check-passed: #1e7e34;
+	--polykit-color-check-warning: #b32d2e;
+	--polykit-color-check-notice: #135e96;
 	--polykit-color-copy-row-bg: #e5f5fa;
 
 	/* Settings table */

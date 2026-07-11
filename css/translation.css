@@ -6,21 +6,30 @@
 }
 
 table.translations {
+	.actions{
 	a.action {
 		text-decoration: none;
+		display: block;
 	}
+	}
+
 
 	tr.preview {
 		&.polykit-has-check-warning {
-			outline: 1px solid var(--polykit-color-check-warning-outline);
+			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-warning) 45%, transparent);
 		}
 
 		&.polykit-has-check-notice {
-			outline: 1px solid var(--polykit-color-check-notice-outline);
+			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-notice) 45%, transparent);
+		}
+
+		&.polykit-has-check-passed {
+			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-passed) 35%, transparent);
 		}
 
 		.polykit-check-preview {
-			display: inline-flex;
+			display: flex;
+			flex-flow: column;
 			align-items: center;
 			justify-content: center;
 			padding: 3px 8px;
@@ -30,16 +39,25 @@ table.translations {
 			border-radius: 0;
 			vertical-align: middle;
 
-			&.polykit-check-preview-status-warning {
-				color: var(--polykit-color-danger);
-				background: var(--polykit-color-label-error-bg);
-				border-color: color-mix(in srgb, var(--polykit-color-danger) 22%, transparent);
+			/* チェックが合格している場合 */
+			&.polykit-check-preview-status-passed {
+				color: var(--polykit-color-check-passed);
+				background: var(--polykit-color-label-passed-bg);
+				border-color: color-mix(in srgb, var(--polykit-color-check-passed) 40%, transparent);
 			}
 
+			/* チェックが警告している場合 */
+			&.polykit-check-preview-status-warning {
+				color: var(--polykit-color-check-warning);
+				background: var(--polykit-color-label-error-bg);
+				border-color: color-mix(in srgb, var(--polykit-color-check-warning) 40%, transparent);
+			}
+
+			/* チェックが注意している場合 */
 			&.polykit-check-preview-status-notice {
-				color: var(--polykit-color-info);
+				color: var(--polykit-color-check-notice);
 				background: var(--polykit-color-label-notice-bg);
-				border-color: color-mix(in srgb, var(--polykit-color-info) 22%, transparent);
+				border-color: color-mix(in srgb, var(--polykit-color-check-notice) 40%, transparent);
 			}
 		}
 
@@ -94,23 +112,23 @@ table.translations {
 		}
 
 		.polykit-check-label--warning {
-			color: var(--polykit-color-danger-dark);
+			color: var(--polykit-color-check-warning);
 			background: var(--polykit-color-label-error-bg);
-			border-color: color-mix(in srgb, var(--polykit-color-danger) 22%, transparent);
+			border-color: color-mix(in srgb, var(--polykit-color-check-warning) 35%, transparent);
 		}
 
 		.polykit-check-label--warning .dashicons {
-			color: var(--polykit-color-danger);
+			color: var(--polykit-color-check-warning);
 		}
 
 		.polykit-check-label--notice {
-			color: var(--polykit-color-text);
+			color: var(--polykit-color-check-notice);
 			background: var(--polykit-color-label-notice-bg);
-			border-color: color-mix(in srgb, var(--polykit-color-info) 22%, transparent);
+			border-color: color-mix(in srgb, var(--polykit-color-check-notice) 35%, transparent);
 		}
 
 		.polykit-check-label--notice .dashicons {
-			color: var(--polykit-color-info);
+			color: var(--polykit-color-check-notice);
 		}
 
 		.polykit-check-preview .dashicons {
