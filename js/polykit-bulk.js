@@ -35,7 +35,6 @@ jQuery(".bulk-actions").on("click", ".button", (e) => {
 					$gp.editor.show(checkbox);
 					jQuery(`#editor-${row} .translation-actions__copy`).trigger("click");
 					jQuery(`#editor-${row} textarea.foreign-text`).trigger("change");
-					jQuery(`#preview-${row}`).addClass("has-original-copy");
 					if (polykit_get_setting("force_autosubmit_bulk_copy_from_original")) {
 						jQuery(`#editor-${row} button.translation-actions__save`).addClass(
 							"forcesubmit",
@@ -52,7 +51,6 @@ jQuery(".bulk-actions").on("click", ".button", (e) => {
 				$gp.editor.show(checkbox);
 				jQuery(`#editor-${row} .translation-actions__copy`).trigger("click");
 				jQuery(`#editor-${row} textarea.foreign-text`).trigger("change");
-				jQuery(`#preview-${row}`).addClass("has-original-copy");
 				copied_count++;
 				polykit_copied_count_notice(copied_count);
 			}

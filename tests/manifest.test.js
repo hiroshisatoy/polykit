@@ -56,11 +56,11 @@ Deno.test("scripts loaded by init.js are web accessible", () => {
 	}
 });
 
-Deno.test("background service worker is packaged consistently", () => {
+Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(Array.isArray(manifest.permissions));
 	assert.ok(manifest.permissions.includes("storage"));
-	assert.strictEqual(
-		manifest.background.service_worker,
-		manifest.background.scripts[0],
-	);
+	assert.strictEqual(manifest.background.service_worker, "js/background.js");
+	// Chrome は MV3 で background.scripts を拒否する。Firefox 向け差分は pack-ext.js が .xpi 生成時に適用する。
+	assert.ok(!("scripts" in manifest.background));
+	assert.ok(!("browser_specific_settings" in manifest));
 });

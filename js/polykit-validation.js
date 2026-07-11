@@ -4,36 +4,42 @@
  * @returns void
  */
 function polykit_run_review() {
-	let review_count = 0;
-	let review_error_count = 0;
-	jQuery("#polykit-review-count").remove();
-	jQuery("tr.preview").each(function () {
-		const $preview = jQuery(this);
-		if ($preview.hasClass("untranslated")) {
-			return;
-		}
-		const preview_id = `#${$preview.attr("id")}`;
-		const editor_id = `#editor-${$preview.attr("row")}`;
-		polykit_editor_checks_init(editor_id, preview_id);
-		const state = polykit_prepare_row_checks(editor_id, true);
-		polykit_display_check_results(editor_id, preview_id, state);
-		review_count++;
-		review_error_count += polykit_count_row_check_issues(state);
-	});
-	if (review_count) {
-		if (review_error_count) {
-			jQuery("#polykit-notices-container").append(
-				`<div id="polykit-review-count" class="notice reviewed warned">${
-					polykit_t("review_warned", review_count, review_error_count)
-				}</div>`,
-			);
-		} else {
-			jQuery("#polykit-notices-container").append(
-				`<div id="polykit-review-count" class="notice reviewed">${
-					polykit_t("review_clean", review_count)
-				}</div>`,
-			);
-		}
+	polykit_check_all_translations(true);
+	polykit_ensure_review_summary();
+}
+
+/**
+ * レビュー完了状態にし、ボタン表示を更新する。
+ *
+ * @returns {void}
+ */
+function polykit_ensure_review_summary() {
+	const button = document.querySelector(".polykit-review, .polykit-review-done");
+	if (button) {
+		button.classList.remove("polykit-review");
+		button.classList.add("polykit-review-done");
+		button.disabled = true;
+	}
+	polykit_update_review_summary();
+}
+
+/**
+ * レビュー完了ボタンの表示を、警告 / 通知の件数に合わせて更新する。
+ *
+ * @returns {void}
+ */
+function polykit_update_review_summary() {
+	const button = document.querySelector(".polykit-review-done, .polykit-review");
+	if (!button || !button.classList.contains("polykit-review-done")) {
+		return;
+	}
+	const warning_count = document.querySelectorAll(".polykit-has-check-warning").length;
+	const notice_count = document.querySelectorAll(".polykit-has-check-notice").length;
+	button.classList.toggle("polykit-review-has-issues", warning_count > 0);
+	if (warning_count || notice_count) {
+		button.value = polykit_t("review_complete_issues", warning_count, notice_count);
+	} else {
+		button.value = polykit_t("review_complete");
 	}
 }
 
@@ -156,7 +162,12 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 	}
 	const $editor = jQuery(selector);
 	const translations = jQuery("textarea.foreign-text", $editor);
-	const originals = jQuery(".original, .original-text", $editor);
+	// 用語集登録語は GlotPress が .original-text 内に .glossary-word としてマークする
+	// （ロケール用語集とプロジェクト用語集のマージ済み）。旧マークアップは .original のみ。
+	let originals = jQuery(".original-text", $editor);
+	if (!originals.length) {
+		originals = jQuery(".original", $editor);
+	}
 	let original_index = SINGULAR;
 	if (2 === originals.length && 1 === translations.length) {
 		original_index = PLURAL;
@@ -247,86 +258,4 @@ function polykit_collect_glossary_warnings(selector, form_index) {
  */
 function polykit_is_gp_initial_uppercase_warning(element) {
 	return /missing the initial uppercase/i.test(element.textContent);
-}
-
-/**
- * @param {string} text
- * @returns {string} 正規表現用にエスケープした文字列。
- */
-function polykit_escape_regexp(text) {
-	return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-/**
- * 原文に含まれる用語集の用語のうち、訳文に推奨訳が見つからないものの警告を返す（DOM 非依存）。
- *
- * @param {string} original 原文。
- * @param {string} translated 訳文。
- * @param {{ term: string, translations: string[], source: string }[]} entries 用語集エントリー。
- * @param {string[]} [skip_terms] GlotPress が既にマークしている用語（既存チェックが担当）。
- * @returns {string[]}
- */
-function polykit_get_custom_glossary_warnings(
-	original,
-	translated,
-	entries,
-	skip_terms = [],
-) {
-	const warnings = [];
-	if (!original || !translated || !entries || !entries.length) {
-		return warnings;
-	}
-	const skip = new Set(skip_terms.map((term) => term.toLowerCase()));
-	const translated_lower = translated.toLowerCase();
-	for (const entry of entries) {
-		if (skip.has(entry.term.toLowerCase())) {
-			continue;
-		}
-		// 単純な複数形 (s / es) も同じ用語として扱う。
-		const pattern = new RegExp(
-			`(?:^|[^\\p{L}\\p{N}])${polykit_escape_regexp(entry.term)}(?:s|es)?(?![\\p{L}\\p{N}])`,
-			"iu",
-		);
-		if (!pattern.test(original)) {
-			continue;
-		}
-		const found = entry.translations.some((translation) => translated_lower.includes(translation.toLowerCase()));
-		if (found) {
-			continue;
-		}
-		if (polykit_check_for_URL(entry.term, translated)) {
-			continue;
-		}
-		warnings.push(polykit_t(
-			"glossary_missing_custom",
-			"project" === entry.source ? polykit_t("glossary_source_project") : polykit_t("glossary_source_locale"),
-			entry.term,
-			entry.translations.join("」「"),
-		));
-	}
-	return warnings;
-}
-
-/**
- * 取得済みのロケール / プロジェクト用語集で訳文を照合する。
- * GlotPress がツールチップとしてマークした用語は polykit_collect_glossary_warnings が担当するため除外する。
- *
- * @param {string} selector エディターのセレクター。
- * @param {string} original 原文。
- * @param {string} translated 訳文。
- * @returns {string[]}
- */
-function polykit_collect_custom_glossary_warnings(selector, original, translated) {
-	if (polykit_get_setting("no_glossary_term_check")) {
-		return [];
-	}
-	const marked = jQuery(".glossary-word", jQuery(selector)).map(function () {
-		return this.textContent;
-	}).get();
-	return polykit_get_custom_glossary_warnings(
-		original,
-		translated,
-		polykit_get_custom_glossary_entries(),
-		marked,
-	);
 }

@@ -55,46 +55,6 @@ Deno.test("polykit_get_available_locales is bundled and includes ja", () => {
 	assert.ok(locales.length > 100);
 });
 
-function unwrap(value) {
-	return JSON.parse(JSON.stringify(value));
-}
-
-Deno.test("polykit_parse_csv handles quoted fields", () => {
-	assert.deepStrictEqual(
-		unwrap(context.polykit_parse_csv('a,b,c\n"x, y","he said ""hi""",z\n')),
-		[["a", "b", "c"], ["x, y", 'he said "hi"', "z"]],
-	);
-	assert.deepStrictEqual(
-		unwrap(context.polykit_parse_csv('"複数\n行",値\r\n')),
-		[["複数\n行", "値"]],
-	);
-	assert.deepStrictEqual(unwrap(context.polykit_parse_csv("")), []);
-});
-
-Deno.test("polykit_glossary_entries_from_csv builds entries", () => {
-	const csv = [
-		"en,pos,comment,ja",
-		"site,noun,,サイト",
-		"post,noun,,投稿",
-		"post,verb,,投稿する",
-		"slug,noun,,N/A",
-		"a,noun,,短すぎ",
-	].join("\n");
-	const entries = unwrap(context.polykit_glossary_entries_from_csv(csv, "locale", "ja"));
-	assert.deepStrictEqual(entries, [
-		{ term: "site", translations: ["サイト"], source: "locale" },
-		{ term: "post", translations: ["投稿", "投稿する"], source: "locale" },
-	]);
-});
-
-Deno.test("polykit_glossary_entries_from_csv falls back to last column", () => {
-	const csv = "term,part of speech,translation\ncomment,noun,コメント";
-	const entries = unwrap(context.polykit_glossary_entries_from_csv(csv, "project", "ja"));
-	assert.deepStrictEqual(entries, [
-		{ term: "comment", translations: ["コメント"], source: "project" },
-	]);
-});
-
 Deno.test("polykit_get_locale_slug resolves both directions", () => {
 	assert.strictEqual(context.polykit_get_locale_slug("ja", "locale"), "ja");
 	assert.strictEqual(context.polykit_get_locale_slug("de_DE", "locale"), "de");

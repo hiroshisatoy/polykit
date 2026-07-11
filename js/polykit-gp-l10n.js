@@ -35,6 +35,9 @@ const polykit_gp_skip_selector = [
  * @returns {boolean}
  */
 function polykit_should_localize_glotpress() {
+	if (!polykit_get_setting("translate_interface")) {
+		return false;
+	}
 	const gp_strings = window.polykit_gp_strings || {};
 	return "ja" === polykit_get_lang() && Object.keys(gp_strings).length > 0;
 }

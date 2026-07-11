@@ -5,47 +5,9 @@
 	}
 }
 
-.box {
-	&.has-polykit {
-		border-left-width: var(--polykit-size-border-accent) !important;
-		border-left-color: var(--polykit-color-mark-blue) !important;
-	}
-
-	&.has-old-string {
-		border-right-width: var(--polykit-size-border-accent) !important;
-		border-right-color: var(--polykit-color-mark-black) !important;
-	}
-}
-
 table.translations {
-	tr.preview.has-polykit {
-		th,
-		.original {
-			position: relative;
-		}
-
-		.original::before {
-			content: "";
-			display: inline-block;
-			width: var(--polykit-size-border-accent);
-			height: 100%;
-			background: var(--polykit-color-mark-blue);
-			position: absolute;
-			margin-left: calc(-0.5em - var(--polykit-space-sm));
-			margin-top: -0.5em;
-		}
-
-		th + .priority + .original::before {
-			margin-left: calc(-0.5em - var(--polykit-space-original-marker-offset));
-		}
-
-		&.has-warnings th + .priority + .original::before {
-			margin-left: calc(-0.5em - var(--polykit-space-original-marker-offset-warn));
-		}
-	}
-
-	tr.preview.has-original-copy {
-		background: var(--polykit-color-accent-bg);
+	a.action {
+		text-decoration: none;
 	}
 
 	tr.preview {
@@ -58,16 +20,26 @@ table.translations {
 		}
 
 		.polykit-check-preview {
-			margin-right: var(--polykit-space-sm);
-			font-size: var(--polykit-font-size-md);
-			line-height: 1;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 3px 8px;
+			font-size: var(--polykit-font-size-xs);
+			line-height: 1.45;
+			border: 1px solid transparent;
+			border-radius: 0;
+			vertical-align: middle;
 
-			&.warning {
+			&.polykit-check-preview-status-warning {
 				color: var(--polykit-color-danger);
+				background: var(--polykit-color-label-error-bg);
+				border-color: color-mix(in srgb, var(--polykit-color-danger) 22%, transparent);
 			}
 
-			&.notice {
+			&.polykit-check-preview-status-notice {
 				color: var(--polykit-color-info);
+				background: var(--polykit-color-label-notice-bg);
+				border-color: color-mix(in srgb, var(--polykit-color-info) 22%, transparent);
 			}
 		}
 
@@ -84,33 +56,14 @@ table.translations {
 			gap: var(--polykit-space-sm);
 			margin: var(--polykit-space-sm) 0 0;
 			padding: 0;
-			line-height: var(--polykit-line-height-tight);
+			line-height: 1.45;
 		}
 
-		.polykit-check-labels-heading {
-			flex: 0 0 auto;
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			min-width: 2.75em;
-			padding: 2px 6px;
-			font-size: var(--polykit-font-size-2xs);
-			font-weight: 600;
-			line-height: 1.3;
-			border-radius: var(--polykit-radius-pill);
-			white-space: nowrap;
-		}
-
-		.polykit-check-labels-heading--warning {
-			color: var(--polykit-color-danger);
-			background: var(--polykit-color-label-error-bg);
-			border: 1px solid color-mix(in srgb, var(--polykit-color-danger) 20%, transparent);
-		}
-
-		.polykit-check-labels-heading--notice {
-			color: var(--polykit-color-info);
-			background: var(--polykit-color-label-notice-bg);
-			border: 1px solid color-mix(in srgb, var(--polykit-color-info) 20%, transparent);
+		/* ラベルが 1 つもない行や空ラベルは表示しない */
+		.polykit-check-warning-labels-row:not(:has(.polykit-check-label)),
+		.polykit-check-notice-labels-row:not(:has(.polykit-check-label)),
+		.polykit-check-label:empty {
+			display: none;
 		}
 
 		.polykit-check-warning-labels,
@@ -119,14 +72,25 @@ table.translations {
 		}
 
 		.polykit-check-label {
-			display: inline-block;
+			display: inline-flex;
+			align-items: flex-start;
+			gap: 0.35em;
 			max-width: 100%;
-			padding: 2px 8px;
-			font-size: var(--polykit-font-size-2xs);
-			line-height: 1.4;
-			border-radius: var(--polykit-radius-pill);
+			padding: 3px 8px;
+			font-size: var(--polykit-font-size-xs);
+			line-height: 1.45;
+			border-radius: 0;
 			border: 1px solid transparent;
 			word-break: break-word;
+		}
+
+		.polykit-check-label .dashicons {
+			flex: 0 0 auto;
+			width: 1em;
+			height: 1em;
+			font-size: var(--polykit-font-size-sm);
+			line-height: 1;
+			margin-top: 0.1em;
 		}
 
 		.polykit-check-label--warning {
@@ -135,10 +99,31 @@ table.translations {
 			border-color: color-mix(in srgb, var(--polykit-color-danger) 22%, transparent);
 		}
 
+		.polykit-check-label--warning .dashicons {
+			color: var(--polykit-color-danger);
+		}
+
 		.polykit-check-label--notice {
-			color: var(--polykit-color-info);
+			color: var(--polykit-color-text);
 			background: var(--polykit-color-label-notice-bg);
 			border-color: color-mix(in srgb, var(--polykit-color-info) 22%, transparent);
+		}
+
+		.polykit-check-label--notice .dashicons {
+			color: var(--polykit-color-info);
+		}
+
+		.polykit-check-preview .dashicons {
+			width: 1em;
+			height: 1em;
+			font-size: var(--polykit-font-size-sm);
+			line-height: 1;
+		}
+
+		.polykit-check-label code {
+			padding: 0 3px;
+			border-radius: 0;
+			background: var(--polykit-color-surface-code);
 		}
 	}
 
@@ -156,20 +141,6 @@ table.translations {
 
 			text-align: right;
 		}
-	}
-}
-
-.has-old-string {
-	td:nth-last-child(2),
-	th:nth-last-child(2) {
-		border-right-width: var(--polykit-size-border-accent) !important;
-		border-right-color: var(--polykit-color-mark-black) !important;
-	}
-}
-
-#legend {
-	.has-original-copy {
-		background: var(--polykit-color-accent-bg);
 	}
 }
 
@@ -261,6 +232,38 @@ table.translations {
 		a {
 			text-decoration: none;
 		}
+	}
+
+	#polykit-notices-container {
+		display: inline-flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 0.35em;
+		margin: 0;
+
+		&:not(:has(.notice)) {
+			display: none;
+		}
+
+		.notice {
+			display: inline-block;
+			margin: 0;
+			padding: 0.3em 0.6em;
+			font-size: var(--polykit-font-size-sm);
+			line-height: 1.35;
+			box-sizing: border-box;
+		}
+	}
+
+	input.button.polykit-review,
+	input.button.polykit-review-done {
+		margin: 0;
+	}
+
+	input.button.polykit-review-done.polykit-review-has-issues {
+		color: var(--polykit-color-danger-dark);
+		border-color: color-mix(in srgb, var(--polykit-color-danger) 35%, transparent);
+		background: var(--polykit-color-label-error-bg);
 	}
 }
 
@@ -359,12 +362,6 @@ table.translations {
 	&.submitted {
 		background: var(--polykit-color-notice-approved-bg);
 		border-left: var(--polykit-size-border-notice) solid var(--polykit-color-approve);
-	}
-
-	&.reviewed.warned {
-		color: var(--polykit-color-white);
-		background: var(--polykit-color-warned);
-		border-left: var(--polykit-size-border-notice) solid var(--polykit-color-reject);
 	}
 }
 
@@ -679,6 +676,17 @@ li.consistency-header-index {
 	}
 }
 
+/* wp.org のグローバル CSS が code に大きめの font-size を指定するため、チェック結果内では周囲に合わせる */
+.polykit-check-label code,
+.polykit-checks-list code,
+#polykit-notices-container code {
+	font-size: inherit;
+	line-height: inherit;
+	padding: 0 3px;
+	border-radius: 0;
+	vertical-align: baseline;
+}
+
 @keyframes polykit-ripple-out {
 	0% {
 		box-shadow: var(--polykit-shadow-ripple);
@@ -697,14 +705,6 @@ li.consistency-header-index {
 	z-index: var(--polykit-z-gp-message);
 }
 
-#polykit-notices-container {
-	margin-top: var(--polykit-space-xl);
-
-	&:not(:has(.notice)) {
-		display: none;
-	}
-}
-
 #bulk-actions-toolbar-top {
 	float: left !important;
 }
@@ -717,10 +717,6 @@ li.consistency-header-index {
 .polykit-on-translations {
 	.gp-content {
 		max-width: 100%;
-
-		input.button.polykit-review {
-			margin: 0 5px;
-		}
 
 		h2 {
 			display: block !important;
@@ -833,13 +829,6 @@ li.consistency-header-index {
 		width: 100%;
 		box-shadow: var(--polykit-shadow-md);
 		z-index: var(--polykit-z-sticky-header);
-
-		#polykit-notices-container [id^="polykit-"].notice {
-			display: inline-block;
-			padding: 0.3em 0.5em;
-			margin: 0 1em .4em 0;
-			box-sizing: border-box;
-		}
 	}
 }
 
@@ -953,43 +942,6 @@ li.consistency-header-index {
 	padding: 0.5em 1em;
 	background: var(--polykit-color-results-bg);
 	border-left: var(--polykit-size-border-results) solid var(--polykit-color-info);
-}
-
-.polykit-h-label {
-	display: inline-block;
-	margin: 2px 4px 2px 0;
-	padding: 2px 6px;
-	font-size: 11px;
-	background: var(--polykit-color-surface-muted);
-	border-radius: var(--polykit-radius-xs);
-	text-decoration: none;
-
-	&.polykit-label-error {
-		background: var(--polykit-color-label-error-bg);
-		color: var(--polykit-color-danger);
-	}
-}
-
-.polykit {
-	.polykit_diff,
-	.polykit_compared_to {
-		margin: 0.5em 0;
-		font-size: var(--polykit-font-size-xs);
-	}
-
-	.polykit-diff-added {
-		background: var(--polykit-color-diff-added);
-	}
-
-	.polykit-diff-removed {
-		background: var(--polykit-color-diff-removed);
-		text-decoration: line-through;
-	}
-}
-
-.identical-history {
-	color: var(--polykit-color-text-secondary);
-	font-style: italic;
 }
 
 .polykit-bulk {

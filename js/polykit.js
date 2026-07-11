@@ -26,11 +26,8 @@ const polykit_glossary = {
 	},
 };
 
-// Create notice container at the beginning since notices are added in AJAX
-const translations = document.querySelector("#translations");
-const polykit_notices_container = document.createElement("DIV");
-polykit_notices_container.id = "polykit-notices-container";
-translations && translations.before(polykit_notices_container);
+// Create notice container early; moved into the review toolbar when available.
+polykit_ensure_notices_container();
 
 polykit_current_locale_first();
 
@@ -60,24 +57,9 @@ if (window.polykit_filter_bar.length > 0) {
 		jQuery(".preview .action").trigger("click");
 	}
 
-	jQuery(
-		"<div class='box has-polykit'></div><div>" + polykit_t("legend_glossary") +
-			"</div>",
-	).appendTo("#legend");
-	jQuery(
-		"<div class='box has-old-string'></div><div>" + polykit_t("legend_old") +
-			"</div>",
-	).appendTo("#legend");
-	jQuery(
-		"<div class='box has-original-copy'></div><div>" +
-			polykit_t("legend_original_copy") + "</div>",
-	).appendTo("#legend");
-
 	document.querySelectorAll(".glossary-word").forEach(
 		polykit_add_glossary_links,
 	);
-
-	polykit_mark_old_strings();
 }
 
 polykit_add_project_links();
@@ -122,8 +104,6 @@ jQuery(".gp-content").on(
 	function (e) {
 		jQuery(this).val(polykit_t("review_in_progress"));
 		polykit_run_review();
-		jQuery(this).val(polykit_t("review_complete")).removeClass("polykit-review")
-			.addClass("polykit-review-done").attr("disabled", "disabled");
 	},
 );
 
@@ -159,8 +139,6 @@ polykit_localize_date();
 polykit_anonymous();
 polykit_pagination();
 polykit_checks_init();
-polykit_load_custom_glossaries();
 polykit_wrap_review_paging_row();
 polykit_search_events();
-polykit_history_init();
 polykit_bulk_consistency_init();

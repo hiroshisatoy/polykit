@@ -15,7 +15,6 @@ function polykit_selected_count() {
 		let untranslated_selectedcount = 0;
 		let nowarnings_selectedcount = 0;
 		let warnings_selectedcount = 0;
-		let polykit_selectedcount = 0;
 		jQuery("tbody .checkbox :checkbox:checked").each(function (index) {
 			const row = jQuery(this).closest("tr.preview");
 			if (row.hasClass("status-current")) {
@@ -41,9 +40,6 @@ function polykit_selected_count() {
 			}
 			if (row.hasClass("has-warnings")) {
 				warnings_selectedcount++;
-			}
-			if (row.hasClass("has-polykit")) {
-				polykit_selectedcount++;
 			}
 		});
 		const selected_strings_text = [];
@@ -78,11 +74,6 @@ function polykit_selected_count() {
 		if (warnings_selectedcount > 0) {
 			selected_strings_text.push(
 				polykit_t("selected_warnings", warnings_selectedcount),
-			);
-		}
-		if (polykit_selectedcount > 0) {
-			selected_strings_text.push(
-				polykit_t("selected_glossary", polykit_selectedcount),
 			);
 		}
 		jQuery("#polykit-notices-container").append(

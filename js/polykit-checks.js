@@ -277,10 +277,6 @@ function polykit_run_all_checks(original, translated, editor_id, form_index) {
 		polykit_collect_glossary_warnings(editor_id, form_index),
 	);
 	polykit_push_messages_as_items(
-		results.warning,
-		polykit_collect_custom_glossary_warnings(editor_id, original, translated),
-	);
-	polykit_push_messages_as_items(
 		results.notice,
 		polykit_collect_locale_notices(original, translated),
 	);
@@ -291,18 +287,6 @@ function polykit_run_all_checks(original, translated, editor_id, form_index) {
 		);
 	}
 	return results;
-}
-
-/**
- * @param {object} state
- * @returns {number}
- */
-function polykit_count_row_check_issues(state) {
-	let count = state.check_warnings.length;
-	if (polykit_get_setting("checks_block_notices")) {
-		count += state.check_notices.length;
-	}
-	return count;
 }
 
 /**
@@ -427,13 +411,17 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		check_notices: [],
 		preview_class: "polykit-has-check-passed",
 		preview_status: polykit_create_element("span", {
-			class: "polykit-check-preview passed",
+			class: "polykit-check-preview polykit-check-preview-status-passed",
 			title: polykit_t("check_all_passed"),
 		}, "✓"),
 		labels: [],
 		highlights: [],
 		ignore_status: "none",
 	};
+
+	if (!editor_id || "#" === editor_id || !polykit_query_selector_safe(editor_id)) {
+		return state;
+	}
 
 	const original_forms = [];
 	const translated_forms = [];
@@ -532,15 +520,23 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		state.ignore_status = "block";
 		state.preview_class = "polykit-has-check-warning";
 		state.preview_status = polykit_create_element("span", {
-			class: "polykit-check-preview warning",
+			class: "polykit-check-preview polykit-check-preview-status-warning",
 			title: polykit_t("check_has_warning"),
-		}, "⚠");
+		});
+		state.preview_status.appendChild(polykit_create_element("span", {
+			class: "dashicons dashicons-warning",
+			"aria-hidden": "true",
+		}));
 	} else if (state.has_notice) {
 		state.preview_class = "polykit-has-check-notice";
 		state.preview_status = polykit_create_element("span", {
-			class: "polykit-check-preview notice",
+			class: "polykit-check-preview polykit-check-preview-status-notice",
 			title: polykit_t("check_has_notice"),
-		}, "ℹ");
+		});
+		state.preview_status.appendChild(polykit_create_element("span", {
+			class: "dashicons dashicons-info",
+			"aria-hidden": "true",
+		}));
 	}
 
 	return state;
@@ -549,17 +545,34 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 /**
  * @param {HTMLElement} el
  * @param {"warning"|"notice"} type
- * @returns {HTMLSpanElement}
+ * @returns {HTMLSpanElement|null} 中身が空の場合は null。
  */
 function polykit_create_check_label(el, type) {
+	const full_text = (el.textContent || "").trim();
+	if ("" === full_text) {
+		return null;
+	}
 	const label = document.createElement("span");
 	label.className = `polykit-check-label polykit-check-label--${type}`;
-	if (el.innerHTML && el.innerHTML !== el.textContent) {
-		label.innerHTML = el.innerHTML;
-	} else {
-		label.textContent = el.textContent;
+	if ("notice" === type) {
+		label.appendChild(polykit_create_element("span", {
+			class: "dashicons dashicons-info",
+			"aria-hidden": "true",
+		}));
+	} else if ("warning" === type) {
+		label.appendChild(polykit_create_element("span", {
+			class: "dashicons dashicons-warning",
+			"aria-hidden": "true",
+		}));
 	}
-	const full_text = label.textContent.trim();
+	const message = document.createElement("span");
+	message.className = "polykit-check-label__text";
+	if (el.innerHTML && el.innerHTML !== el.textContent) {
+		message.innerHTML = el.innerHTML;
+	} else {
+		message.textContent = el.textContent;
+	}
+	label.appendChild(message);
 	if (full_text.length > 72) {
 		label.title = full_text;
 	}
@@ -569,15 +582,18 @@ function polykit_create_check_label(el, type) {
 /**
  * @param {HTMLElement[]} items
  * @param {"warning"|"notice"} type
- * @returns {HTMLDivElement}
+ * @returns {HTMLDivElement|string} ラベルが 1 つもない場合は空文字（グループ要素を作らない）。
  */
 function polykit_create_check_labels_group(items, type) {
 	const group = document.createElement("div");
 	group.className = `polykit-check-${type}-labels`;
 	items.forEach((item) => {
-		group.appendChild(polykit_create_check_label(item, type));
+		const label = polykit_create_check_label(item, type);
+		if (label) {
+			group.appendChild(label);
+		}
 	});
-	return group;
+	return group.childElementCount ? group : "";
 }
 
 /**
@@ -595,19 +611,13 @@ function polykit_add_check_labels(form_label, form_i, translation_p_text, highli
 		if (form_label.warnings) {
 			const labels_w = document.createElement("div");
 			labels_w.className = "polykit-check-warning-labels-row";
-			const heading_w = document.createElement("span");
-			heading_w.className = "polykit-check-labels-heading polykit-check-labels-heading--warning";
-			heading_w.textContent = polykit_t("check_label_warning");
-			labels_w.append(heading_w, form_label.warnings);
+			labels_w.append(form_label.warnings);
 			translation_p_text[form_i].insertAdjacentElement("afterend", labels_w);
 		}
 		if (form_label.notices) {
 			const labels_n = document.createElement("div");
 			labels_n.className = "polykit-check-notice-labels-row";
-			const heading_n = document.createElement("span");
-			heading_n.className = "polykit-check-labels-heading polykit-check-labels-heading--notice";
-			heading_n.textContent = polykit_t("check_label_notice");
-			labels_n.append(heading_n, form_label.notices);
+			labels_n.append(form_label.notices);
 			translation_p_text[form_i].insertAdjacentElement("afterend", labels_n);
 		}
 		if (highlights.length && highlights[form_i]) {
@@ -625,10 +635,45 @@ function polykit_add_check_labels(form_label, form_i, translation_p_text, highli
  * @returns {boolean}
  */
 function polykit_editor_save_warnings_ignored(editor_id) {
-	const editor = document.querySelector(editor_id);
+	const editor = polykit_query_selector_safe(editor_id);
 	return Boolean(
 		editor?.querySelector(".polykit-ignore-warnings input:checked"),
 	);
+}
+
+/**
+ * preview / editor 行のセレクターを組み立てる。無効な場合は null。
+ *
+ * @param {Element} el preview または editor の tr
+ * @param {"preview"|"editor"} kind
+ * @returns {string|null}
+ */
+function polykit_translation_row_selector(el, kind) {
+	if (!el) {
+		return null;
+	}
+	const row = el.getAttribute("row") ||
+		(el.id && el.id.replace(/^(?:preview|editor)-/, "")) ||
+		"";
+	if (!row || !/^[A-Za-z0-9_-]+$/.test(row)) {
+		return null;
+	}
+	return `#${kind}-${row}`;
+}
+
+/**
+ * @param {string} selector
+ * @returns {Element|null}
+ */
+function polykit_query_selector_safe(selector) {
+	if (!selector || "#" === selector) {
+		return null;
+	}
+	try {
+		return document.querySelector(selector);
+	} catch (_error) {
+		return null;
+	}
 }
 
 /**
@@ -637,7 +682,10 @@ function polykit_editor_save_warnings_ignored(editor_id) {
  * @returns {void}
  */
 function polykit_editor_checks_init(editor_id, preview_id) {
-	const editor = document.querySelector(editor_id);
+	if (!editor_id || !preview_id || "#" === editor_id || "#" === preview_id) {
+		return;
+	}
+	const editor = polykit_query_selector_safe(editor_id);
 	if (!editor || editor.dataset.polykitChecksInit) {
 		return;
 	}
@@ -712,8 +760,8 @@ function polykit_check_this_translation(editor_id, preview_id) {
  * @returns {void}
  */
 function polykit_display_check_results(editor_id, preview_id, state) {
-	const editor = document.querySelector(editor_id);
-	const preview = document.querySelector(preview_id);
+	const editor = polykit_query_selector_safe(editor_id);
+	const preview = polykit_query_selector_safe(preview_id);
 	if (!editor || !preview) {
 		return;
 	}
@@ -761,18 +809,22 @@ function polykit_display_check_results(editor_id, preview_id, state) {
 }
 
 /**
+ * @param {boolean} [force] チェック設定が無効でも実行する（レビューボタンからの手動実行）。
  * @returns {void}
  */
-function polykit_check_all_translations() {
+function polykit_check_all_translations(force = false) {
 	document.querySelectorAll("#translations tbody tr.preview").forEach(
 		(translation_p) => {
 			if (translation_p.classList.contains("untranslated")) {
 				return;
 			}
-			const preview_id = `#${translation_p.id}`;
-			const editor_id = preview_id.replace("preview", "editor");
+			const preview_id = polykit_translation_row_selector(translation_p, "preview");
+			const editor_id = polykit_translation_row_selector(translation_p, "editor");
+			if (!preview_id || !editor_id) {
+				return;
+			}
 			polykit_editor_checks_init(editor_id, preview_id);
-			if (!polykit_get_setting("checks_enabled")) {
+			if (!force && !polykit_get_setting("checks_enabled")) {
 				return;
 			}
 			const state = polykit_prepare_row_checks(editor_id, true);
@@ -795,14 +847,16 @@ function polykit_checks_mutations() {
 				if (1 !== el.nodeType || !el.classList.contains("editor")) {
 					return;
 				}
-				const editor_id = `#${el.id}`;
-				const preview_id = editor_id.replace("editor", "preview");
+				const editor_id = polykit_translation_row_selector(el, "editor");
+				const preview_id = polykit_translation_row_selector(el, "preview");
+				if (!editor_id || !preview_id) {
+					return;
+				}
 				polykit_editor_checks_init(editor_id, preview_id);
 				if (polykit_get_setting("checks_enabled")) {
 					const state = polykit_prepare_row_checks(editor_id, false);
 					polykit_display_check_results(editor_id, preview_id, state);
 				}
-				polykit_history_on_editor_open(editor_id);
 			});
 		});
 	});
@@ -829,6 +883,8 @@ function polykit_update_check_filters() {
 		warning_link.textContent = polykit_t("filter_warnings", warnings_count);
 		warning_link.title = polykit_t("filter_warnings_hint", warnings_count);
 	}
+	// レビューサマリーが表示されていればフィルターと同時に更新し、数値のずれを防ぐ。
+	polykit_update_review_summary();
 }
 
 /**
@@ -857,7 +913,7 @@ function polykit_check_filters() {
 	}, polykit_t("filter_all"));
 	filters.append(notices_link, " | ", warnings_link, " | ", all_link);
 	const insert_before = review_toolbar.querySelector(
-		".separator, .polykit-toolbar-extensions",
+		".polykit-review, .polykit-review-done, #polykit-notices-container, .separator, .polykit-toolbar-extensions",
 	);
 	if (insert_before) {
 		review_toolbar.insertBefore(filters, insert_before);
@@ -907,6 +963,10 @@ function polykit_checks_init() {
 	polykit_check_filters();
 	polykit_check_all_translations();
 	polykit_checks_mutations();
+
+	if (polykit_get_setting("checks_enabled")) {
+		polykit_ensure_review_summary();
+	}
 
 	document.querySelectorAll("textarea").forEach((el) => {
 		el.addEventListener("change", () => {

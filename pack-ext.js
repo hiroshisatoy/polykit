@@ -52,15 +52,19 @@ async function collectFiles(dir, root, files) {
 /**
  * @param {string} root
  * @param {string} output
+ * @param {Record<string, Uint8Array | string>} [overrides] archivePath ごとの差し替え内容。
  * @returns {Promise<void>}
  */
-async function zipdir(root, output) {
+async function zipdir(root, output, overrides = {}) {
 	const files = [];
 	await collectFiles(root, root, files);
 	const zip = new JSZip();
 
 	for (const file of files) {
-		zip.file(file.archivePath, await Deno.readFile(file.path));
+		zip.file(
+			file.archivePath,
+			overrides[file.archivePath] ?? await Deno.readFile(file.path),
+		);
 	}
 
 	const bytes = await zip.generateAsync({
@@ -68,6 +72,26 @@ async function zipdir(root, output) {
 		compression: "DEFLATE",
 	});
 	await Deno.writeFile(output, bytes);
+}
+
+/**
+ * Firefox は MV3 の background.service_worker を未サポート（イベントページの scripts を使う）。
+ * Chrome は background.scripts を拒否するため、Firefox 向け差分は .xpi 生成時にのみ適用する。
+ *
+ * @param {Record<string, unknown>} manifest
+ * @returns {string}
+ */
+function buildFirefoxManifest(manifest) {
+	const firefox = structuredClone(manifest);
+	firefox.background = {
+		scripts: [manifest.background.service_worker],
+	};
+	firefox.browser_specific_settings = {
+		gecko: {
+			id: "polykit@hiroshisatoy.github.io",
+		},
+	};
+	return JSON.stringify(firefox, null, "  ") + "\n";
 }
 
 const scriptDir = dirname(fromFileUrl(import.meta.url));
@@ -93,5 +117,7 @@ const name = data.name.replaceAll(" ", "-") + "_v" + data.version;
 
 await zipdir(packPath, name + ".zip");
 console.log("- Chrome package done: " + name + ".zip");
-await zipdir(packPath, name + ".xpi");
+await zipdir(packPath, name + ".xpi", {
+	"manifest.json": buildFirefoxManifest(data),
+});
 console.log("- Firefox package done: " + name + ".xpi");

@@ -1,81 +1,72 @@
 {
-  "manifest_version": 3,
-  "name": "PolyKit",
-  "version": "1.0.0",
-  "description": "translate.wordpress.org 向け日本語翻訳ツールキット",
-  "homepage_url": "https://github.com/hiroshisatoy/polykit",
-  "icons": {
-    "16": "icons/icon-16.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
-  },
-  "background": {
-    "service_worker": "js/background.js",
-    "scripts": [
-      "js/background.js"
-    ]
-  },
-  "permissions": [
-    "storage"
-  ],
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "polykit@hiroshisatoy.github.io"
-    }
-  },
-  "content_scripts": [
-    {
-      "js": [
-        "js/init.js"
-      ],
-      "css": [
-        "css/common.css",
-        "css/translation.css",
-        "css/settings.css"
-      ],
-      "matches": [
-        "*://translate.wordpress.org/*"
-      ]
-    }
-  ],
-  "host_permissions": [
-    "*://translate.wordpress.org/*"
-  ],
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "js/polykit-locales.js",
-        "js/polykit.js",
-        "js/polykit-functions.js",
-        "js/polykit-hotkey.js",
-        "js/polykit-validation.js",
-        "js/polykit-locale-validation.js",
-        "js/polykit-i18n.js",
-        "js/polykit-gp-l10n.js",
-        "languages/*/*.json",
-        "js/polykit-notices.js",
-        "js/polykit-bulk.js",
-        "js/polykit-column.js",
-        "js/polykit-meta.js",
-        "js/polykit-consistency.js",
-        "js/polykit-checks.js",
-        "js/polykit-search.js",
-        "js/polykit-history.js",
-        "js/polykit-bulk-consistency.js",
-        "js/polykit-settings.js",
-        "js/keymaster.js",
-        "js/jquery.bind-first.js",
-        "js/dompurify.js",
-        "CHANGELOG.md",
-        "icons/icon-48.png",
-        "css/common.css",
-        "css/translation.css",
-        "css/settings.css",
-        "js/init.js"
-      ],
-      "matches": [
-        "*://translate.wordpress.org/*"
-      ]
-    }
-  ]
+	"manifest_version": 3,
+	"name": "PolyKit",
+	"version": "1.0.0",
+	"description": "translate.wordpress.org 向け日本語翻訳ツールキット",
+	"homepage_url": "https://github.com/hiroshisatoy/polykit",
+	"icons": {
+		"16": "icons/icon-16.png",
+		"48": "icons/icon-48.png",
+		"128": "icons/icon-128.png"
+	},
+	"background": {
+		"service_worker": "js/background.js"
+	},
+	"permissions": [
+		"storage"
+	],
+	"content_scripts": [
+		{
+			"js": [
+				"js/init.js"
+			],
+			"css": [
+				"css/common.css",
+				"css/translation.css",
+				"css/settings.css"
+			],
+			"matches": [
+				"*://translate.wordpress.org/*"
+			]
+		}
+	],
+	"host_permissions": [
+		"*://translate.wordpress.org/*"
+	],
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"js/polykit-locales.js",
+				"js/polykit.js",
+				"js/polykit-functions.js",
+				"js/polykit-hotkey.js",
+				"js/polykit-validation.js",
+				"js/polykit-locale-validation.js",
+				"js/polykit-i18n.js",
+				"js/polykit-gp-l10n.js",
+				"languages/*/*.json",
+				"js/polykit-notices.js",
+				"js/polykit-bulk.js",
+				"js/polykit-column.js",
+				"js/polykit-meta.js",
+				"js/polykit-consistency.js",
+				"js/polykit-checks.js",
+				"js/polykit-search.js",
+				"js/polykit-bulk-consistency.js",
+				"js/polykit-settings.js",
+				"js/keymaster.js",
+				"js/jquery.bind-first.js",
+				"js/dompurify.js",
+				"CHANGELOG.md",
+				"icons/icon-48.png",
+				"css/common.css",
+				"css/translation.css",
+				"css/settings.css",
+				"js/init.js"
+			],
+			"matches": [
+				"*://translate.wordpress.org/*"
+			]
+		}
+	]
 }

@@ -3,7 +3,6 @@
 	--polykit-color-primary: #0073aa;
 	--polykit-color-primary-hover: #00a0d2;
 	--polykit-color-primary-dark: #046594;
-	--polykit-color-accent-bg: #e5f5fa;
 	--polykit-color-notranslate-bg: #ebf5fd;
 	--polykit-color-notranslate-bg-hover: #c9e3f9;
 
@@ -40,8 +39,6 @@
 	--polykit-color-settings-tab-active-bg: #fff;
 	--polykit-color-settings-panel-bg: #fff;
 	--polykit-color-layover: #0009;
-	--polykit-color-mark-blue: blue;
-	--polykit-color-mark-black: black;
 	--polykit-color-consistency-space: #cbcdce;
 	--polykit-color-consistency-divider: #cabfbf;
 
@@ -60,8 +57,6 @@
 	--polykit-color-results-bg: #f0f6fc;
 	--polykit-color-label-error-bg: #fce4e4;
 	--polykit-color-label-notice-bg: #e8f4fc;
-	--polykit-color-diff-added: #d4edda;
-	--polykit-color-diff-removed: #f8d7da;
 	--polykit-color-copy-row-bg: #e5f5fa;
 
 	/* Settings table */
@@ -90,8 +85,6 @@
 	--polykit-space-glossary-link-gap: 26px;
 	--polykit-space-glossary-link-gap-lg: 54px;
 	--polykit-space-glossary-link-gap-sm: 14px;
-	--polykit-space-original-marker-offset: 49px;
-	--polykit-space-original-marker-offset-warn: 50px;
 	--polykit-space-ripple: 22px;
 	--polykit-space-settings-header-offset: 19px;
 	--polykit-space-settings-caret-top: 12px;
