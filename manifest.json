@@ -1,7 +1,7 @@
 {
 	"manifest_version": 3,
 	"name": "PolyKit",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "translate.wordpress.org 向け日本語翻訳ツールキット",
 	"homepage_url": "https://github.com/hiroshisatoy/polykit",
 	"icons": {

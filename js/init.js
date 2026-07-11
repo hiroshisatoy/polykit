@@ -105,12 +105,13 @@ async function script(urls) {
 		}
 		return;
 	}
+	const version = chrome.runtime.getManifest().version;
 	return new Promise((resolve, reject) => {
 		let r = false;
 		const t = document.getElementsByTagName("script")[0];
 		const s = document.createElement("script");
 		s.type = "text/javascript";
-		s.src = chrome.runtime.getURL(`js/${urls}.js`);
+		s.src = chrome.runtime.getURL(`js/${urls}.js`) + `?v=${version}`;
 		s.async = false;
 		s.onload = s.onreadystatechange = function () {
 			if (!r && (!this.readyState || "complete" === this.readyState)) {

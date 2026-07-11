@@ -419,22 +419,23 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		ignore_status: "none",
 	};
 
-	if (!editor_id || "#" === editor_id || !polykit_query_selector_safe(editor_id)) {
+	const editor = polykit_query_selector_safe(editor_id);
+	if (!editor) {
 		return state;
 	}
 
 	const original_forms = [];
 	const translated_forms = [];
-	document.querySelectorAll(
-		`${editor_id} .source-string.strings div .original-raw`,
-	).forEach((form) => {
-		original_forms.push(form.textContent);
-	});
-	document.querySelectorAll(
-		`${editor_id} .translation-wrapper div.textareas textarea`,
-	).forEach((form) => {
-		translated_forms.push(form.value);
-	});
+	editor.querySelectorAll(".source-string.strings div .original-raw").forEach(
+		(form) => {
+			original_forms.push(form.textContent);
+		},
+	);
+	editor.querySelectorAll(".translation-wrapper div.textareas textarea").forEach(
+		(form) => {
+			translated_forms.push(form.value);
+		},
+	);
 
 	let original_form_i = 0;
 	if (2 === original_forms.length && 1 === translated_forms.length) {
@@ -695,9 +696,7 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 	const wrapper = editor.querySelector(".translation-wrapper");
 	wrapper && wrapper.insertAdjacentElement("afterend", ignore_box);
 
-	document.querySelectorAll(
-		`${editor_id} .translation-actions__save, ${editor_id} .approve`,
-	).forEach((btn) => {
+	editor.querySelectorAll(".translation-actions__save, .approve").forEach((btn) => {
 		btn.addEventListener("click", (e) => {
 			const force = btn.classList.contains("forcesubmit");
 			if (force) {
