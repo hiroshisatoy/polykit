@@ -216,82 +216,92 @@ function polykit_has_paren_period_before_close(masked) {
 }
 
 /**
- * 日本語スタイルガイドの警告メッセージを収集する（DOM 非依存）。
+ * 日本語スタイルガイドのチェック結果を収集する（DOM 非依存）。
+ * 各項目の設定（warning / notice / off）に応じて振り分ける。
  *
  * @param {string} original 原文。
  * @param {string} text 訳文。
- * @returns {string[]}
+ * @returns {{ warning: string[], notice: string[] }}
  */
-function polykit_collect_locale_warnings(original, text) {
+function polykit_collect_locale_checks(original, text) {
+	const results = { warning: [], notice: [] };
 	if ("ja" !== polykit_get_lang()) {
-		return [];
+		return results;
 	}
-	const warnings = [];
 	const masked = polykit_mask_locale_text(text);
+	const push = (key, message) => {
+		polykit_push_message_by_check_level(results, key, message);
+	};
 
-	if (polykit_get_setting("ja_japanese_punctuation")) {
+	if (polykit_is_check_enabled("ja_japanese_punctuation")) {
 		const punctuation = polykit_get_halfwidth_japanese_punctuation_chars(masked);
 		if (punctuation) {
-			warnings.push(polykit_t("ja_japanese_punctuation", punctuation));
+			push(
+				"ja_japanese_punctuation",
+				polykit_t("ja_japanese_punctuation", punctuation),
+			);
 		}
 	}
 
-	if (polykit_get_setting("ja_fullwidth_ascii")) {
+	if (polykit_is_check_enabled("ja_fullwidth_ascii")) {
 		const fullwidth = masked.match(/[！-／：-＠Ａ-Ｚ［-｀ａ-ｚ｛-～]/g);
 		if (fullwidth) {
 			const unique = [...new Set(fullwidth)].slice(0, 5).join("");
-			warnings.push(polykit_t("ja_fullwidth_ascii", unique));
+			push("ja_fullwidth_ascii", polykit_t("ja_fullwidth_ascii", unique));
 		}
 		if (/\u3000/.test(masked)) {
-			warnings.push(polykit_t("ja_fullwidth_space"));
+			push("ja_fullwidth_ascii", polykit_t("ja_fullwidth_space"));
 		}
 	}
 
-	if (polykit_get_setting("ja_fullwidth_number")) {
+	if (polykit_is_check_enabled("ja_fullwidth_number")) {
 		const nums = masked.match(/[０-９]+/g);
 		if (nums) {
-			warnings.push(polykit_t("ja_fullwidth_number", nums[0]));
+			push("ja_fullwidth_number", polykit_t("ja_fullwidth_number", nums[0]));
 		}
 	}
 
 	if (
-		polykit_get_setting("ja_space_before_half") &&
-		!polykit_get_setting("ja_space_around_mixed")
+		polykit_is_check_enabled("ja_space_before_half") &&
+		!polykit_is_check_enabled("ja_space_around_mixed")
 	) {
 		const bad = masked.match(/[\u3040-\u9FFF][!?]/g);
 		if (bad) {
-			warnings.push(polykit_t("ja_space_before_half", bad[0]));
+			push("ja_space_before_half", polykit_t("ja_space_before_half", bad[0]));
 		}
 	}
 
-	if (polykit_get_setting("ja_space_around_mixed")) {
+	if (polykit_is_check_enabled("ja_space_around_mixed")) {
 		const boundary = polykit_get_unspaced_mixed_boundary(masked);
 		if (boundary) {
-			warnings.push(polykit_t("ja_space_around_mixed", boundary));
+			push(
+				"ja_space_around_mixed",
+				polykit_t("ja_space_around_mixed", boundary),
+			);
 		}
 		// 1-4: 文字列最先頭のスペースは不要（原文自体が先頭スペースの場合を除く）。
 		if (/^[ \u00A0\u3000]/.test(text) && !/^[\s\u00A0\u3000]/.test(original)) {
-			warnings.push(polykit_t("ja_leading_space"));
+			push("ja_space_around_mixed", polykit_t("ja_leading_space"));
 		}
 	}
 
-	if (polykit_get_setting("ja_space_after_comma")) {
+	if (polykit_is_check_enabled("ja_space_after_comma")) {
 		if (/、[ \u00A0\u3000]/.test(masked)) {
-			warnings.push(polykit_t("ja_space_after_comma"));
+			push("ja_space_after_comma", polykit_t("ja_space_after_comma"));
 		}
 	}
 
-	if (polykit_get_setting("ja_colon_spacing")) {
+	if (polykit_is_check_enabled("ja_colon_spacing")) {
 		if (/[ \u00A0\u3000]:/.test(masked)) {
-			warnings.push(polykit_t("ja_colon_before"));
+			push("ja_colon_spacing", polykit_t("ja_colon_before"));
 		} else if (
 			/:(?!\s)[A-Za-z\u3040-\u9FFF]/.test(masked) && !/\d:\d/.test(masked)
 		) {
-			warnings.push(polykit_t("ja_colon_after"));
+			push("ja_colon_spacing", polykit_t("ja_colon_after"));
 		}
 	}
 
-	if (polykit_get_setting("ja_digit_spacing")) {
+	if (polykit_is_check_enabled("ja_digit_spacing")) {
 		// 1-9: 半角数字と全角文字の間にはスペースを入れない（前後とも）。
 		const digit_space = masked.match(
 			/\d[ \u00A0\u3000]+[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF]/,
@@ -299,35 +309,39 @@ function polykit_collect_locale_warnings(original, text) {
 			/[\u3040-\u9FFF\u3400-\u4DBF\uF900-\uFAFF][ \u00A0\u3000]+\d/,
 		);
 		if (digit_space) {
-			warnings.push(polykit_t("ja_digit_spacing", digit_space[0]));
+			push("ja_digit_spacing", polykit_t("ja_digit_spacing", digit_space[0]));
 		}
 	}
 
-	if (polykit_get_setting("ja_paren_space_outside")) {
+	if (polykit_is_check_enabled("ja_paren_space_outside")) {
 		if (polykit_paren_needs_outside_space(masked)) {
-			warnings.push(polykit_t("ja_paren_space_outside"));
+			push("ja_paren_space_outside", polykit_t("ja_paren_space_outside"));
 		}
 	}
 
-	if (polykit_get_setting("ja_paren_space_inside")) {
+	if (polykit_is_check_enabled("ja_paren_space_inside")) {
 		if (/\(\s+|\s+\)/.test(masked)) {
-			warnings.push(polykit_t("ja_paren_space_inside"));
+			push("ja_paren_space_inside", polykit_t("ja_paren_space_inside"));
 		}
 	}
 
-	if (polykit_get_setting("ja_paren_period_before_close")) {
+	if (polykit_is_check_enabled("ja_paren_period_before_close")) {
 		if (polykit_has_paren_period_before_close(masked)) {
-			warnings.push(polykit_t("ja_paren_period_before_close"));
+			push(
+				"ja_paren_period_before_close",
+				polykit_t("ja_paren_period_before_close"),
+			);
 		}
 	}
 
-	if (polykit_get_setting("ja_terminology")) {
+	if (polykit_is_check_enabled("ja_terminology")) {
 		for (const rule of polykit_locale_terminology_rules) {
 			if (rule.exclude && rule.exclude.test(text)) {
 				continue;
 			}
 			if (text.includes(rule.wrong)) {
-				warnings.push(
+				push(
+					"ja_terminology",
 					polykit_t("ja_terminology_wrong", rule.right, rule.wrong),
 				);
 			}
@@ -335,87 +349,89 @@ function polykit_collect_locale_warnings(original, text) {
 	}
 
 	if (
-		polykit_get_setting("ja_view_terminology") ||
-		polykit_get_setting("ja_not_allowed_terminology") ||
-		polykit_get_setting("ja_sorry_terminology")
+		polykit_is_check_enabled("ja_view_terminology") ||
+		polykit_is_check_enabled("ja_not_allowed_terminology") ||
+		polykit_is_check_enabled("ja_sorry_terminology")
 	) {
 		for (
 			const warning of polykit_get_source_terminology_warnings(original, text)
 		) {
-			if (!polykit_get_setting(warning)) {
+			if (!polykit_is_check_enabled(warning)) {
 				continue;
 			}
-			warnings.push(polykit_t(warning));
+			push(warning, polykit_t(warning));
 		}
 	}
 
-	if (polykit_get_setting("ja_straight_quotes")) {
+	if (polykit_is_check_enabled("ja_straight_quotes")) {
 		const check = text.replace(/([^>"]*)"(?=[^<]*>)/g, "$1\x01");
 		if (/[\u3040-\u9FFF]"/.test(check) || /"[\u3040-\u9FFF]/.test(check)) {
-			warnings.push(polykit_t("ja_straight_quotes"));
+			push("ja_straight_quotes", polykit_t("ja_straight_quotes"));
 		}
 		// 2-3: “” で囲まれた語が日本語の場合は「」を使う。
 		if (/[“”][^“”]*[\u3040-\u9FFF][^“”]*[“”]/.test(masked)) {
-			warnings.push(polykit_t("ja_curly_quotes_japanese"));
+			push("ja_straight_quotes", polykit_t("ja_curly_quotes_japanese"));
 		}
 	}
 
-	if (polykit_get_setting("ja_katakana_choon")) {
+	if (polykit_is_check_enabled("ja_katakana_choon")) {
 		for (const rule of polykit_katakana_choon_rules) {
 			if (rule.wrong.test(text)) {
-				warnings.push(
+				push(
+					"ja_katakana_choon",
 					polykit_t("ja_katakana_choon_wrong", rule.right, rule.label),
 				);
 			}
 		}
 	}
 
-	if (polykit_get_setting("ja_brand_names")) {
+	if (polykit_is_check_enabled("ja_brand_names")) {
 		if (/ワードプレス/.test(text)) {
-			warnings.push(polykit_t("ja_brand_wordpress", "ワードプレス"));
+			push("ja_brand_names", polykit_t("ja_brand_wordpress", "ワードプレス"));
 		}
 		const wrong_case = (masked.match(/wordpress/gi) || []).filter(
 			(match) => "WordPress" !== match,
 		);
 		if (wrong_case.length) {
-			warnings.push(polykit_t("ja_brand_wordpress", wrong_case[0]));
+			push("ja_brand_names", polykit_t("ja_brand_wordpress", wrong_case[0]));
 		}
 	}
 
-	return warnings;
+	// 3-1: 受動態はなるべく避ける。
+	if (polykit_is_check_enabled("ja_passive_voice") && /されました/.test(text)) {
+		push("ja_passive_voice", polykit_t("ja_passive_voice"));
+	}
+
+	// 3-5: 不自然な「あなた」「あなたの」を避ける。
+	if (polykit_is_check_enabled("ja_avoid_anata") && /あなた/.test(text)) {
+		push("ja_avoid_anata", polykit_t("ja_avoid_anata"));
+	}
+
+	// 5: カタカナ複合語の中点は原則使用しない（例外あり）。
+	if (
+		polykit_is_check_enabled("ja_nakaguro") &&
+		/[ァ-ヶー]・[ァ-ヶー]/.test(text)
+	) {
+		push("ja_nakaguro", polykit_t("ja_nakaguro"));
+	}
+
+	return results;
 }
 
 /**
- * 日本語スタイルガイドの参考事項（Notice レベル）を収集する（DOM 非依存）。
- * 例外が許容されるルールは保存をブロックしない Notice として扱う。
- *
+ * @param {string} original 原文。
+ * @param {string} text 訳文。
+ * @returns {string[]}
+ */
+function polykit_collect_locale_warnings(original, text) {
+	return polykit_collect_locale_checks(original, text).warning;
+}
+
+/**
  * @param {string} original 原文。
  * @param {string} text 訳文。
  * @returns {string[]}
  */
 function polykit_collect_locale_notices(original, text) {
-	if ("ja" !== polykit_get_lang()) {
-		return [];
-	}
-	const notices = [];
-
-	// 3-1: 受動態はなるべく避ける。
-	if (polykit_get_setting("ja_passive_voice") && /されました/.test(text)) {
-		notices.push(polykit_t("ja_passive_voice"));
-	}
-
-	// 3-5: 不自然な「あなた」「あなたの」を避ける。
-	if (polykit_get_setting("ja_avoid_anata") && /あなた/.test(text)) {
-		notices.push(polykit_t("ja_avoid_anata"));
-	}
-
-	// 5: カタカナ複合語の中点は原則使用しない（例外あり）。
-	if (
-		polykit_get_setting("ja_nakaguro") &&
-		/[ァ-ヶー]・[ァ-ヶー]/.test(text)
-	) {
-		notices.push(polykit_t("ja_nakaguro"));
-	}
-
-	return notices;
+	return polykit_collect_locale_checks(original, text).notice;
 }

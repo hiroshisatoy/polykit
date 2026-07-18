@@ -32,10 +32,29 @@ Deno.test("source terminology warnings", () => {
 	assert.deepStrictEqual(getWarnings("Open settings", "設定を開く"), []);
 });
 
-function makeIntegrationContext(enabled_settings) {
+function makeIntegrationContext(enabled_settings, levels = {}) {
 	const integration = {
 		polykit_get_lang: () => "ja",
-		polykit_get_setting: (key) => enabled_settings.includes(key),
+		polykit_get_check_level: (key) => {
+			if (Object.prototype.hasOwnProperty.call(levels, key)) {
+				return levels[key];
+			}
+			return enabled_settings.includes(key) ? "warning" : "off";
+		},
+		polykit_is_check_enabled: (key) => {
+			const level = integration.polykit_get_check_level(key);
+			return "off" !== level;
+		},
+		polykit_push_message_by_check_level: (results, key, message) => {
+			if (!message) {
+				return;
+			}
+			const level = integration.polykit_get_check_level(key);
+			if ("off" === level) {
+				return;
+			}
+			results["notice" === level ? "notice" : "warning"].push(message);
+		},
 		polykit_t: (key, ...args) => [key, ...args].join("|"),
 	};
 	vm.createContext(integration);
@@ -123,17 +142,29 @@ Deno.test("curly double quotes around Japanese (2-3)", () => {
 });
 
 Deno.test("locale notices (3-1 / 3-5 / 5)", () => {
-	const integration = makeIntegrationContext([
-		"ja_passive_voice",
-		"ja_avoid_anata",
-		"ja_nakaguro",
-	]);
+	const integration = makeIntegrationContext([], {
+		ja_passive_voice: "notice",
+		ja_avoid_anata: "notice",
+		ja_nakaguro: "notice",
+	});
 	const collect = (text) => Array.from(integration.polykit_collect_locale_notices("", text));
 	assert.deepStrictEqual(collect("設定が更新されました。"), ["ja_passive_voice"]);
 	assert.deepStrictEqual(collect("設定を更新しました。"), []);
 	assert.deepStrictEqual(collect("あなたのサイト"), ["ja_avoid_anata"]);
 	assert.deepStrictEqual(collect("テキスト・エディター"), ["ja_nakaguro"]);
 	assert.deepStrictEqual(collect("お使いのサイト"), []);
+});
+
+Deno.test("locale check level can move notice items to warning", () => {
+	const integration = makeIntegrationContext([], {
+		ja_passive_voice: "warning",
+	});
+	const result = integration.polykit_collect_locale_checks(
+		"",
+		"設定が更新されました。",
+	);
+	assert.deepStrictEqual(Array.from(result.warning), ["ja_passive_voice"]);
+	assert.deepStrictEqual(Array.from(result.notice), []);
 });
 
 Deno.test("locale validation helpers", () => {

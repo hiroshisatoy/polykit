@@ -657,7 +657,7 @@ function polykit_non_breaking_space_highlight() {
  * @returns {void}
  */
 function polykit_curly_apostrophe_highlight() {
-	if (!polykit_get_setting("curly_apostrophe_warning")) {
+	if ("off" === polykit_get_check_level("curly_apostrophe_warning")) {
 		jQuery(
 			"tr.preview > td.translation.foreign-text, blockquote.translation > em > small",
 		).each(function () {

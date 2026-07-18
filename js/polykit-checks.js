@@ -20,8 +20,7 @@ polykit_ignore_warnings_template.appendChild(polykit_ignore_label);
  * @returns {string}
  */
 function polykit_get_level_setting(key, defaultValue = "warning") {
-	const stored = localStorage.getItem(`polykit_${key}`);
-	return null === stored ? defaultValue : stored;
+	return polykit_get_check_level(key, defaultValue);
 }
 
 /**
@@ -32,7 +31,7 @@ function polykit_get_level_setting(key, defaultValue = "warning") {
  * @returns {void}
  */
 function polykit_push_check_result(level, bucket, message, results) {
-	if (!message || "disabled" === level || "nothing" === level) {
+	if (!message || "off" === level || "disabled" === level || "nothing" === level) {
 		return;
 	}
 	const target = ("notice" === level) ? "notice" : "warning";
@@ -123,11 +122,15 @@ function polykit_check_placeholders(original, translated) {
 	const broken = [];
 	for (let i = 0; i < original_ph.length; i++) {
 		if (original_ph[i] !== translated_ph[i]) {
-			broken.push(`${translated_ph[i]} instead of ${original_ph[i]}`);
+			broken.push(i);
 		}
 	}
 	if (broken.length) {
-		msg.textContent = polykit_t("check_placeholder_broken", broken.toString());
+		msg.textContent = polykit_t(
+			"check_placeholder_broken",
+			original_ph.join(" "),
+			translated_ph.join(" "),
+		);
 		return msg;
 	}
 	return null;
@@ -264,27 +267,15 @@ function polykit_run_all_checks(original, translated, editor_id, form_index) {
 	if ("" === translated) {
 		return results;
 	}
-	polykit_push_messages_as_items(
-		results.warning,
-		polykit_collect_general_warnings(original, translated),
-	);
-	polykit_push_messages_as_items(
-		results.warning,
-		polykit_collect_locale_warnings(original, translated),
-	);
-	polykit_push_messages_as_items(
-		results.warning,
-		polykit_collect_glossary_warnings(editor_id, form_index),
-	);
-	polykit_push_messages_as_items(
-		results.notice,
-		polykit_collect_locale_notices(original, translated),
-	);
+	const merge_buckets = (buckets) => {
+		polykit_push_messages_as_items(results.warning, buckets.warning || []);
+		polykit_push_messages_as_items(results.notice, buckets.notice || []);
+	};
+	merge_buckets(polykit_collect_general_checks(original, translated));
+	merge_buckets(polykit_collect_locale_checks(original, translated));
+	merge_buckets(polykit_collect_glossary_warnings(editor_id, form_index));
 	if (0 === form_index) {
-		polykit_push_messages_as_items(
-			results.warning,
-			polykit_collect_gp_warning_messages(editor_id),
-		);
+		merge_buckets(polykit_collect_gp_warning_messages(editor_id));
 	}
 	return results;
 }
@@ -310,7 +301,7 @@ function polykit_run_extra_checks(original, translated) {
 		return results;
 	}
 
-	const double_level = polykit_get_level_setting("check_double_spaces", "warning");
+	const double_level = polykit_get_check_level("check_double_spaces", "warning");
 	const double_spaces = polykit_check_double_spaces(translated, original);
 	if (double_spaces.arr.length) {
 		polykit_push_check_result(
@@ -337,8 +328,8 @@ function polykit_run_extra_checks(original, translated) {
 		);
 	}
 
-	const tags_level = polykit_get_level_setting("check_tag_spaces", "notice");
-	if ("disabled" !== tags_level) {
+	const tags_level = polykit_get_check_level("check_tag_spaces", "notice");
+	if ("off" !== tags_level) {
 		const tag_spaces = polykit_check_tag_spaces(translated);
 		polykit_push_check_result(tags_level, "message", tag_spaces.msg, results);
 		polykit_push_strings(results.highlight_me, tag_spaces.arr);

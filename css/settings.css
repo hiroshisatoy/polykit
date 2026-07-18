@@ -250,6 +250,12 @@
 				text-align: left;
 			}
 
+			.polykit-settings-table__select {
+				min-width: 8.5em;
+				max-width: 100%;
+				box-sizing: border-box;
+			}
+
 			.polykit-settings-table__desc-text {
 				display: inline;
 			}

@@ -44,18 +44,21 @@ function polykit_update_review_summary() {
 }
 
 /**
- * 汎用バリデーションの警告メッセージを収集する（DOM 非依存）。
+ * 汎用バリデーションのメッセージを収集する（DOM 非依存）。
  *
  * @param {string} originaltext 原文。
  * @param {string} newtext 訳文。
- * @returns {string[]}
+ * @returns {{ warning: string[], notice: string[] }}
  */
-function polykit_collect_general_warnings(originaltext, newtext) {
-	const warnings = [];
+function polykit_collect_general_checks(originaltext, newtext) {
+	const results = { warning: [], notice: [] };
 	if ("undefined" === typeof newtext || "" === newtext) {
-		warnings.push(polykit_t("empty_translation"));
-		return warnings;
+		results.warning.push(polykit_t("empty_translation"));
+		return results;
 	}
+	const push = (key, message) => {
+		polykit_push_message_by_check_level(results, key, message);
+	};
 	const lastcharoriginaltext = originaltext.slice(-1);
 	const firstcharoriginaltext = originaltext.charAt(0);
 	const hellipseoriginaltext = "..." === originaltext.slice(-3);
@@ -63,87 +66,105 @@ function polykit_collect_general_warnings(originaltext, newtext) {
 	const firstcharnewtext = newtext.charAt(0);
 	const last_dot = [";", ".", "!", ":", "、", "。", "؟", "？", "！"];
 	if (hellipseoriginaltext) {
-		if (!polykit_get_setting("no_final_dot")) {
+		if (polykit_is_check_enabled("no_final_dot")) {
 			if (
 				"..." === newtext.slice(-3) ||
 				(lastcharnewtext !== ";" && lastcharnewtext !== "." &&
 					lastcharnewtext !== "…")
 			) {
-				warnings.push(polykit_t("missing_ellipsis"));
+				push("no_final_dot", polykit_t("missing_ellipsis"));
 			}
 		}
-	} else if (!polykit_get_setting("no_final_other_dots")) {
+	} else if (polykit_is_check_enabled("no_final_other_dots")) {
 		if (
 			jQuery.inArray(lastcharoriginaltext, last_dot) >= 0 &&
 			-1 === jQuery.inArray(lastcharnewtext, last_dot)
 		) {
-			warnings.push(polykit_t("missing_end_punct"));
+			push("no_final_other_dots", polykit_t("missing_end_punct"));
 		}
 	}
-	if (!polykit_get_setting("no_initial_uppercase")) {
+	if (polykit_is_check_enabled("no_initial_uppercase")) {
 		if (
 			polykit_is_uppercase(firstcharoriginaltext) &&
 			!polykit_is_uppercase(firstcharnewtext)
 		) {
-			warnings.push(
+			push(
+				"no_initial_uppercase",
 				polykit_t("missing_initial_uppercase", firstcharnewtext),
 			);
 		}
 	}
-	if (!polykit_get_setting("no_initial_space")) {
+	if (polykit_is_check_enabled("no_initial_space")) {
 		if (
 			(" " === firstcharoriginaltext && firstcharnewtext !== " ") ||
 			(" " === firstcharoriginaltext && firstcharnewtext !== " ")
 		) {
-			warnings.push(polykit_t("missing_initial_space"));
+			push("no_initial_space", polykit_t("missing_initial_space"));
 		}
 	}
-	if (!polykit_get_setting("no_trailing_space")) {
+	if (polykit_is_check_enabled("no_trailing_space")) {
 		if (
 			(" " === lastcharoriginaltext && lastcharnewtext !== " ") ||
 			(" " === lastcharoriginaltext && lastcharnewtext !== " ")
 		) {
-			warnings.push(polykit_t("missing_trailing_space"));
+			push("no_trailing_space", polykit_t("missing_trailing_space"));
 		}
 	}
-	if (polykit_get_setting("curly_apostrophe_warning")) {
+	if (polykit_is_check_enabled("curly_apostrophe_warning")) {
 		if (newtext.indexOf("'") > -1) {
-			warnings.push(polykit_t("curly_apostrophe_warning_msg"));
+			push(
+				"curly_apostrophe_warning",
+				polykit_t("curly_apostrophe_warning_msg"),
+			);
 		}
 	}
-	if (polykit_get_setting("localized_quote_warning")) {
+	if (polykit_is_check_enabled("localized_quote_warning")) {
 		let check_quotes = newtext;
 		check_quotes = check_quotes.replace(
 			/([^>"]*)"(?=[^<]*>)/g,
 			"$1#POLYKITATTR#",
 		);
 		if (check_quotes.indexOf('"') > -1) {
-			warnings.push(polykit_t("localized_quote_warning_msg"));
+			push(
+				"localized_quote_warning",
+				polykit_t("localized_quote_warning_msg"),
+			);
 		}
 	}
-	return warnings;
+	return results;
+}
+
+/**
+ * @param {string} originaltext 原文。
+ * @param {string} newtext 訳文。
+ * @returns {string[]}
+ */
+function polykit_collect_general_warnings(originaltext, newtext) {
+	return polykit_collect_general_checks(originaltext, newtext).warning;
 }
 
 /**
  * GlotPress 本体の未無視警告メッセージを収集する。
  *
  * @param {string} selector
- * @returns {string[]}
+ * @returns {{ warning: string[], notice: string[] }}
  */
 function polykit_collect_gp_warning_messages(selector) {
-	const messages = [];
+	const results = { warning: [], notice: [] };
 	jQuery(selector).find(
 		".warning:not(.polykit-warning):has(> a.discard-warning)",
 	).each(function () {
-		if (
-			polykit_get_setting("no_initial_uppercase") &&
-			polykit_is_gp_initial_uppercase_warning(this)
-		) {
+		if (polykit_is_gp_initial_uppercase_warning(this)) {
+			polykit_push_message_by_check_level(
+				results,
+				"no_initial_uppercase",
+				this.textContent.trim(),
+			);
 			return;
 		}
-		messages.push(this.textContent.trim());
+		results.warning.push(this.textContent.trim());
 	});
-	return messages;
+	return results;
 }
 
 /**
@@ -151,14 +172,14 @@ function polykit_collect_gp_warning_messages(selector) {
  *
  * @param {string} selector
  * @param {number} form_index
- * @returns {string[]}
+ * @returns {{ warning: string[], notice: string[] }}
  */
 function polykit_collect_glossary_warnings(selector, form_index) {
 	const SINGULAR = 0;
 	const PLURAL = 1;
-	const warnings = [];
-	if (polykit_get_setting("no_glossary_term_check")) {
-		return warnings;
+	const results = { warning: [], notice: [] };
+	if (!polykit_is_check_enabled("no_glossary_term_check")) {
+		return results;
 	}
 	const $editor = jQuery(selector);
 	const translations = jQuery("textarea.foreign-text", $editor);
@@ -177,7 +198,7 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 	}
 	const translation = translations.get(form_index);
 	if (!translation) {
-		return warnings;
+		return results;
 	}
 	const translatedText = translation.value;
 	const glossary_words = jQuery(".glossary-word", originals[original_index])
@@ -233,7 +254,9 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 					translatedText,
 				);
 				if (!is_within_URL) {
-					warnings.push(
+					polykit_push_message_by_check_level(
+						results,
+						"no_glossary_term_check",
 						polykit_t(
 							"missing_glossary_detail",
 							message,
@@ -247,7 +270,7 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 			}
 		},
 	);
-	return warnings;
+	return results;
 }
 
 /**

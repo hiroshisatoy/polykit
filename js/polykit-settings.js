@@ -82,6 +82,20 @@ function polykit_generate_settings_panel() {
 				},
 			},
 			{
+				title: "general_checks_items_title",
+				controlColumn: "severity",
+				settings: {
+					check_double_spaces: polykit_t("setting_check_double_spaces"),
+					check_tag_spaces: polykit_t("setting_check_tag_spaces"),
+					no_glossary_term_check: polykit_t("setting_no_glossary_term_check"),
+					no_initial_uppercase: polykit_t("setting_no_initial_uppercase"),
+					no_initial_space: polykit_t("setting_no_initial_space"),
+					no_trailing_space: polykit_t("setting_no_trailing_space"),
+					no_final_dot: polykit_t("setting_no_final_dot"),
+					no_final_other_dots: polykit_t("setting_no_final_other_dots"),
+				},
+			},
+			{
 				title: "custom_checks_title",
 				controlColumn: "value",
 				textFields: [
@@ -97,18 +111,6 @@ function polykit_generate_settings_panel() {
 					},
 				],
 			},
-			{
-				title: "hide_warnings_title",
-				controlColumn: "hidden",
-				settings: {
-					no_glossary_term_check: polykit_t("setting_no_glossary_term_check"),
-					no_initial_uppercase: polykit_t("setting_no_initial_uppercase"),
-					no_initial_space: polykit_t("setting_no_initial_space"),
-					no_trailing_space: polykit_t("setting_no_trailing_space"),
-					no_final_dot: polykit_t("setting_no_final_dot"),
-					no_final_other_dots: polykit_t("setting_no_final_other_dots"),
-				},
-			},
 		],
 	};
 
@@ -119,7 +121,7 @@ function polykit_generate_settings_panel() {
 		categories: [
 			{
 				title: "ja_style_section1_title",
-				controlColumn: "enabled",
+				controlColumn: "severity",
 				settings: {
 					ja_japanese_punctuation: polykit_t(
 						"setting_ja_japanese_punctuation",
@@ -143,7 +145,7 @@ function polykit_generate_settings_panel() {
 			},
 			{
 				title: "ja_style_section2_title",
-				controlColumn: "enabled",
+				controlColumn: "severity",
 				settings: {
 					ja_straight_quotes: polykit_t("setting_ja_straight_quotes"),
 					localized_quote_warning: polykit_t("setting_localized_quote_warning"),
@@ -151,7 +153,7 @@ function polykit_generate_settings_panel() {
 			},
 			{
 				title: "ja_style_section3_title",
-				controlColumn: "enabled",
+				controlColumn: "severity",
 				settings: {
 					ja_view_terminology: polykit_t("setting_ja_view_terminology"),
 					ja_not_allowed_terminology: polykit_t(
@@ -165,7 +167,7 @@ function polykit_generate_settings_panel() {
 			},
 			{
 				title: "ja_style_section4_title",
-				controlColumn: "enabled",
+				controlColumn: "severity",
 				settings: {
 					ja_katakana_choon: polykit_t("setting_ja_katakana_choon"),
 					ja_nakaguro: polykit_t("setting_ja_nakaguro"),
@@ -187,7 +189,6 @@ function polykit_generate_settings_panel() {
 					search_enabled: polykit_t("setting_search_enabled"),
 					google_translate: polykit_t("setting_google_translate"),
 					shortcuts_alt: polykit_t("setting_shortcuts_alt"),
-					editor_scroll_center: polykit_t("setting_editor_scroll_center"),
 					prevent_unsaved: polykit_t("setting_prevent_unsaved"),
 				},
 			},
@@ -519,34 +520,55 @@ const polykit_setting_defaults = {
 	translate_interface: true,
 	google_translate: true,
 	shortcuts_alt: true,
-	editor_scroll_center: true,
 	prevent_unsaved: true,
 	bulk_consistency: false,
+};
+
+/**
+ * Check item severity defaults: "warning" | "notice" | "off".
+ * Keys that previously used inverted hide-checkboxes (no_*) migrate true→off, false→warning.
+ */
+const polykit_check_level_defaults = {
+	check_double_spaces: "warning",
+	check_tag_spaces: "notice",
+	no_glossary_term_check: "warning",
+	no_initial_uppercase: "off",
+	no_initial_space: "warning",
+	no_trailing_space: "warning",
+	no_final_dot: "off",
+	no_final_other_dots: "warning",
+	curly_apostrophe_warning: "off",
+	localized_quote_warning: "off",
+	ja_japanese_punctuation: "warning",
+	ja_fullwidth_ascii: "warning",
+	ja_fullwidth_number: "warning",
+	ja_space_before_half: "warning",
+	ja_space_around_mixed: "warning",
+	ja_space_after_comma: "warning",
+	ja_colon_spacing: "warning",
+	ja_digit_spacing: "warning",
+	ja_paren_space_outside: "warning",
+	ja_paren_space_inside: "warning",
+	ja_paren_period_before_close: "warning",
+	ja_terminology: "warning",
+	ja_view_terminology: "warning",
+	ja_not_allowed_terminology: "warning",
+	ja_sorry_terminology: "warning",
+	ja_straight_quotes: "warning",
+	ja_katakana_choon: "warning",
+	ja_nakaguro: "notice",
+	ja_brand_names: "warning",
+	ja_passive_voice: "notice",
+	ja_avoid_anata: "notice",
+};
+
+const polykit_inverted_check_keys = {
+	no_glossary_term_check: true,
 	no_initial_uppercase: true,
+	no_initial_space: true,
+	no_trailing_space: true,
 	no_final_dot: true,
-	curly_apostrophe_warning: false,
-	localized_quote_warning: false,
-	ja_japanese_punctuation: true,
-	ja_fullwidth_ascii: true,
-	ja_fullwidth_number: true,
-	ja_space_before_half: true,
-	ja_space_around_mixed: true,
-	ja_space_after_comma: true,
-	ja_colon_spacing: true,
-	ja_digit_spacing: true,
-	ja_paren_space_outside: true,
-	ja_paren_space_inside: true,
-	ja_paren_period_before_close: true,
-	ja_terminology: true,
-	ja_view_terminology: true,
-	ja_not_allowed_terminology: true,
-	ja_sorry_terminology: true,
-	ja_straight_quotes: true,
-	ja_katakana_choon: true,
-	ja_nakaguro: true,
-	ja_brand_names: true,
-	ja_passive_voice: true,
-	ja_avoid_anata: true,
+	no_final_other_dots: true,
 };
 
 /**
@@ -642,6 +664,7 @@ function polykit_append_settings_category(parent, category, asterisk) {
 	const controlColumn = category.controlColumn || "enabled";
 	const table = polykit_create_settings_table(controlColumn);
 	const tbody = table.querySelector("tbody");
+	const is_severity = "severity" === controlColumn;
 
 	if (category.settings) {
 		Object.entries(category.settings).forEach((setting) => {
@@ -653,18 +676,26 @@ function polykit_append_settings_category(parent, category, asterisk) {
 			polykit_fill_settings_description_cell(descCell, setting_desc, asterisk);
 			const controlCell = document.createElement("TD");
 			controlCell.classList.add("polykit-settings-table__control");
-			const input = document.createElement("INPUT");
-			input.type = "checkbox";
-			input.id = `polykit_${setting_slug}`;
-			input.checked = polykit_get_setting(setting_slug);
-			input.setAttribute(
-				"aria-label",
-				polykit_t(`settings_col_${controlColumn}`),
-			);
-			input.addEventListener("click", (event) => {
-				localStorage.setItem("polykit_" + setting_slug, event.target.checked);
-			});
-			controlCell.appendChild(input);
+			if (is_severity) {
+				const select = polykit_create_check_level_select(setting_slug);
+				controlCell.appendChild(select);
+			} else {
+				const input = document.createElement("INPUT");
+				input.type = "checkbox";
+				input.id = `polykit_${setting_slug}`;
+				input.checked = polykit_get_setting(setting_slug);
+				input.setAttribute(
+					"aria-label",
+					polykit_t(`settings_col_${controlColumn}`),
+				);
+				input.addEventListener("click", (event) => {
+					localStorage.setItem(
+						"polykit_" + setting_slug,
+						event.target.checked,
+					);
+				});
+				controlCell.appendChild(input);
+			}
 			row.append(descCell, controlCell);
 			tbody.appendChild(row);
 		});
@@ -695,6 +726,38 @@ function polykit_append_settings_category(parent, category, asterisk) {
 	}
 
 	parent.appendChild(table);
+}
+
+/**
+ * Create a Warning / Notice / off select for a check item.
+ *
+ * @param {string} setting_slug
+ * @returns {HTMLSelectElement}
+ */
+function polykit_create_check_level_select(setting_slug) {
+	const select = document.createElement("SELECT");
+	select.id = `polykit_${setting_slug}`;
+	select.classList.add("polykit-settings-table__select");
+	select.setAttribute("aria-label", polykit_t("settings_col_severity"));
+	const levels = [
+		["warning", "settings_level_warning"],
+		["notice", "settings_level_notice"],
+		["off", "settings_level_off"],
+	];
+	const current = polykit_get_check_level(setting_slug);
+	levels.forEach(([value, label_key]) => {
+		const option = document.createElement("OPTION");
+		option.value = value;
+		option.textContent = polykit_t(label_key);
+		if (value === current) {
+			option.selected = true;
+		}
+		select.appendChild(option);
+	});
+	select.addEventListener("change", (event) => {
+		localStorage.setItem(`polykit_${setting_slug}`, event.target.value);
+	});
+	return select;
 }
 
 /**
@@ -731,11 +794,56 @@ function polykit_append_setting_label_content(label, text) {
 	label.appendChild(fragment);
 }
 
-function polykit_get_setting(key) {
+/**
+ * Normalize a stored check-level value (including legacy booleans).
+ *
+ * @param {string|null} stored
+ * @param {string} defaultLevel
+ * @param {boolean} inverted Legacy hide-checkbox (true meant off).
+ * @returns {"warning"|"notice"|"off"}
+ */
+function polykit_normalize_check_level(stored, defaultLevel, inverted) {
+	if (null === stored) {
+		return defaultLevel;
+	}
+	if ("warning" === stored || "notice" === stored || "off" === stored) {
+		return stored;
+	}
+	if ("disabled" === stored || "nothing" === stored) {
+		return "off";
+	}
+	if ("true" === stored) {
+		return inverted ? "off" : defaultLevel;
+	}
+	if ("false" === stored) {
+		return inverted ? ("notice" === defaultLevel ? "notice" : "warning") : "off";
+	}
+	return defaultLevel;
+}
+
+/**
+ * Read a check item severity setting.
+ *
+ * @param {string} key
+ * @param {string} [defaultLevel]
+ * @returns {"warning"|"notice"|"off"}
+ */
+function polykit_get_check_level(key, defaultLevel) {
 	const storageKey = `polykit_${key}`;
+	let fallback = defaultLevel;
+	if (
+		undefined === fallback &&
+		Object.prototype.hasOwnProperty.call(polykit_check_level_defaults, key)
+	) {
+		fallback = polykit_check_level_defaults[key];
+	}
+	if (undefined === fallback) {
+		fallback = "warning";
+	}
+	const inverted = Boolean(polykit_inverted_check_keys[key]);
 	const stored = localStorage.getItem(storageKey);
 	if (null !== stored) {
-		return "true" === stored;
+		return polykit_normalize_check_level(stored, fallback, inverted);
 	}
 	const legacy_source_terminology = {
 		ja_view_terminology: "ja_source_terminology",
@@ -747,8 +855,56 @@ function polykit_get_setting(key) {
 			`polykit_${legacy_source_terminology[key]}`,
 		);
 		if (null !== legacy) {
-			return "true" === legacy;
+			return polykit_normalize_check_level(legacy, fallback, false);
 		}
+	}
+	return fallback;
+}
+
+/**
+ * Whether a check item is enabled (Warning or Notice).
+ *
+ * @param {string} key
+ * @param {string} [defaultLevel]
+ * @returns {boolean}
+ */
+function polykit_is_check_enabled(key, defaultLevel) {
+	return "off" !== polykit_get_check_level(key, defaultLevel);
+}
+
+/**
+ * Push a message into warning or notice based on the check level.
+ *
+ * @param {{ warning: string[], notice: string[] }} results
+ * @param {string} key
+ * @param {string} message
+ * @param {string} [defaultLevel]
+ * @returns {void}
+ */
+function polykit_push_message_by_check_level(
+	results,
+	key,
+	message,
+	defaultLevel,
+) {
+	if (!message) {
+		return;
+	}
+	const level = polykit_get_check_level(key, defaultLevel);
+	if ("off" === level) {
+		return;
+	}
+	results["notice" === level ? "notice" : "warning"].push(message);
+}
+
+function polykit_get_setting(key) {
+	if (Object.prototype.hasOwnProperty.call(polykit_check_level_defaults, key)) {
+		return polykit_is_check_enabled(key);
+	}
+	const storageKey = `polykit_${key}`;
+	const stored = localStorage.getItem(storageKey);
+	if (null !== stored) {
+		return "true" === stored;
 	}
 	if (Object.prototype.hasOwnProperty.call(polykit_setting_defaults, key)) {
 		return polykit_setting_defaults[key];

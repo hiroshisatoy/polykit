@@ -16,15 +16,17 @@ table.translations {
 
 	tr.preview {
 		&.polykit-has-check-warning {
-			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-warning) 45%, transparent);
+			outline: 2px solid var(--polykit-color-check-warning);
+			outline-offset: -2px;
 		}
 
 		&.polykit-has-check-notice {
-			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-notice) 45%, transparent);
+			outline: 2px solid var(--polykit-color-check-notice);
+			outline-offset: -2px;
 		}
 
 		&.polykit-has-check-passed {
-			outline: 1px solid color-mix(in srgb, var(--polykit-color-check-passed) 35%, transparent);
+			/* outline: 2px solid var(--polykit-color-check-passed); */
 		}
 
 		.polykit-check-preview {

@@ -90,9 +90,6 @@ if (polykit_user.is_on_translations) {
 				);
 				polykit_get_setting("autocopy_string_on_translation_opened") &&
 					polykit_copy_visible_original_string();
-				if (polykit_get_setting("editor_scroll_center")) {
-					current.scrollIntoView({ behavior: "smooth", block: "center" });
-				}
 			}
 		};
 	}($gp.editor.show);
