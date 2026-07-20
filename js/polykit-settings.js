@@ -683,9 +683,9 @@ function polykit_create_settings_table(controlColumn) {
 function polykit_fill_settings_description_cell(cell, text, asterisk) {
 	let desc = text;
 	let has_asterisk = false;
-	if ("*" === desc.slice(-1)) {
+	if (/\s*\*$/.test(desc)) {
 		has_asterisk = true;
-		desc = desc.slice(0, -1);
+		desc = desc.replace(/\s*\*$/, "");
 	}
 	const wrapper = document.createElement("DIV");
 	wrapper.classList.add("polykit-settings-table__desc-text");
