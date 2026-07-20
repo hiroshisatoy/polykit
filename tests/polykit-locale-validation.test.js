@@ -69,18 +69,18 @@ Deno.test("terminology rules with exclusions", () => {
 	const integration = makeIntegrationContext(["ja_terminology"]);
 	const collect = (text) => Array.from(integration.polykit_collect_locale_warnings("", text));
 	assert.deepStrictEqual(collect("入力して下さい。"), [
-		"ja_terminology_wrong|ください|下さい",
+		"ja_terminology_wrong|下さい|ください",
 	]);
 	assert.deepStrictEqual(collect("入力してください。"), []);
 	assert.deepStrictEqual(collect("既に更新済みです。"), [
-		"ja_terminology_wrong|すでに|既に",
+		"ja_terminology_wrong|既に|すでに",
 	]);
 	assert.deepStrictEqual(collect("編集出来ます。"), [
-		"ja_terminology_wrong|でき|出来",
+		"ja_terminology_wrong|出来|でき",
 	]);
 	assert.deepStrictEqual(collect("最近の出来事。"), []);
 	assert.deepStrictEqual(collect("但し書きは有効です。"), [
-		"ja_terminology_wrong|ただし|但し",
+		"ja_terminology_wrong|但し|ただし",
 	]);
 	assert.deepStrictEqual(collect("あらかじめご了承ください。"), []);
 });

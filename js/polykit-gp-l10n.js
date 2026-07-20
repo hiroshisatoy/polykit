@@ -25,7 +25,6 @@ const polykit_gp_skip_selector = [
 	".project-top",
 	"#glossary tbody",
 	".polykit-settings",
-	".polykit-toolbar-extensions",
 	"#polykit-i18n-data",
 	"#polykit-notices-container",
 	"[data-polykit-no-l10n]",

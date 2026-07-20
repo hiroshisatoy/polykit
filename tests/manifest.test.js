@@ -20,7 +20,12 @@ Deno.test("manifest referenced files exist", () => {
 	const files = [];
 	files.push(manifest.background.service_worker);
 	for (const content_script of manifest.content_scripts) {
-		files.push(...content_script.js, ...content_script.css);
+		if (content_script.js) {
+			files.push(...content_script.js);
+		}
+		if (content_script.css) {
+			files.push(...content_script.css);
+		}
 	}
 	for (const icon of Object.values(manifest.icons)) {
 		files.push(icon);

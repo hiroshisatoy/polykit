@@ -1,0 +1,12 @@
+/**
+ * Styles for plugin project pages:
+ * https://translate.wordpress.org/projects/wp-plugins/...
+ */
+
+.stats-table{
+    .table{
+        tbody tr:has(th[title="ja"]){
+outline: 2px solid red;
+        }
+    }
+}

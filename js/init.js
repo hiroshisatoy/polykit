@@ -2,7 +2,6 @@ const jsScripts = [
 	"jquery.bind-first",
 	"dompurify",
 	"keymaster",
-	"polykit-locales",
 	"polykit-functions",
 	"polykit-i18n",
 	"polykit-gp-l10n",
@@ -22,56 +21,33 @@ const jsScripts = [
 ];
 
 /**
- * UI locale from PolyKit language picker (falls back to ja).
- *
- * @returns {string}
- */
-function polykit_resolve_ui_locale() {
-	const lang = localStorage.getItem("polykit_language");
-	return (!lang || "" === lang) ? "ja" : lang;
-}
-
-/**
- * Load languages/{locale}/polykit.json and glotpress.json.
+ * Load languages/ja/polykit.json and glotpress.json.
  *
  * @returns {Promise<void>}
  */
 async function polykit_load_language_files() {
-	const preferred = polykit_resolve_ui_locale();
-	const locales = [preferred];
-	if ("ja" !== preferred) {
-		locales.push("ja");
-	}
 	const strings = {};
 	const gp_strings = {};
-	let ui_locale = "ja";
-
-	for (const locale of locales) {
-		const base = chrome.runtime.getURL(`languages/${locale}/`);
-		try {
-			const [polykit_response, gp_response] = await Promise.all([
-				fetch(`${base}polykit.json`),
-				fetch(`${base}glotpress.json`),
-			]);
-			if (polykit_response.ok) {
-				Object.assign(strings, await polykit_response.json());
-				ui_locale = locale;
-			}
-			if (gp_response.ok) {
-				Object.assign(gp_strings, await gp_response.json());
-			}
-			if (polykit_response.ok) {
-				break;
-			}
-		} catch (_error) {
-			// Try next fallback locale.
+	const base = chrome.runtime.getURL("languages/ja/");
+	try {
+		const [polykit_response, gp_response] = await Promise.all([
+			fetch(`${base}polykit.json`),
+			fetch(`${base}glotpress.json`),
+		]);
+		if (polykit_response.ok) {
+			Object.assign(strings, await polykit_response.json());
 		}
+		if (gp_response.ok) {
+			Object.assign(gp_strings, await gp_response.json());
+		}
+	} catch (_error) {
+		// Keep empty strings; UI keys will fall back to raw keys.
 	}
 
 	polykit_publish_language_data({
 		polykit_strings: strings,
 		polykit_gp_strings: gp_strings,
-		polykit_ui_locale: ui_locale,
+		polykit_ui_locale: "ja",
 	});
 }
 

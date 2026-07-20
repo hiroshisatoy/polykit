@@ -5,12 +5,10 @@ import vm from "node:vm";
 
 const context = {};
 vm.createContext(context);
-for (const file of ["polykit-locales.js", "polykit-functions.js"]) {
-	vm.runInContext(
-		Deno.readTextFileSync(new URL(`../js/${file}`, import.meta.url)),
-		context,
-	);
-}
+vm.runInContext(
+	Deno.readTextFileSync(new URL("../js/polykit-functions.js", import.meta.url)),
+	context,
+);
 
 Deno.test("sanitize_value strips html comments", () => {
 	assert.strictEqual(
@@ -48,16 +46,11 @@ Deno.test("polykit_check_for_URL detects terms inside URLs", () => {
 	assert.strictEqual(context.polykit_check_for_URL("", "text"), false);
 });
 
-Deno.test("polykit_get_available_locales is bundled and includes ja", () => {
-	const locales = context.polykit_get_available_locales();
-	assert.ok(Array.isArray(locales));
-	assert.ok(locales.includes("ja"));
-	assert.ok(locales.length > 100);
-});
-
-Deno.test("polykit_get_locale_slug resolves both directions", () => {
-	assert.strictEqual(context.polykit_get_locale_slug("ja", "locale"), "ja");
-	assert.strictEqual(context.polykit_get_locale_slug("de_DE", "locale"), "de");
-	assert.strictEqual(context.polykit_get_locale_slug("de", "slug"), "de_DE");
-	assert.strictEqual(context.polykit_get_locale_slug("unknown", "locale"), "");
+Deno.test("polykit_get_lang is fixed to Japanese", () => {
+	assert.strictEqual(context.polykit_get_lang(), "ja");
+	assert.strictEqual(context.polykit_get_lang_consistency(), "ja");
+	assert.strictEqual(
+		context.polykit_get_global_glossary_url(),
+		"https://translate.wordpress.org/locale/ja/default/glossary/",
+	);
 });

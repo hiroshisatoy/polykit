@@ -83,25 +83,55 @@ function polykit_array_diff(a, b) {
  * @param {string} translated
  * @returns {HTMLElement|null}
  */
-function polykit_check_placeholders(original, translated) {
-	const placeholder_pattern = /(?:%[bcdefgosuxl]|%\d[$][bcdefgosuxl])/g;
-	const original_ph = original.match(placeholder_pattern);
-	const translated_ph = translated.match(placeholder_pattern);
-	if (null === original_ph && null === translated_ph) {
+/**
+ * Extract printf-style placeholders from a string.
+ *
+ * @param {string} text
+ * @returns {string[]}
+ */
+function polykit_extract_placeholders(text) {
+	return text.match(/(?:%[bcdefgosuxl]|%\d[$][bcdefgosuxl])/g) || [];
+}
+
+/**
+ * @param {string[]} a
+ * @param {string[]} b
+ * @returns {boolean}
+ */
+function polykit_placeholder_sets_equal(a, b) {
+	if (a.length !== b.length) {
+		return false;
+	}
+	const sorted_a = [...a].sort();
+	const sorted_b = [...b].sort();
+	return sorted_a.every((item, index) => item === sorted_b[index]);
+}
+
+/**
+ * Check placeholder count / set mismatches (not order).
+ *
+ * @param {string} original
+ * @param {string} translated
+ * @returns {HTMLElement|null}
+ */
+function polykit_check_placeholder_count(original, translated) {
+	const original_ph = polykit_extract_placeholders(original);
+	const translated_ph = polykit_extract_placeholders(translated);
+	if (!original_ph.length && !translated_ph.length) {
 		return null;
 	}
 	const msg = document.createElement("li");
-	if (null !== original_ph && null === translated_ph) {
+	if (original_ph.length && !translated_ph.length) {
 		msg.textContent = polykit_t(
 			"check_placeholder_missing",
-			original_ph.toString(),
+			original_ph.join(", "),
 		);
 		return msg;
 	}
-	if (null === original_ph && null !== translated_ph) {
+	if (!original_ph.length && translated_ph.length) {
 		msg.textContent = polykit_t(
 			"check_placeholder_extra",
-			translated_ph.toString(),
+			translated_ph.join(", "),
 		);
 		return msg;
 	}
@@ -119,21 +149,47 @@ function polykit_check_placeholders(original, translated) {
 		);
 		return msg;
 	}
-	const broken = [];
-	for (let i = 0; i < original_ph.length; i++) {
-		if (original_ph[i] !== translated_ph[i]) {
-			broken.push(i);
-		}
-	}
-	if (broken.length) {
+	if (!polykit_placeholder_sets_equal(original_ph, translated_ph)) {
 		msg.textContent = polykit_t(
-			"check_placeholder_broken",
+			"check_placeholder_mismatch",
 			original_ph.join(" "),
 			translated_ph.join(" "),
 		);
 		return msg;
 	}
 	return null;
+}
+
+/**
+ * Check placeholder order when the same set exists in both strings.
+ *
+ * @param {string} original
+ * @param {string} translated
+ * @returns {HTMLElement|null}
+ */
+function polykit_check_placeholder_order(original, translated) {
+	const original_ph = polykit_extract_placeholders(original);
+	const translated_ph = polykit_extract_placeholders(translated);
+	if (
+		!original_ph.length ||
+		original_ph.length !== translated_ph.length ||
+		!polykit_placeholder_sets_equal(original_ph, translated_ph)
+	) {
+		return null;
+	}
+	const same_order = original_ph.every(
+		(item, index) => item === translated_ph[index],
+	);
+	if (same_order) {
+		return null;
+	}
+	const msg = document.createElement("li");
+	msg.textContent = polykit_t(
+		"check_placeholder_order",
+		original_ph.join(" "),
+		translated_ph.join(" "),
+	);
+	return msg;
 }
 
 /**
@@ -294,8 +350,20 @@ function polykit_run_extra_checks(original, translated) {
 		return results;
 	}
 
-	const placeholder = polykit_check_placeholders(original, translated);
-	polykit_push_check_item(results.warning, placeholder);
+	const placeholder_count = polykit_check_placeholder_count(original, translated);
+	polykit_push_check_result(
+		polykit_get_check_level("check_placeholder_count", "warning"),
+		"message",
+		placeholder_count,
+		results,
+	);
+	const placeholder_order = polykit_check_placeholder_order(original, translated);
+	polykit_push_check_result(
+		polykit_get_check_level("check_placeholder_order", "notice"),
+		"message",
+		placeholder_order,
+		results,
+	);
 
 	if (!polykit_get_setting("checks_enabled")) {
 		return results;
@@ -910,7 +978,7 @@ function polykit_check_filters() {
 	}, polykit_t("filter_all"));
 	filters.append(notices_link, " | ", warnings_link, " | ", all_link);
 	const insert_before = review_toolbar.querySelector(
-		".polykit-review, .polykit-review-done, #polykit-notices-container, .separator, .polykit-toolbar-extensions",
+		".polykit-review, .polykit-review-done, #polykit-notices-container",
 	);
 	if (insert_before) {
 		review_toolbar.insertBefore(filters, insert_before);

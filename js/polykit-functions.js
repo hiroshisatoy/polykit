@@ -11,28 +11,12 @@ function sanitize_value(value) {
 }
 
 /**
- * Get the list of locales available, bundled with the extension.
+ * PolyKit is Japanese-only; always return ja.
  *
- * @returns {string[]}
- */
-function polykit_get_available_locales() {
-	return Object.keys(polykit_locales_slugs);
-}
-
-/**
- * Get the language saved in PolyKit
- *
- * @returns string
+ * @returns {string}
  */
 function polykit_get_lang() {
-	if ("undefined" === typeof window.polykit_lang) {
-		const lang = localStorage.getItem("polykit_language");
-		if ("" === lang || null === lang) {
-			return "ja";
-		}
-		window.polykit_lang = sanitize_value(lang);
-	}
-	return window.polykit_lang;
+	return "ja";
 }
 
 /**
@@ -123,14 +107,7 @@ function polykit_ensure_notices_container(toolbar) {
 	const host = toolbar || document.querySelector(".polykit-review-toolbar");
 	if (host) {
 		if (container.parentNode !== host) {
-			const insert_before = host.querySelector(
-				".separator, .polykit-toolbar-extensions",
-			);
-			if (insert_before) {
-				host.insertBefore(container, insert_before);
-			} else {
-				host.appendChild(container);
-			}
+			host.appendChild(container);
 		}
 		return container;
 	}
@@ -190,8 +167,7 @@ function polykit_add_review_button() {
 			review_button.className = "button polykit-review";
 			review_button.value = polykit_t("review");
 			const notices = review_toolbar.querySelector("#polykit-notices-container");
-			const insert_before = notices ||
-				review_toolbar.querySelector(".separator, .polykit-toolbar-extensions");
+			const insert_before = notices;
 			if (insert_before) {
 				review_toolbar.insertBefore(review_button, insert_before);
 			} else {
@@ -202,29 +178,7 @@ function polykit_add_review_button() {
 }
 
 /**
- * Get locale from slug or slug from locale
- *
- * @param {string} value locale or slug
- * @param {string} type the type of value 'locale' or 'slug'
- * @returns {string} slug or locale depending on type
- */
-function polykit_get_locale_slug(value, type) {
-	if ("locale" === type) {
-		return polykit_locales_slugs[value] || "";
-	}
-	for (const elem in polykit_locales_slugs) {
-		if (
-			Object.prototype.hasOwnProperty.call(polykit_locales_slugs, elem) &&
-			polykit_locales_slugs[elem] === value
-		) {
-			return elem;
-		}
-	}
-	return "";
-}
-
-/**
- * Add the buttons to scroll to the row of the language choosen
+ * Add the buttons to scroll to the Japanese locale row
  * @returns void
  */
 function polykit_add_scroll_buttons() {
@@ -234,36 +188,22 @@ function polykit_add_scroll_buttons() {
 		appsRegex: "https:\\/\\/translate.wordpress.org\\/projects\\/apps\\/[^\\/]+\\/[^\\/]+\\/$",
 	};
 
-	let slug = polykit_get_locale_slug(polykit_get_lang(), "locale");
+	let slug = "ja";
 
-	const lang = polykit_get_lang();
-	slug = slug.replace(/de/, "de/default");
-	slug = slug.replace(/nl/, "nl/default");
 	for (const regex in locations) {
 		const position = document.querySelector("table");
 		const acquired = (RegExp(locations[regex])).test(window.location.href);
 
 		if (position && acquired) {
-			if ("" === lang) {
-				jQuery(position).before(
-					`<span style="float:right;margin-bottom:1em">${
-						polykit_t(
-							"locale_not_set",
-							"https://translate.wordpress.org/projects/wp/dev/en-gb/default/#polykit-language-picker",
-						)
-					}</span>`,
-				);
-				return;
-			}
 			jQuery(position).before(
 				`<button style="float:right;margin-bottom:1em" class="polykit-scroll">${
-					polykit_t("scroll_to", lang)
+					polykit_t("scroll_to")
 				}</button>`,
 			);
 			const StatsSpecificLinks = Array.prototype.slice.call(
 				document.querySelectorAll(".stats-table tbody tr th a"),
 			).filter((el) => {
-				return polykit_get_lang() === el.textContent.trim();
+				return "ja" === el.textContent.trim();
 			})[0];
 			jQuery(".polykit-scroll").on("click", () => {
 				const target = StatsSpecificLinks ||
@@ -327,194 +267,13 @@ function polykit_query_visible_editor(selector) {
 }
 
 /**
- * @returns {HTMLElement|null}
- */
-function polykit_get_toolbar_extensions_panel() {
-	return document.querySelector(".polykit-toolbar-extensions__panel");
-}
-
-/**
- * @param {HTMLElement} root
- * @returns {void}
- */
-function polykit_toggle_toolbar_extensions_panel(root) {
-	const panel = root.querySelector(".polykit-toolbar-extensions__panel");
-	if (!panel) {
-		return;
-	}
-	const open = "block" === panel.style.display;
-	panel.style.display = open ? "none" : "block";
-	root.classList.toggle("polykit-toolbar-extensions--open", !open);
-}
-
-/**
- * @param {HTMLElement} root
- * @param {HTMLElement} trigger
- * @returns {void}
- */
-function polykit_bind_toolbar_extensions_accordion(root, trigger) {
-	trigger.addEventListener("click", (e) => {
-		e.preventDefault();
-		e.stopPropagation();
-		polykit_toggle_toolbar_extensions_panel(root);
-	});
-}
-
-/**
- * @param {HTMLElement} root
- * @returns {HTMLElement}
- */
-function polykit_wrap_toolbar_extensions_accordion(root) {
-	const existing_panel = root.querySelector(".polykit-toolbar-extensions__panel");
-	if (existing_panel) {
-		return existing_panel;
-	}
-	const panel = document.createElement("div");
-	panel.className = "polykit-toolbar-extensions__panel";
-	panel.style.display = "none";
-	while (root.firstChild) {
-		panel.appendChild(root.firstChild);
-	}
-	const trigger = document.createElement("button");
-	trigger.type = "button";
-	trigger.className = "button polykit-toolbar-extensions__trigger";
-	trigger.textContent = polykit_t("toolbar_extensions_toggle");
-	root.prepend(trigger);
-	root.appendChild(panel);
-	polykit_bind_toolbar_extensions_accordion(root, trigger);
-	return panel;
-}
-
-/**
- * @returns {HTMLElement}
- */
-function polykit_create_toolbar_extensions_root() {
-	const root = document.createElement("div");
-	root.className = "polykit-toolbar-extensions";
-	const trigger = document.createElement("button");
-	trigger.type = "button";
-	trigger.className = "button polykit-toolbar-extensions__trigger";
-	trigger.textContent = polykit_t("toolbar_extensions_toggle");
-	const panel = document.createElement("div");
-	panel.className = "polykit-toolbar-extensions__panel";
-	panel.style.display = "none";
-	root.append(trigger, panel);
-	polykit_bind_toolbar_extensions_accordion(root, trigger);
-	return root;
-}
-
-/**
- * Accordion panel for PolyKit toolbar controls (next to the review button).
- *
- * @returns {HTMLElement|null}
- */
-function polykit_ensure_toolbar_extensions() {
-	const existing_panel = polykit_get_toolbar_extensions_panel();
-	if (existing_panel) {
-		return existing_panel;
-	}
-
-	let root = document.querySelector(".polykit-toolbar-extensions");
-	if (root) {
-		return polykit_wrap_toolbar_extensions_accordion(root);
-	}
-
-	root = polykit_create_toolbar_extensions_root();
-	const review_toolbar = document.querySelector(".polykit-review-toolbar");
-	if (review_toolbar) {
-		const separator = document.createElement("span");
-		separator.classList.add("separator");
-		separator.textContent = "•";
-		review_toolbar.append(separator, root);
-		return root.querySelector(".polykit-toolbar-extensions__panel");
-	}
-
-	const filter_toolbars_div = polykit_get_filters_toolbar_row();
-	if (!filter_toolbars_div) {
-		return null;
-	}
-	const separator = document.createElement("span");
-	separator.classList.add("separator");
-	separator.textContent = "•";
-	filter_toolbars_div.append(separator, root);
-	return root.querySelector(".polykit-toolbar-extensions__panel");
-}
-
-/**
- * Print the locales selector
- *
- * @returns void
- */
-function polykit_locales_selector() {
-	if (document.getElementById("polykit-language-picker")) {
-		return;
-	}
-	const filter_toolbars_div = polykit_get_filters_toolbar_row();
-	if (!filter_toolbars_div) {
-		return;
-	}
-	const lang = polykit_get_lang();
-	const group = polykit_ensure_toolbar_extensions();
-	if (!group) {
-		return;
-	}
-	if (group.childElementCount > 0) {
-		const separator = document.createElement("span");
-		separator.classList.add("separator");
-		separator.textContent = "•";
-		group.append(separator);
-	}
-	const picker_container = document.createElement("div");
-	picker_container.className = `polykit-language-picker-container${
-		("" === lang || false === lang) ? " empty-locale" : ""
-	}`;
-	const picker_label = document.createElement("label");
-	picker_label.htmlFor = "polykit-language-picker";
-	picker_label.textContent = polykit_t("locale_label");
-	const picker_select = document.createElement("select");
-	picker_select.id = "polykit-language-picker";
-	picker_select.className = "polykit_language";
-	picker_container.append(picker_label, picker_select);
-	group.append(picker_container);
-	jQuery(".polykit_language").append(jQuery("<option></option>"));
-	const polykit_locales_array = polykit_get_available_locales();
-	var browserlanguage = Intl.DateTimeFormat().resolvedOptions().locale;
-	browserlanguage = browserlanguage.replace("-", "_");
-	jQuery.each(polykit_locales_array, (key, value) => {
-		const new_option = jQuery("<option></option>").attr("value", value).text(
-			value,
-		);
-		if (
-			lang === value || (lang === "ja" && value === "ja") ||
-			(lang === "" && value === "ja") ||
-			(lang === "" && browserlanguage === value)
-		) {
-			new_option.attr("selected", true);
-		}
-		jQuery(".polykit_language").append(new_option);
-	});
-	jQuery(".polykit_language").change(() => {
-		localStorage.setItem(
-			"polykit_language",
-			jQuery(".polykit_language").val() || "",
-		);
-		location.reload();
-	});
-}
-
-/**
  * Get Global Handbook URL for current locale and populates polykit_glossary global constant
  * Don't check if handbook exists
  *
  * @return void
  */
 function polykit_get_handbook_link() {
-	let slug = polykit_get_locale_slug(polykit_get_lang(), "locale");
-	if (!slug) {
-		slug = "ja";
-	}
-	const global_handbook_url = `https://${slug}.wordpress.org/team/handbook/`;
-	polykit_glossary.handbook_url = global_handbook_url;
+	polykit_glossary.handbook_url = "https://ja.wordpress.org/team/handbook/";
 }
 
 /**
@@ -524,13 +283,7 @@ function polykit_get_handbook_link() {
  * @return string Global glossary URL
  */
 function polykit_get_global_glossary_url() {
-	let slug = polykit_get_locale_slug(polykit_get_lang(), "locale");
-	if (slug === "") {
-		slug = "ja";
-	}
-
-	const global_glossary_url = `https://translate.wordpress.org/locale/${slug}/default/glossary/`;
-	return global_glossary_url;
+	return "https://translate.wordpress.org/locale/ja/default/glossary/";
 }
 
 /**
@@ -541,10 +294,6 @@ function polykit_get_global_glossary_url() {
 function polykit_get_glossary_global_data() {
 	polykit_get_handbook_link();
 	const global_glossary_url = polykit_get_global_glossary_url();
-	if (global_glossary_url === false) {
-		polykit_locales_selector();
-		return;
-	}
 
 	fetch(global_glossary_url)
 		.then((response) => response.text())
@@ -555,14 +304,8 @@ function polykit_get_glossary_global_data() {
 		.then((glossary_data) => {
 			polykit_extract_glossary_data(glossary_data);
 		})
-		.then(() => {
-			polykit_add_official_links_to_filters();
-		})
-		.then(() => {
-			polykit_locales_selector();
-		})
 		.catch(() => {
-			polykit_locales_selector();
+			// Glossary page unavailable; continue without glossary metadata.
 		});
 }
 
@@ -589,40 +332,6 @@ function polykit_extract_glossary_data(glossary_data) {
 			polykit_glossary.guide.title = guide_link.dataset.title;
 		}
 	}
-}
-
-/**
- * Add official links to filters links
- *
- * @returns void
- */
-function polykit_add_official_links_to_filters() {
-	if (document.getElementById("polykit-guide-link")) {
-		return;
-	}
-	const filter_toolbars_div = polykit_get_filters_toolbar_row();
-	if (!filter_toolbars_div) {
-		return;
-	}
-	if (
-		"" === polykit_glossary.guide.url && "" === polykit_glossary.handbook_url
-	) {
-		return;
-	}
-	const polykit_guide_link = document.createElement("a");
-	polykit_guide_link.id = "polykit-guide-link";
-	polykit_guide_link.target = "_blank";
-	polykit_guide_link.textContent = "" !== polykit_glossary.guide.title
-		? polykit_glossary.guide.title
-		: polykit_t("default_style_guide");
-	polykit_guide_link.href = "" !== polykit_glossary.guide.url
-		? polykit_glossary.guide.url
-		: polykit_glossary.handbook_url;
-	const group = polykit_ensure_toolbar_extensions();
-	if (!group) {
-		return;
-	}
-	group.append(polykit_guide_link);
 }
 
 /**
@@ -676,24 +385,12 @@ function polykit_curly_apostrophe_highlight() {
 }
 
 /**
- * Get the language for consistency
+ * Consistency tool locale slug (Japanese only).
  *
- * @returns string
+ * @returns {string}
  */
 function polykit_get_lang_consistency() {
-	const lang = polykit_get_lang();
-	let reallang = "";
-	if ("pt_BR" === lang) {
-		reallang = "pt-br";
-	} else if ("en_CA" === lang) {
-		reallang = "en-ca";
-	} else {
-		reallang = lang.split("_");
-		if (typeof reallang[1] !== "undefined") {
-			reallang = reallang[1].toLowerCase();
-		}
-	}
-	return reallang;
+	return "ja";
 }
 
 /**
@@ -716,9 +413,8 @@ function polykit_is_uppercase(myString) {
 function polykit_current_locale_first() {
 	if ("https://translate.wordpress.org/" !== document.URL) return;
 	const locales_filter = document.querySelector("#locales-filter");
-	const slug = polykit_get_locale_slug(polykit_get_lang(), "locale");
 	const current_locale = document.querySelector(
-		`#locales .english a[href="/locale/${slug}/"]`,
+		'#locales .english a[href="/locale/ja/"]',
 	);
 	const first_locale = document.querySelector("div.locale:first-child");
 	if (!current_locale) return;
@@ -945,11 +641,7 @@ function polykit_scroll_to_top() {
 function polykit_build_sticky_header() {
 	if (!polykit_user.is_on_translations) return;
 
-	if (null === localStorage.getItem("polykit_header_is_sticky")) {
-		localStorage.setItem("polykit_header_is_sticky", "true");
-	}
-	let polykit_header_is_sticky = "true" === localStorage.getItem("polykit_header_is_sticky");
-	if (polykit_header_is_sticky) {
+	if (polykit_get_setting("header_is_sticky")) {
 		document.body.classList.add("polykit-header-is-sticky");
 	}
 
@@ -961,39 +653,7 @@ function polykit_build_sticky_header() {
 	);
 	const paging_top = document.querySelector(".paging");
 
-	const toggle_sticky = document.createElement("DIV");
-	toggle_sticky.id = "polykit-toggle-header";
-	toggle_sticky.classList.add("polykit-toggle");
-	const toggle_sticky_input = document.createElement("INPUT");
-	toggle_sticky_input.id = "polykit-toggle-header-sticky";
-	toggle_sticky_input.type = "checkbox";
-	toggle_sticky_input.classList.add("polykit-toggle__input");
-	toggle_sticky_input.checked = polykit_header_is_sticky ? "checked" : "";
-	toggle_sticky_input.addEventListener("click", (e) => {
-		polykit_header_is_sticky = !polykit_header_is_sticky;
-		document.body.classList.toggle("polykit-header-is-sticky");
-		localStorage.setItem(
-			"polykit_header_is_sticky",
-			(true === polykit_header_is_sticky) ? "true" : "false",
-		);
-		e.stopPropagation();
-	});
-	const toggle_sticky_label = document.createElement("LABEL");
-	toggle_sticky_label.htmlFor = "polykit-toggle-header-sticky";
-	toggle_sticky_label.classList.add("polykit-toggle__label");
-	toggle_sticky_label.title = polykit_t("sticky_header_toggle");
-	toggle_sticky &&
-		toggle_sticky.append(toggle_sticky_input, toggle_sticky_label);
-
-	const toolbar_extensions = polykit_ensure_toolbar_extensions();
-	if (toolbar_extensions) {
-		toolbar_extensions.prepend(toggle_sticky);
-	}
-
 	const fragment = document.createDocumentFragment();
-	if (!toolbar_extensions) {
-		toggle_sticky && fragment.appendChild(toggle_sticky);
-	}
 	title && fragment.appendChild(title);
 	filter_toolbar && fragment.appendChild(filter_toolbar);
 	bulk_actions && fragment.appendChild(bulk_actions);

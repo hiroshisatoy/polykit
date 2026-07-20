@@ -19,11 +19,12 @@
 		width: var(--polykit-size-icon-nav);
 		height: auto;
 		vertical-align: -5px;
+		margin-right: 0.25em;
 	}
 }
 
 .navigation-main {
-	.polykit-setting a {
+	.polykit-setting > a {
 		color: var(--polykit-color-white);
 	}
 }
@@ -37,7 +38,6 @@
 
 .polykit-settings {
 	margin-bottom: var(--polykit-space-lg);
-	margin-top: calc(-1 * var(--polykit-space-2xl));
 
 	&::before {
 		content: '';
@@ -83,8 +83,6 @@
 		}
 
 		fieldset {
-			display: flex;
-			flex-direction: column;
 
 			h3 {
 				padding: 10px 0 0 0;
@@ -241,6 +239,10 @@
 				width: var(--polykit-size-settings-table-control);
 				white-space: nowrap;
 				text-align: center;
+
+				&:has(.polykit-settings-level-radios) {
+					white-space: normal;
+				}
 			}
 
 			.polykit-settings-table__text {
@@ -250,10 +252,35 @@
 				text-align: left;
 			}
 
-			.polykit-settings-table__select {
-				min-width: 8.5em;
-				max-width: 100%;
-				box-sizing: border-box;
+			.polykit-settings-level-radios {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				align-items: center;
+				gap: 0.25em 0.85em;
+				margin: 0;
+				padding: 0;
+				border: 0;
+				min-width: 0;
+			}
+
+			.polykit-settings-level-radios__option {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3em;
+				margin: 0;
+				padding: 0;
+				padding-left: 0;
+				cursor: pointer;
+				width: auto;
+				white-space: nowrap;
+
+				input[type="radio"] {
+					margin: 0;
+					margin-right: 0;
+					margin-left: 0;
+					vertical-align: middle;
+				}
 			}
 
 			.polykit-settings-table__desc-text {

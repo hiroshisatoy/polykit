@@ -28,6 +28,14 @@
 			"matches": [
 				"*://translate.wordpress.org/*"
 			]
+		},
+		{
+			"css": [
+				"css/wp-plugins.css"
+			],
+			"matches": [
+				"*://translate.wordpress.org/projects/wp-plugins/*"
+			]
 		}
 	],
 	"host_permissions": [
@@ -36,7 +44,6 @@
 	"web_accessible_resources": [
 		{
 			"resources": [
-				"js/polykit-locales.js",
 				"js/polykit.js",
 				"js/polykit-functions.js",
 				"js/polykit-hotkey.js",
@@ -62,6 +69,7 @@
 				"css/common.css",
 				"css/translation.css",
 				"css/settings.css",
+				"css/wp-plugins.css",
 				"js/init.js"
 			],
 			"matches": [

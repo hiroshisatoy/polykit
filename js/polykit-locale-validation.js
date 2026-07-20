@@ -342,7 +342,7 @@ function polykit_collect_locale_checks(original, text) {
 			if (text.includes(rule.wrong)) {
 				push(
 					"ja_terminology",
-					polykit_t("ja_terminology_wrong", rule.right, rule.wrong),
+					polykit_t("ja_terminology_wrong", rule.wrong, rule.right),
 				);
 			}
 		}

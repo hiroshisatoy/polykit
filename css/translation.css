@@ -205,11 +205,6 @@ table.translations {
 	}
 }
 
-#polykit-glossary-link,
-#polykit-guide-link {
-	margin: 0 1px;
-}
-
 .polykit-anonymous-filter {
 	display: block;
 	margin-top: 0.35em;
@@ -284,82 +279,6 @@ table.translations {
 		color: var(--polykit-color-danger-dark);
 		border-color: color-mix(in srgb, var(--polykit-color-danger) 35%, transparent);
 		background: var(--polykit-color-label-error-bg);
-	}
-}
-
-.polykit-toolbar-extensions {
-	display: inline-block;
-	position: relative;
-	vertical-align: middle;
-
-	.polykit-toolbar-extensions__trigger {
-		margin: 0;
-	}
-
-	.polykit-toolbar-extensions__panel {
-		display: none;
-		position: absolute;
-		top: calc(100% + var(--polykit-size-border-toolbar));
-		left: 0;
-		z-index: var(--polykit-z-toolbar-panel);
-		min-width: var(--polykit-size-toolbar-panel-min);
-		padding: 0.5em 0.75em;
-		background: var(--polykit-color-white);
-		border: 1px solid var(--polykit-color-border);
-		border-radius: var(--polykit-radius-sm);
-		box-shadow: var(--polykit-shadow-sm);
-		box-sizing: border-box;
-
-		> * {
-			display: block;
-			margin: 0.35em 0;
-		}
-
-		.separator {
-			display: none;
-		}
-
-		#polykit-toggle-header {
-			margin: 0;
-		}
-	}
-
-	&.polykit-toolbar-extensions--open {
-		.polykit-toolbar-extensions__trigger {
-			background: var(--polykit-color-surface-muted);
-			border-color: var(--polykit-color-border-strong);
-		}
-	}
-}
-
-#polykit-language-picker {
-	box-sizing: border-box;
-
-	.polykit-language-picker-container {
-		display: inline-block;
-
-		label {
-			vertical-align: 0;
-			margin: 0 2px;
-
-			&::after {
-				content: ': ';
-			}
-		}
-
-		&.empty-locale {
-			padding: 2px 5px;
-			color: var(--polykit-color-error);
-			font-weight: 600;
-
-			label::after {
-				content: ' glossary\2002 \2192  \2002';
-			}
-
-			#polykit-language-picker {
-				border: var(--polykit-size-border-accent) solid var(--polykit-color-error);
-			}
-		}
 	}
 }
 

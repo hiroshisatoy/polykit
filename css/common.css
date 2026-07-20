@@ -180,51 +180,6 @@
  * - & の直後に識別子を続けてクラス名を作ることはできない → クラス名をそのまま書く
  */
 
-.polykit-toggle {
-	.polykit-toggle__input {
-		display: none !important;
-
-		&:checked + .polykit-toggle__label {
-			background: var(--polykit-color-toggle-on);
-
-			&::after {
-				left: 50%;
-			}
-		}
-
-		&:hover + .polykit-toggle__label:hover {
-			background: var(--polykit-color-toggle-hover);
-		}
-	}
-
-	.polykit-toggle__label {
-		display: block;
-		position: relative;
-		box-sizing: border-box !important;
-		outline: 0;
-		width: var(--polykit-size-toggle-width);
-		height: var(--polykit-size-toggle-height);
-		padding: var(--polykit-space-xs);
-		border-radius: var(--polykit-radius-pill);
-		cursor: pointer;
-		user-select: none;
-		background: var(--polykit-color-surface-inactive);
-		transition: all var(--polykit-duration-normal) ease;
-
-		&::after {
-			position: relative;
-			display: block;
-			content: '';
-			width: 50%;
-			height: 100%;
-			left: 0;
-			border-radius: var(--polykit-radius-round);
-			background: var(--polykit-color-white);
-			transition: all var(--polykit-duration-fast) ease;
-		}
-	}
-}
-
 code {
 	padding: 0.2em 0.4em;
 	margin: 0 2px;
