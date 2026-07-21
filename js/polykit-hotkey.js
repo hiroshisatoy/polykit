@@ -182,10 +182,6 @@ function polykit_hotkeys() {
 				polykit_query_visible_editor(".polykit-get-gt")?.click();
 				event.preventDefault();
 				break;
-			case "n":
-				polykit_query_visible_editor(".polykit-notranslate-copy-all")?.click();
-				event.preventDefault();
-				break;
 			case "p":
 			case "s":
 				polykit_focus_search();

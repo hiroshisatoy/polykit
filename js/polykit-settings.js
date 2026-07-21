@@ -238,7 +238,6 @@ function polykit_generate_settings_panel() {
 		[polykit_t("hk_consistency")]: "Alt+C",
 		[polykit_t("hk_consistency_num")]: "Alt+1〜9",
 		[polykit_t("hk_google_translate")]: "Alt+G",
-		[polykit_t("hk_notranslate_all")]: "Alt+N",
 		[polykit_t("hk_search_focus")]: "Alt+S / Alt+P",
 		[polykit_t("hk_next")]: "Page Down",
 		[polykit_t("hk_prev")]: "Page Up",
