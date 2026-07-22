@@ -110,27 +110,6 @@ function polykit_collect_general_checks(originaltext, newtext) {
 			push("no_trailing_space", polykit_t("missing_trailing_space"));
 		}
 	}
-	if (polykit_is_check_enabled("curly_apostrophe_warning")) {
-		if (newtext.indexOf("'") > -1) {
-			push(
-				"curly_apostrophe_warning",
-				polykit_t("curly_apostrophe_warning_msg"),
-			);
-		}
-	}
-	if (polykit_is_check_enabled("localized_quote_warning")) {
-		let check_quotes = newtext;
-		check_quotes = check_quotes.replace(
-			/([^>"]*)"(?=[^<]*>)/g,
-			"$1#POLYKITATTR#",
-		);
-		if (check_quotes.indexOf('"') > -1) {
-			push(
-				"localized_quote_warning",
-				polykit_t("localized_quote_warning_msg"),
-			);
-		}
-	}
 	return results;
 }
 

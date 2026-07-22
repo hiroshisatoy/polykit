@@ -108,8 +108,6 @@ polykit_selected_count();
 
 polykit_non_breaking_space_highlight();
 
-polykit_curly_apostrophe_highlight();
-
 const polykit_to_top = document.createElement("A");
 polykit_to_top.id = "polykit-back-to-top";
 polykit_to_top.textContent = "↑";

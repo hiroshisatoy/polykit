@@ -138,9 +138,6 @@ function polykit_generate_settings_panel() {
 						"setting_ja_japanese_punctuation",
 					),
 					ja_fullwidth_ascii: polykit_t("setting_ja_fullwidth_ascii"),
-					curly_apostrophe_warning: polykit_t(
-						"setting_curly_apostrophe_warning",
-					),
 					ja_space_before_half: polykit_t("setting_ja_space_before_half"),
 					ja_fullwidth_number: polykit_t("setting_ja_fullwidth_number"),
 					ja_space_around_mixed: polykit_t("setting_ja_space_around_mixed"),
@@ -159,7 +156,6 @@ function polykit_generate_settings_panel() {
 				controlColumn: "severity",
 				settings: {
 					ja_straight_quotes: polykit_t("setting_ja_straight_quotes"),
-					localized_quote_warning: polykit_t("setting_localized_quote_warning"),
 				},
 			},
 			{
@@ -581,8 +577,6 @@ const polykit_check_level_defaults = {
 	no_trailing_space: "warning",
 	no_final_dot: "off",
 	no_final_other_dots: "warning",
-	curly_apostrophe_warning: "off",
-	localized_quote_warning: "off",
 	ja_japanese_punctuation: "warning",
 	ja_fullwidth_ascii: "warning",
 	ja_fullwidth_number: "warning",
