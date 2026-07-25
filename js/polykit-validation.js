@@ -61,21 +61,24 @@ function polykit_collect_general_checks(originaltext, newtext) {
 	};
 	const lastcharoriginaltext = originaltext.slice(-1);
 	const firstcharoriginaltext = originaltext.charAt(0);
-	const hellipseoriginaltext = "..." === originaltext.slice(-3);
 	const lastcharnewtext = newtext.slice(-1);
 	const firstcharnewtext = newtext.charAt(0);
-	const last_dot = [";", ".", "!", ":", "、", "。", "؟", "？", "！"];
-	if (hellipseoriginaltext) {
-		if (polykit_is_check_enabled("no_final_dot")) {
-			if (
-				"..." === newtext.slice(-3) ||
-				(lastcharnewtext !== ";" && lastcharnewtext !== "." &&
-					lastcharnewtext !== "…")
-			) {
-				push("no_final_dot", polykit_t("missing_ellipsis"));
-			}
+	const last_dot = [";", ".", "!", ":", "、", "。", "؟", "？", "！", "…"];
+	if (polykit_is_check_enabled("no_final_dot")) {
+		const has_ascii_ellipsis = -1 !== newtext.indexOf("...");
+		if (has_ascii_ellipsis) {
+			push("no_final_dot", polykit_t("ascii_ellipsis"));
 		}
-	} else if (polykit_is_check_enabled("no_final_other_dots")) {
+		if (
+			-1 !== originaltext.indexOf("…") &&
+			-1 === newtext.indexOf("…") &&
+			-1 === newtext.indexOf("&hellip;") &&
+			!has_ascii_ellipsis
+		) {
+			push("no_final_dot", polykit_t("missing_ellipsis"));
+		}
+	}
+	if (polykit_is_check_enabled("no_final_other_dots")) {
 		if (
 			jQuery.inArray(lastcharoriginaltext, last_dot) >= 0 &&
 			-1 === jQuery.inArray(lastcharnewtext, last_dot)

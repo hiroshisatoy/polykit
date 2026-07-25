@@ -132,6 +132,8 @@ Deno.test("leading space and fullwidth space (1-2 / 1-4)", () => {
 	assert.deepStrictEqual(collect(" 設定を開く", " Original"), []);
 	assert.deepStrictEqual(collect("設定　を開く"), ["ja_fullwidth_space"]);
 	assert.deepStrictEqual(collect("設定を開く"), []);
+	assert.deepStrictEqual(collect("約10分～20分"), []);
+	assert.deepStrictEqual(collect("設定をＯＮにする"), ["ja_fullwidth_ascii|ＯＮ"]);
 });
 
 Deno.test("curly double quotes around Japanese (2-3)", () => {

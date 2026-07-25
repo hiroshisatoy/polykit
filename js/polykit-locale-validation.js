@@ -244,7 +244,8 @@ function polykit_collect_locale_checks(original, text) {
 	}
 
 	if (polykit_is_check_enabled("ja_fullwidth_ascii")) {
-		const fullwidth = masked.match(/[！-／：-＠Ａ-Ｚ［-｀ａ-ｚ｛-～]/g);
+		// ～ (U+FF5E) は日本語の範囲・「から」表現で使うため、半角化対象外。
+		const fullwidth = masked.match(/[！-／：-＠Ａ-Ｚ［-｀ａ-ｚ｛-｝]/g);
 		if (fullwidth) {
 			const unique = [...new Set(fullwidth)].slice(0, 5).join("");
 			push("ja_fullwidth_ascii", polykit_t("ja_fullwidth_ascii", unique));
