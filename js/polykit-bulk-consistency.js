@@ -48,7 +48,15 @@ function polykit_bulk_magic_save() {
 		);
 		return;
 	}
-	const replacement = JSON.parse(stored);
+	const replacement = polykit_parse_json(stored, null);
+	if (!Array.isArray(replacement)) {
+		warning.textContent = polykit_t("bulk_empty_alternative");
+		document.querySelector(".translation-wrapper")?.insertAdjacentElement(
+			"beforebegin",
+			warning,
+		);
+		return;
+	}
 	const forms = document.querySelectorAll(".translation-wrapper textarea");
 	if (forms.length !== replacement.length) {
 		warning.textContent = polykit_t("bulk_plural_mismatch");
@@ -247,7 +255,11 @@ function polykit_fire_bulk_save(alternatives) {
 		alert(polykit_t("bulk_choose_first"));
 		return;
 	}
-	const chosen = JSON.parse(stored);
+	const chosen = polykit_parse_json(stored, null);
+	if (!Array.isArray(chosen)) {
+		alert(polykit_t("bulk_choose_first"));
+		return;
+	}
 	const checked = document.querySelectorAll(
 		"#translations-overview input[type=checkbox]:checked",
 	);

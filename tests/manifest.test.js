@@ -70,6 +70,17 @@ Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(!("browser_specific_settings" in manifest));
 });
 
+Deno.test("init.js loads page scripts without waiting for changelog", () => {
+	const init_source = Deno.readTextFileSync(new URL("js/init.js", root));
+	assert.ok(init_source.includes("polykit_record_extension_status();"));
+	assert.ok(
+		init_source.includes(
+			"polykit_load_language_files()\n\t.then(() => script(jsScripts))",
+		),
+	);
+	assert.ok(!init_source.includes(".then(() => polykit_load_language_files())"));
+});
+
 Deno.test("playground pages are excluded from content scripts", () => {
 	const expected = [
 		"*://translate.wordpress.org/*/playground",

@@ -11,6 +11,133 @@ function sanitize_value(value) {
 }
 
 /**
+ * Parse JSON without throwing on corrupt storage.
+ *
+ * @param {string|null|undefined} value
+ * @param {*} [fallback]
+ * @returns {*}
+ */
+function polykit_parse_json(value, fallback = null) {
+	if (null === value || undefined === value || "" === value) {
+		return fallback;
+	}
+	if ("object" === typeof value) {
+		return value;
+	}
+	try {
+		return JSON.parse(value);
+	} catch (_error) {
+		return fallback;
+	}
+}
+
+/**
+ * @param {string} tagName
+ * @returns {boolean}
+ */
+function polykit_is_trusted_inline_tag(tagName) {
+	return "B" === tagName || "I" === tagName;
+}
+
+/**
+ * Copy only <b> and <i> from a string; other tags become text.
+ *
+ * @param {string} html
+ * @param {Document} [doc]
+ * @returns {DocumentFragment}
+ */
+function polykit_trusted_inline_fragment(html, doc = document) {
+	const fragment = doc.createDocumentFragment();
+	const parsed = new DOMParser().parseFromString(`<div>${html}</div>`, "text/html");
+	const root = parsed.body && parsed.body.firstChild;
+	if (!root) {
+		fragment.appendChild(doc.createTextNode(String(html)));
+		return fragment;
+	}
+	const walk = (node, target) => {
+		node.childNodes.forEach((child) => {
+			if (3 === child.nodeType) {
+				target.appendChild(doc.createTextNode(child.nodeValue));
+				return;
+			}
+			if (1 === child.nodeType && polykit_is_trusted_inline_tag(child.tagName)) {
+				const el = doc.createElement(child.tagName.toLowerCase());
+				walk(child, el);
+				target.appendChild(el);
+				return;
+			}
+			if (1 === child.nodeType) {
+				walk(child, target);
+			}
+		});
+	};
+	walk(root, fragment);
+	return fragment;
+}
+
+/**
+ * First translation string from a glossary-word data payload.
+ *
+ * @param {*} info
+ * @returns {string}
+ */
+function polykit_glossary_translation_from_data(info) {
+	if (!info || !info[0] || "string" !== typeof info[0].translation) {
+		return "";
+	}
+	return info[0].translation;
+}
+
+/**
+ * @param {string} word
+ * @returns {string}
+ */
+function polykit_glossary_consistency_url(word) {
+	return `https://translate.wordpress.org/consistency?search=${
+		encodeURIComponent(word)
+	}&set=${polykit_get_lang_consistency()}%2Fdefault`;
+}
+
+/**
+ * @param {string[]} hrefs
+ * @returns {{permalink: string, history: string, consistency: string, discussion: string}|null}
+ */
+function polykit_quicklink_hrefs_from_menu(hrefs) {
+	if (!hrefs || hrefs.length < 4) {
+		return null;
+	}
+	const history = hrefs[1].includes("historypage") ? hrefs[1] : `${hrefs[1]}&historypage`;
+	return {
+		permalink: hrefs[0],
+		history,
+		consistency: `${hrefs[2]}&consistencypage`,
+		discussion: hrefs[3],
+	};
+}
+
+const polykit_editor_added_hooks = [];
+
+/**
+ * @param {Function} callback
+ * @returns {void}
+ */
+function polykit_register_editor_added(callback) {
+	if ("function" === typeof callback) {
+		polykit_editor_added_hooks.push(callback);
+	}
+}
+
+/**
+ * @param {Element} editor
+ * @returns {void}
+ */
+function polykit_notify_editor_added(editor) {
+	polykit_editor_added_hooks.forEach((callback) => {
+		callback(editor);
+	});
+}
+
+/**
  * PolyKit is Japanese-only; always return ja.
  *
  * @returns {string}
@@ -24,37 +151,44 @@ function polykit_get_lang() {
  * @returns void
  */
 function polykit_add_project_links() {
-	if (
-		jQuery(".gp-content .breadcrumb li").length > 3 &&
-		jQuery(".gp-content .breadcrumb li:last-child a").length > 0
-	) {
-		let lang = jQuery(".gp-content .breadcrumb li:last-child a").attr("href")
-			.split("/");
-		lang = sanitize_value(lang[lang.length - 3]);
-		const titleLinksContainer = document.createElement("SPAN");
-		titleLinksContainer.id = "polykit-title-links";
-		document.querySelector(".gp-content h2").appendChild(titleLinksContainer);
-		jQuery("#polykit-title-links").append(
-			`<a class="glossary-link" href="https://translate.wordpress.org/locale/${lang}/default" target="_blank" rel="noreferrer noopener">${
-				jQuery(".gp-content .breadcrumb li:last-child a").text()
-			} ${polykit_t("projects_suffix")}</a>` +
-				`<a class="glossary-link" href="https://translate.wordpress.org/stats" target="_blank" rel="noreferrer noopener">${
-					polykit_t("translation_global_status")
-				}</a>`,
-		);
-
-		const titleLinks = document.querySelector("#polykit-title-links");
-		const glossaryLinks = document.querySelector(
-			".gp-heading>h2+.glossary-links",
-		);
-		if (glossaryLinks) {
-			titleLinks.append(glossaryLinks);
-		}
-		const glossaryLinksSeparator = document.querySelector(
-			"#polykit-title-links .glossary-links .separator",
-		);
-		glossaryLinksSeparator && glossaryLinksSeparator.remove();
+	const heading = document.querySelector(".gp-content h2");
+	const breadcrumb_items = document.querySelectorAll(".gp-content .breadcrumb li");
+	const last_link = document.querySelector(".gp-content .breadcrumb li:last-child a");
+	if (!heading || breadcrumb_items.length <= 3 || !last_link) {
+		return;
 	}
+	const href_parts = (last_link.getAttribute("href") || "").split("/");
+	const lang = sanitize_value(href_parts[href_parts.length - 3] || "");
+	if (!lang) {
+		return;
+	}
+
+	const titleLinksContainer = document.createElement("span");
+	titleLinksContainer.id = "polykit-title-links";
+
+	const locale_link = document.createElement("a");
+	locale_link.className = "glossary-link";
+	locale_link.href = `https://translate.wordpress.org/locale/${encodeURIComponent(lang)}/default`;
+	locale_link.target = "_blank";
+	locale_link.rel = "noreferrer noopener";
+	locale_link.textContent = `${last_link.textContent} ${polykit_t("projects_suffix")}`;
+
+	const stats_link = document.createElement("a");
+	stats_link.className = "glossary-link";
+	stats_link.href = "https://translate.wordpress.org/stats";
+	stats_link.target = "_blank";
+	stats_link.rel = "noreferrer noopener";
+	stats_link.textContent = polykit_t("translation_global_status");
+
+	titleLinksContainer.append(locale_link, stats_link);
+	heading.appendChild(titleLinksContainer);
+
+	const glossaryLinks = document.querySelector(".gp-heading>h2+.glossary-links");
+	if (glossaryLinks) {
+		titleLinksContainer.append(glossaryLinks);
+	}
+	document.querySelector("#polykit-title-links .glossary-links .separator")
+		?.remove();
 }
 
 /**
@@ -64,10 +198,19 @@ function polykit_add_project_links() {
  * @returns void
  */
 function polykit_add_glossary_links(glossary_word) {
-	const word = jQuery(glossary_word);
-	word.wrap(
-		`<a href="https://translate.wordpress.org/consistency?search=${word.text()}&amp;set=${polykit_get_lang_consistency()}%2Fdefault" target="_blank" rel="noreferrer noopener"></a>`,
-	);
+	if (
+		!glossary_word ||
+		!glossary_word.parentNode ||
+		glossary_word.closest("a[href*='consistency?search']")
+	) {
+		return;
+	}
+	const link = document.createElement("a");
+	link.href = polykit_glossary_consistency_url(glossary_word.textContent || "");
+	link.target = "_blank";
+	link.rel = "noreferrer noopener";
+	glossary_word.parentNode.insertBefore(link, glossary_word);
+	link.appendChild(glossary_word);
 }
 
 /**
@@ -182,47 +325,47 @@ function polykit_add_review_button() {
  * @returns void
  */
 function polykit_add_scroll_buttons() {
-	const locations = {
-		statsRegex: "https:\\/\\/translate.wordpress.org\\/stats\\/$",
-		projectsRegex: "https:\\/\\/translate.wordpress.org\\/projects\\/[^\\/]+\\/[^\\/]+\\/$",
-		appsRegex: "https:\\/\\/translate.wordpress.org\\/projects\\/apps\\/[^\\/]+\\/[^\\/]+\\/$",
-	};
-
-	let slug = "ja";
-
-	for (const regex in locations) {
-		const position = document.querySelector("table");
-		const acquired = (RegExp(locations[regex])).test(window.location.href);
-
-		if (position && acquired) {
-			jQuery(position).before(
-				`<button style="float:right;margin-bottom:1em" class="polykit-scroll">${
-					polykit_t("scroll_to")
-				}</button>`,
-			);
-			const StatsSpecificLinks = Array.prototype.slice.call(
-				document.querySelectorAll(".stats-table tbody tr th a"),
-			).filter((el) => {
-				return "ja" === el.textContent.trim();
-			})[0];
-			jQuery(".polykit-scroll").on("click", () => {
-				const target = StatsSpecificLinks ||
-					document.querySelector(`table tr th a[href*="/${slug}/"]`) ||
-					document.querySelector(`table td strong a[href*="/${slug}/"]`);
-				if (!target) return;
-				const row = target.closest("tr");
-				if (!row) return;
-				row.style.border = "2px solid black";
-				target.style.color = "#a70505";
-				if (!target.textContent.includes("➤")) {
-					target.textContent = `➤ ${target.textContent}`;
-				}
-				jQuery("html, body").animate({
-					scrollTop: jQuery(row).offset().top - 160,
-				});
-			});
-		}
+	if (document.querySelector(".polykit-scroll")) {
+		return;
 	}
+	const locations = [
+		/https:\/\/translate\.wordpress\.org\/stats\/$/,
+		/https:\/\/translate\.wordpress\.org\/projects\/[^/]+\/[^/]+\/$/,
+		/https:\/\/translate\.wordpress\.org\/projects\/apps\/[^/]+\/[^/]+\/$/,
+	];
+	const position = document.querySelector("table");
+	if (!position || !locations.some((regex) => regex.test(window.location.href))) {
+		return;
+	}
+
+	const button = document.createElement("button");
+	button.type = "button";
+	button.className = "polykit-scroll";
+	button.textContent = polykit_t("scroll_to");
+	position.before(button);
+
+	const stats_link = Array.from(
+		document.querySelectorAll(".stats-table tbody tr th a"),
+	).find((el) => "ja" === el.textContent.trim());
+
+	button.addEventListener("click", () => {
+		const target = stats_link ||
+			document.querySelector('table tr th a[href*="/ja/"]') ||
+			document.querySelector('table td strong a[href*="/ja/"]');
+		if (!target) {
+			return;
+		}
+		const row = target.closest("tr");
+		if (!row) {
+			return;
+		}
+		row.style.border = "2px solid black";
+		target.style.color = "#a70505";
+		if (!target.textContent.includes("➤")) {
+			target.textContent = `➤ ${target.textContent}`;
+		}
+		row.scrollIntoView({ block: "start", behavior: "smooth" });
+	});
 }
 
 /**
@@ -248,13 +391,39 @@ function polykit_get_filter_toolbar() {
 }
 
 /**
- * Currently open translation editor row (GlotPress toggles display on .editor).
+ * @param {Element} el
+ * @param {Function} [compute_style]
+ * @returns {boolean}
+ */
+function polykit_is_displayed_editor(el, compute_style) {
+	if (!el || !el.classList || !el.classList.contains("editor")) {
+		return false;
+	}
+	const view = el.ownerDocument?.defaultView ||
+		(typeof window !== "undefined" ? window : null);
+	const style = compute_style
+		? compute_style(el)
+		: (view && view.getComputedStyle
+			? view.getComputedStyle(el)
+			: { display: el.style?.display || "", visibility: "" });
+	return "none" !== style.display && "hidden" !== style.visibility;
+}
+
+/**
+ * Currently open translation editor row.
  *
+ * @param {ParentNode} [root]
+ * @param {Function} [compute_style]
  * @returns {HTMLElement|null}
  */
-function polykit_get_visible_editor() {
-	return document.querySelector('.editor[style="display: table-row;"]') ||
-		document.querySelector(".editor:not([style])");
+function polykit_get_visible_editor(root = document, compute_style) {
+	const editors = root.querySelectorAll(".editor");
+	for (const editor of editors) {
+		if (polykit_is_displayed_editor(editor, compute_style)) {
+			return editor;
+		}
+	}
+	return null;
 }
 
 /**
@@ -451,15 +620,16 @@ function polykit_wait_table_alter() {
 
 					const row_is_preview = addedNode.classList.contains("preview");
 					const row_is_editor = addedNode.classList.contains("editor");
-					const is_new_translation = mutation.previousSibling &&
-						mutation.previousSibling.matches(".editor.untranslated");
+					const previous = 1 === mutation.previousSibling?.nodeType ? mutation.previousSibling : null;
+					const is_new_translation = previous &&
+						previous.matches(".editor.untranslated");
 					let status_has_changed = false;
 					if (
-						row_is_editor && mutation.previousSibling &&
-						mutation.previousSibling.matches('[class*="status-"]')
+						row_is_editor && previous &&
+						previous.matches('[class*="status-"]')
 					) {
 						const status_before = /status-[a-z]*/.exec(
-							mutation.previousSibling.className,
+							previous.className,
 						);
 						const status_after = /status-[a-z]*/.exec(addedNode.className);
 						status_has_changed = null !== status_before &&
@@ -493,15 +663,14 @@ function polykit_wait_table_alter() {
 						polykit_localize_date(editor_id);
 						polykit_search_init(editor_id);
 						polykit_google_translate_init(editor_id);
+						polykit_notify_editor_added(addedNode);
 					}
 				});
 			});
 		});
 
 		observer.observe(document.querySelector("#translations tbody"), {
-			attributes: true,
 			childList: true,
-			characterData: true,
 		});
 	}
 }
@@ -568,7 +737,12 @@ function polykit_add_evt_listener(
  * @returns {void}
  */
 function polykit_copy_to_clipboard(copy_text) {
-	navigator.clipboard.writeText(copy_text);
+	if (!copy_text || !navigator.clipboard) {
+		return;
+	}
+	navigator.clipboard.writeText(copy_text).catch(() => {
+		// Clipboard can be denied; ignore.
+	});
 }
 
 /**

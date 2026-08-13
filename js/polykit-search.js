@@ -13,15 +13,14 @@ function polykit_get_search_settings() {
 		plugin: false,
 		plugin_slug: "",
 	};
-	const stored = localStorage.getItem("polykit_search");
-	if (null === stored) {
+	const stored = polykit_parse_json(
+		localStorage.getItem("polykit_search"),
+		null,
+	);
+	if (null === stored || "object" !== typeof stored) {
 		return defaults;
 	}
-	try {
-		return Object.assign(defaults, JSON.parse(stored));
-	} catch (_error) {
-		return defaults;
-	}
+	return Object.assign(defaults, stored);
 }
 
 /**

@@ -145,6 +145,87 @@ Deno.test("maps readme translation channels to Stable or Dev", () => {
 	}
 });
 
+Deno.test("polykit_parse_json returns fallback for corrupt values", () => {
+	assert.deepStrictEqual(context.polykit_parse_json(null, {}), {});
+	assert.deepStrictEqual(context.polykit_parse_json("", { a: 1 }), { a: 1 });
+	assert.deepStrictEqual(context.polykit_parse_json("{", { ok: false }), {
+		ok: false,
+	});
+	assert.strictEqual(
+		JSON.stringify(context.polykit_parse_json('{"a":1}')),
+		'{"a":1}',
+	);
+	const already = { already: true };
+	assert.strictEqual(context.polykit_parse_json(already), already);
+});
+
+Deno.test("polykit_glossary_consistency_url encodes the search term", () => {
+	assert.strictEqual(
+		context.polykit_glossary_consistency_url("foo & bar"),
+		"https://translate.wordpress.org/consistency?search=foo%20%26%20bar&set=ja%2Fdefault",
+	);
+});
+
+Deno.test("polykit_glossary_translation_from_data ignores missing payloads", () => {
+	assert.strictEqual(context.polykit_glossary_translation_from_data(undefined), "");
+	assert.strictEqual(context.polykit_glossary_translation_from_data([]), "");
+	assert.strictEqual(
+		context.polykit_glossary_translation_from_data([{ translation: "保存" }]),
+		"保存",
+	);
+});
+
+Deno.test("polykit_quicklink_hrefs_from_menu requires four menu links", () => {
+	assert.strictEqual(context.polykit_quicklink_hrefs_from_menu(["a"]), null);
+	assert.strictEqual(
+		JSON.stringify(context.polykit_quicklink_hrefs_from_menu([
+			"https://example.test/permalink",
+			"https://example.test/history",
+			"https://example.test/consistency",
+			"https://example.test/discussion",
+		])),
+		JSON.stringify({
+			permalink: "https://example.test/permalink",
+			history: "https://example.test/history&historypage",
+			consistency: "https://example.test/consistency&consistencypage",
+			discussion: "https://example.test/discussion",
+		}),
+	);
+});
+
+Deno.test("polykit_get_visible_editor uses computed display, not style text", () => {
+	const hidden = {
+		classList: { contains: (name) => "editor" === name },
+		style: { display: "table-row" },
+	};
+	const visible = {
+		classList: { contains: (name) => "editor" === name },
+		style: { display: "none" },
+	};
+	const root = {
+		querySelectorAll: () => [hidden, visible],
+	};
+	const editor = context.polykit_get_visible_editor(root, (el) => ({
+		display: el === visible ? "table-row" : "none",
+		visibility: "visible",
+	}));
+	assert.strictEqual(editor, visible);
+});
+
+Deno.test("polykit_register_editor_added notifies callbacks", () => {
+	const seen = [];
+	context.polykit_register_editor_added((el) => seen.push(el));
+	const editor = { id: "editor-1" };
+	context.polykit_notify_editor_added(editor);
+	assert.deepStrictEqual(seen, [editor]);
+});
+
+Deno.test("polykit_is_trusted_inline_tag allows only b and i", () => {
+	assert.strictEqual(context.polykit_is_trusted_inline_tag("B"), true);
+	assert.strictEqual(context.polykit_is_trusted_inline_tag("I"), true);
+	assert.strictEqual(context.polykit_is_trusted_inline_tag("SCRIPT"), false);
+});
+
 Deno.test("does not change titles outside plugin translation pages", () => {
 	const document = {
 		title: "Projects",

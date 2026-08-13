@@ -120,14 +120,24 @@ function polykit_quicklinks(current_editor = ".editor") {
 	);
 
 	document.querySelectorAll(`${current_editor}`).forEach((editor) => {
-		const editor_menu = editor.querySelectorAll(".button-menu__dropdown li a");
-		editor.querySelector(".polykit-quicklinks-permalink").dataset.quicklink = editor_menu[0].href;
-		editor_menu[1].href += "&historypage";
-		editor.querySelector(".polykit-quicklinks-history").dataset.quicklink = editor_menu[1].href;
-		editor.querySelector(".polykit-quicklinks-consistency").dataset.quicklink = `${
-			editor_menu[2].href
-		}&consistencypage`;
-		editor.querySelector(".polykit-quicklinks-discussion").dataset.quicklink = editor_menu[3].href;
+		const permalink = editor.querySelector(".polykit-quicklinks-permalink");
+		const history = editor.querySelector(".polykit-quicklinks-history");
+		const consistency = editor.querySelector(".polykit-quicklinks-consistency");
+		const discussion = editor.querySelector(".polykit-quicklinks-discussion");
+		const menu_links = editor.querySelectorAll(".button-menu__dropdown li a");
+		const hrefs = polykit_quicklink_hrefs_from_menu(
+			Array.from(menu_links).map((link) => link.href),
+		);
+		if (!permalink || !history || !consistency || !discussion || !hrefs) {
+			return;
+		}
+		if (menu_links[1] && !menu_links[1].href.includes("historypage")) {
+			menu_links[1].href = hrefs.history;
+		}
+		permalink.dataset.quicklink = hrefs.permalink;
+		history.dataset.quicklink = hrefs.history;
+		consistency.dataset.quicklink = hrefs.consistency;
+		discussion.dataset.quicklink = hrefs.discussion;
 	});
 
 	polykit_add_evt_listener(
@@ -179,7 +189,7 @@ function polykit_toggle_quicklinks_copy() {
 }
 
 function polykit_consistency(current_editor = ".editor") {
-	if (document.querySelector(".polykit-get-consistency") !== null) {
+	if (document.querySelector(`${current_editor} .polykit-consistency`)) {
 		return;
 	}
 	const polykit_consistency_output = polykit_create_element("details", {
@@ -216,9 +226,17 @@ async function polykit_do_consistency(el) {
 		return;
 	}
 	el.classList.add("initialized");
-	const consistency_url = el.closest(".editor-panel").querySelectorAll(
+	const menu_links = el.closest(".editor-panel")?.querySelectorAll(
 		".button-menu__dropdown li a",
-	)[2].href.replace("consistency?search", "consistency/?search");
+	);
+	if (!menu_links || !menu_links[2]) {
+		polykit_consistency_end(el, polykit_t("consistency_error"));
+		return;
+	}
+	const consistency_url = menu_links[2].href.replace(
+		"consistency?search",
+		"consistency/?search",
+	);
 	const consistency_page = await polykit_consistency_get_page(consistency_url);
 	if (false === consistency_page) {
 		polykit_consistency_end(el, polykit_t("consistency_error"));

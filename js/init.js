@@ -21,6 +21,22 @@ const jsScripts = [
 ];
 
 /**
+ * @param {string|null} value
+ * @param {*} fallback
+ * @returns {*}
+ */
+function polykit_init_parse_json(value, fallback) {
+	if (null === value || "" === value) {
+		return fallback;
+	}
+	try {
+		return JSON.parse(value);
+	} catch (_error) {
+		return fallback;
+	}
+}
+
+/**
  * Load languages/ja/polykit.json and glotpress.json.
  *
  * @returns {Promise<void>}
@@ -69,75 +85,76 @@ function polykit_publish_language_data(payload) {
 }
 
 /**
- * Load extension scripts in dependency order.
+ * Load extension scripts. async=false keeps execution order while downloads overlap.
  *
  * @param {string[]} urls
  * @returns {Promise<void>}
  */
-async function script(urls) {
-	if (Array.isArray(urls)) {
-		for (const item of urls) {
-			await script(item);
-		}
-		return;
-	}
+function script(urls) {
+	const names = Array.isArray(urls) ? urls : [urls];
 	const version = chrome.runtime.getManifest().version;
-	return new Promise((resolve, reject) => {
-		let r = false;
-		const t = document.getElementsByTagName("script")[0];
-		const s = document.createElement("script");
-		s.type = "text/javascript";
-		s.src = chrome.runtime.getURL(`js/${urls}.js`) + `?v=${version}`;
-		s.async = false;
-		s.onload = s.onreadystatechange = function () {
-			if (!r && (!this.readyState || "complete" === this.readyState)) {
-				r = true;
-				resolve(this);
-			}
-		};
-		s.onerror = s.onabort = reject;
-		t.parentNode.insertBefore(s, t);
-	});
+	const parent = document.head || document.documentElement;
+	return Promise.all(names.map((name) => {
+		return new Promise((resolve, reject) => {
+			const s = document.createElement("script");
+			s.type = "text/javascript";
+			s.src = chrome.runtime.getURL(`js/${name}.js`) + `?v=${version}`;
+			s.async = false;
+			s.onload = () => resolve();
+			s.onerror = reject;
+			parent.appendChild(s);
+		});
+	}));
 }
 
-// Get extension informations
-const changelog = chrome.runtime.getURL("CHANGELOG.md");
-fetch(changelog)
-	.then((response) => response.text())
-	.then((changelogData) => {
-		chrome.runtime.sendMessage(
-			"polykit-status",
-			(response) => {
-				if (chrome.runtime.lastError) {
-					return;
-				}
-				const polykit_extension_storage = (null !== localStorage.getItem("polykit_extension_status"))
-					? JSON.parse(localStorage.getItem("polykit_extension_status"))
-					: "";
-				if (
-					response &&
-					("install" === response["reason"] ||
-						"update" === response["reason"]) &&
-					polykit_extension_storage.currentVersion !==
-						response["currentVersion"]
-				) {
-					let data = {};
-					data = response;
-					const lastChange = changelogData.match(/(\* [\s\S]*?)(?=#)/);
-					data["changelog"] = (null !== lastChange) ? lastChange[1] : "";
-					localStorage.setItem(
-						"polykit_extension_status",
-						JSON.stringify(data),
+/**
+ * Record install/update metadata without blocking page-script startup.
+ *
+ * @returns {void}
+ */
+function polykit_record_extension_status() {
+	const changelog = chrome.runtime.getURL("CHANGELOG.md");
+	fetch(changelog)
+		.then((response) => response.text())
+		.then((changelogData) => {
+			chrome.runtime.sendMessage(
+				"polykit-status",
+				(response) => {
+					if (chrome.runtime.lastError) {
+						return;
+					}
+					const stored = polykit_init_parse_json(
+						localStorage.getItem("polykit_extension_status"),
+						{},
 					);
-				}
-			},
-		);
-	})
-	.then(() => polykit_load_language_files())
-	.then(() => script(jsScripts))
-	.catch(() => polykit_load_language_files().then(() => script(jsScripts)));
+					if (
+						response &&
+						("install" === response.reason ||
+							"update" === response.reason) &&
+						stored.currentVersion !== response.currentVersion
+					) {
+						const lastChange = changelogData.match(/(\* [\s\S]*?)(?=#)/);
+						localStorage.setItem(
+							"polykit_extension_status",
+							JSON.stringify({
+								...response,
+								changelog: (null !== lastChange) ? lastChange[1] : "",
+							}),
+						);
+					}
+				},
+			);
+		})
+		.catch(() => {
+			// Changelog is optional; page scripts must still load.
+		});
+}
 
-// Add the icon
+polykit_record_extension_status();
+polykit_load_language_files()
+	.then(() => script(jsScripts))
+	.catch(() => script(jsScripts));
+
 const polykit_header = document.getElementsByTagName("header")[0];
 if (polykit_header) {
 	const polykit_icon = document.createElement("img");

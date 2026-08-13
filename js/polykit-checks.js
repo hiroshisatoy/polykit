@@ -303,7 +303,7 @@ function polykit_push_messages_as_items(target, messages) {
 	messages.forEach((message) => {
 		const li = document.createElement("li");
 		if (message.includes("<")) {
-			li.innerHTML = message;
+			li.appendChild(polykit_trusted_inline_fragment(message));
 		} else {
 			li.textContent = message;
 		}
@@ -635,7 +635,7 @@ function polykit_create_check_label(el, type) {
 	const message = document.createElement("span");
 	message.className = "polykit-check-label__text";
 	if (el.innerHTML && el.innerHTML !== el.textContent) {
-		message.innerHTML = el.innerHTML;
+		message.appendChild(polykit_trusted_inline_fragment(el.innerHTML));
 	} else {
 		message.textContent = el.textContent;
 	}
@@ -901,31 +901,20 @@ function polykit_check_all_translations(force = false) {
 /**
  * @returns {void}
  */
-function polykit_checks_mutations() {
-	const tbody = document.querySelector("#translations tbody");
-	if (!tbody) {
+function polykit_on_editor_row_added(el) {
+	if (!el || !el.classList.contains("editor")) {
 		return;
 	}
-	const observer = new MutationObserver((mutations) => {
-		mutations.forEach((mutation) => {
-			mutation.addedNodes.forEach((el) => {
-				if (1 !== el.nodeType || !el.classList.contains("editor")) {
-					return;
-				}
-				const editor_id = polykit_translation_row_selector(el, "editor");
-				const preview_id = polykit_translation_row_selector(el, "preview");
-				if (!editor_id || !preview_id) {
-					return;
-				}
-				polykit_editor_checks_init(editor_id, preview_id);
-				if (polykit_get_setting("checks_enabled")) {
-					const state = polykit_prepare_row_checks(editor_id, false);
-					polykit_display_check_results(editor_id, preview_id, state);
-				}
-			});
-		});
-	});
-	observer.observe(tbody, { childList: true, subtree: true });
+	const editor_id = polykit_translation_row_selector(el, "editor");
+	const preview_id = polykit_translation_row_selector(el, "preview");
+	if (!editor_id || !preview_id) {
+		return;
+	}
+	polykit_editor_checks_init(editor_id, preview_id);
+	if (polykit_get_setting("checks_enabled")) {
+		const state = polykit_prepare_row_checks(editor_id, false);
+		polykit_display_check_results(editor_id, preview_id, state);
+	}
 }
 
 /**
@@ -1027,7 +1016,7 @@ function polykit_checks_init() {
 	}
 	polykit_check_filters();
 	polykit_check_all_translations();
-	polykit_checks_mutations();
+	polykit_register_editor_added(polykit_on_editor_row_added);
 
 	if (polykit_get_setting("checks_enabled")) {
 		polykit_ensure_review_summary();
@@ -1042,10 +1031,9 @@ function polykit_checks_init() {
 		if (!polykit_get_setting("prevent_unsaved") || !polykit_user_edited) {
 			return;
 		}
-		const open_editor = document.querySelector(
-			'.editor[style="display: table-row;"] textarea, .editor:not([style]) textarea',
-		);
-		if (open_editor && "" !== open_editor.value) {
+		const open_editor = polykit_get_visible_editor();
+		const open_textarea = open_editor && open_editor.querySelector("textarea");
+		if (open_textarea && "" !== open_textarea.value) {
 			e.preventDefault();
 			e.returnValue = "";
 			return e;
