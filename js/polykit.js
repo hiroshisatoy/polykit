@@ -77,6 +77,7 @@ jQuery(".glossary-word").contextmenu(function (e) {
 });
 
 if (polykit_user.is_on_translations) {
+	polykit_start_alternating_plugin_title();
 	$gp.editor.current &&
 		polykit_get_setting("autocopy_string_on_translation_opened") &&
 		polykit_copy_visible_original_string();

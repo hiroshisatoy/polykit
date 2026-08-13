@@ -54,3 +54,110 @@ Deno.test("polykit_get_lang is fixed to Japanese", () => {
 		"https://translate.wordpress.org/locale/ja/default/glossary/",
 	);
 });
+
+Deno.test("alternates a stable plugin translation page title", () => {
+	const document = {
+		title: "Translations < Japanese < Stable",
+		querySelectorAll() {
+			return [{
+				getAttribute: () => "/projects/wp-plugins/akismet/",
+				textContent: "Akismet Anti-spam: Spam Protection",
+			}];
+		},
+	};
+	let callback;
+	const timer = context.polykit_start_alternating_plugin_title(
+		document,
+		{
+			pathname: "/projects/wp-plugins/akismet/stable/ja/default/",
+		},
+		(next_callback, delay) => {
+			assert.strictEqual(delay, 3000);
+			callback = next_callback;
+			return 42;
+		},
+	);
+
+	assert.strictEqual(timer, 42);
+	callback();
+	assert.strictEqual(
+		document.title,
+		"Akismet Anti-spam: Spam Protection (Stable)",
+	);
+	callback();
+	assert.strictEqual(document.title, "Translations < Japanese < Stable");
+});
+
+Deno.test("uses Dev for development plugin translation pages", () => {
+	const document = {
+		title: "Translations < Japanese < Development",
+		querySelectorAll() {
+			return [{
+				getAttribute: () => "/projects/wp-plugins/example/",
+				textContent: "Example Plugin",
+			}];
+		},
+	};
+	let callback;
+	context.polykit_start_alternating_plugin_title(
+		document,
+		{
+			pathname: "/projects/wp-plugins/example/dev/ja/default/",
+		},
+		(next_callback) => {
+			callback = next_callback;
+			return 1;
+		},
+	);
+
+	callback();
+	assert.strictEqual(document.title, "Example Plugin (Dev)");
+});
+
+Deno.test("maps readme translation channels to Stable or Dev", () => {
+	for (
+		const [project, channel] of [
+			["stable-readme", "Stable"],
+			["dev-readme", "Dev"],
+		]
+	) {
+		const document = {
+			title: "Translations",
+			querySelectorAll: () => [{
+				getAttribute: () => "/projects/wp-plugins/example/",
+				textContent: "Example Plugin",
+			}],
+		};
+		let callback;
+		context.polykit_start_alternating_plugin_title(
+			document,
+			{
+				pathname: `/projects/wp-plugins/example/${project}/ja/default/`,
+			},
+			(next_callback) => {
+				callback = next_callback;
+				return 1;
+			},
+		);
+
+		callback();
+		assert.strictEqual(document.title, `Example Plugin (${channel})`);
+	}
+});
+
+Deno.test("does not change titles outside plugin translation pages", () => {
+	const document = {
+		title: "Projects",
+		querySelectorAll: () => [],
+	};
+	const timer = context.polykit_start_alternating_plugin_title(
+		document,
+		{ pathname: "/projects/wp-themes/twentytwenty/stable/ja/default/" },
+		() => {
+			throw new Error("timer should not start");
+		},
+	);
+
+	assert.strictEqual(timer, null);
+	assert.strictEqual(document.title, "Projects");
+});

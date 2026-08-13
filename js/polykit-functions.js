@@ -585,7 +585,8 @@ function polykit_tag_target_when_source_outside_viewport(
 	classElement,
 ) {
 	const target = document.querySelector(targetElement);
-	if (!target) return;
+	const source = document.querySelector(sourceElement);
+	if (!target || !source) return;
 	const observer = new IntersectionObserver((entries) => {
 		if (true === entries[0].isIntersecting) {
 			target.classList.remove(classElement);
@@ -593,7 +594,7 @@ function polykit_tag_target_when_source_outside_viewport(
 			target.classList.add(classElement);
 		}
 	}, { threshold: [1], rootMargin: "80px" });
-	observer.observe(document.querySelector(sourceElement));
+	observer.observe(source);
 }
 
 /**
@@ -602,7 +603,9 @@ function polykit_tag_target_when_source_outside_viewport(
  * @returns {void}
  */
 function polykit_scroll_to_top() {
-	document.querySelector("#masthead").scrollIntoView({
+	const masthead = document.querySelector("#masthead");
+	if (!masthead) return;
+	masthead.scrollIntoView({
 		block: "start",
 		behavior: "smooth",
 	});
@@ -799,4 +802,40 @@ function polykit_check_for_URL(word, translatedText) {
 	];
 
 	return matches.some((entry) => entry.toLowerCase().includes(lowerWord));
+}
+
+/**
+ * Alternates the translation page title with the plugin name and release channel.
+ *
+ * @param {Document} page_document
+ * @param {Location} page_location
+ * @param {Function} schedule
+ * @returns {number|null}
+ */
+function polykit_start_alternating_plugin_title(
+	page_document = document,
+	page_location = window.location,
+	schedule = window.setInterval,
+) {
+	const path_match = page_location.pathname.match(
+		/^\/projects\/wp-plugins\/([^/]+)\/(stable|dev)(?:-readme)?\/[^/]+\/[^/]+\/?$/,
+	);
+	if (!path_match) return null;
+
+	const plugin_path = `/projects/wp-plugins/${path_match[1]}/`;
+	const plugin_link = Array.from(
+		page_document.querySelectorAll(".breadcrumb a"),
+	).find((link) => link.getAttribute("href") === plugin_path);
+	const plugin_name = plugin_link?.textContent.trim();
+	if (!plugin_name) return null;
+
+	const original_title = page_document.title;
+	const channel = "stable" === path_match[2] ? "Stable" : "Dev";
+	const plugin_title = `${plugin_name} (${channel})`;
+	let show_plugin_title = false;
+
+	return schedule(() => {
+		show_plugin_title = !show_plugin_title;
+		page_document.title = show_plugin_title ? plugin_title : original_title;
+	}, 3000);
 }

@@ -69,3 +69,13 @@ Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(!("scripts" in manifest.background));
 	assert.ok(!("browser_specific_settings" in manifest));
 });
+
+Deno.test("playground pages are excluded from content scripts", () => {
+	const expected = [
+		"*://translate.wordpress.org/*/playground",
+		"*://translate.wordpress.org/*/playground/*",
+	];
+	for (const content_script of manifest.content_scripts) {
+		assert.deepStrictEqual(content_script.exclude_matches, expected);
+	}
+});
