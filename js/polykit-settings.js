@@ -38,8 +38,29 @@ if (polykit_headline_nav) {
 	const menu_link = document.createElement("a");
 	menu_link.href = "#";
 	menu_link.textContent = "PolyKit";
+	menu_link.appendChild(polykit_settings_caret_icon());
 	menu_item.appendChild(menu_link);
 	polykit_headline_nav.appendChild(menu_item);
+}
+
+/**
+ * Ionicons chevron-down (MIT, https://ionic.io/ionicons).
+ * @returns {SVGSVGElement}
+ */
+function polykit_settings_caret_icon() {
+	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+	svg.setAttribute("class", "polykit-setting__caret");
+	svg.setAttribute("viewBox", "0 0 512 512");
+	svg.setAttribute("aria-hidden", "true");
+	const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+	path.setAttribute("fill", "none");
+	path.setAttribute("stroke", "currentColor");
+	path.setAttribute("stroke-linecap", "round");
+	path.setAttribute("stroke-linejoin", "round");
+	path.setAttribute("stroke-width", "48");
+	path.setAttribute("d", "M112 184l144 144 144-144");
+	svg.appendChild(path);
+	return svg;
 }
 
 const polykit_settings_menu = document.querySelector(".polykit-setting");

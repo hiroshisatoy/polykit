@@ -89,7 +89,6 @@
 	--polykit-space-glossary-link-gap-sm: 14px;
 	--polykit-space-ripple: 22px;
 	--polykit-space-settings-header-offset: 19px;
-	--polykit-space-settings-caret-size: 5px;
 
 	/* Sizes */
 	--polykit-size-border-accent: 2px;
@@ -99,6 +98,7 @@
 	--polykit-size-action-button: 32px;
 	--polykit-size-action-button-min-height: 28px;
 	--polykit-size-action-icon: 32px;
+	--polykit-size-settings-caret: 12px;
 	--polykit-size-inline-actions-width: 130px;
 	--polykit-size-glossary-divider-height: 36px;
 	--polykit-size-suggestions-max-height: 300px;

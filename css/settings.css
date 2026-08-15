@@ -1,14 +1,10 @@
 .polykit-setting > a {
-	&::after {
-		content: '';
+	.polykit-setting__caret {
 		display: inline-block;
+		width: var(--polykit-size-settings-caret);
+		height: var(--polykit-size-settings-caret);
 		margin-left: var(--polykit-space-sm);
 		vertical-align: middle;
-		transform: rotate(45deg);
-		width: var(--polykit-space-settings-caret-size);
-		height: var(--polykit-space-settings-caret-size);
-		border-right: var(--polykit-size-border-accent) solid var(--polykit-color-white);
-		border-bottom: var(--polykit-size-border-accent) solid var(--polykit-color-white);
 		transition: transform var(--polykit-duration-fast) ease-in-out;
 	}
 }
@@ -20,9 +16,8 @@
 }
 
 .polykit-settings-on-screen {
-	.polykit-setting > a::after {
-		transform: rotate(-135deg);
-		transform-origin: center var(--polykit-space-settings-caret-size);
+	.polykit-setting > a .polykit-setting__caret {
+		transform: rotate(180deg);
 	}
 }
 
