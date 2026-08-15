@@ -2,3 +2,4 @@
 *.xpi
 .vscode/
 .vs/
+.DS_Store

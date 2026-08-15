@@ -154,12 +154,3 @@ polykit_record_extension_status();
 polykit_load_language_files()
 	.then(() => script(jsScripts))
 	.catch(() => script(jsScripts));
-
-const polykit_header = document.getElementsByTagName("header")[0];
-if (polykit_header) {
-	const polykit_icon = document.createElement("img");
-	polykit_icon.src = chrome.runtime.getURL("icons/icon-48.png");
-	polykit_icon.style.display = "none";
-	polykit_icon.classList.add("polykit-icon");
-	polykit_header.parentNode.insertBefore(polykit_icon, polykit_header);
-}

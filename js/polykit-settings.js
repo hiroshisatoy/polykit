@@ -38,11 +38,6 @@ if (polykit_headline_nav) {
 	const menu_link = document.createElement("a");
 	menu_link.href = "#";
 	menu_link.textContent = "PolyKit";
-	const polykit_icon = document.querySelector(".polykit-icon");
-	if (polykit_icon) {
-		polykit_icon.style.display = "";
-		menu_link.prepend(polykit_icon);
-	}
 	menu_item.appendChild(menu_link);
 	polykit_headline_nav.appendChild(menu_item);
 }
