@@ -37,30 +37,22 @@ if (polykit_headline_nav) {
 	menu_item.className = "menu-item menu-item-type-custom menu-item-object-custom menu-item-polykit polykit-setting";
 	const menu_link = document.createElement("a");
 	menu_link.href = "#";
-	menu_link.textContent = "PolyKit";
-	menu_link.appendChild(polykit_settings_caret_icon());
+	const menu_label = document.createElement("span");
+	menu_label.className = "polykit-setting__label";
+	menu_label.textContent = "PolyKit";
+	menu_link.append(menu_label, polykit_settings_caret_icon());
 	menu_item.appendChild(menu_link);
 	polykit_headline_nav.appendChild(menu_item);
 }
 
 /**
- * Ionicons chevron-down (MIT, https://ionic.io/ionicons).
- * @returns {SVGSVGElement}
+ * @returns {HTMLSpanElement}
  */
 function polykit_settings_caret_icon() {
-	const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-	svg.setAttribute("class", "polykit-setting__caret");
-	svg.setAttribute("viewBox", "0 0 512 512");
-	svg.setAttribute("aria-hidden", "true");
-	const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-	path.setAttribute("fill", "none");
-	path.setAttribute("stroke", "currentColor");
-	path.setAttribute("stroke-linecap", "round");
-	path.setAttribute("stroke-linejoin", "round");
-	path.setAttribute("stroke-width", "48");
-	path.setAttribute("d", "M112 184l144 144 144-144");
-	svg.appendChild(path);
-	return svg;
+	const icon = document.createElement("span");
+	icon.className = "dashicons dashicons-arrow-down-alt2 polykit-setting__caret";
+	icon.setAttribute("aria-hidden", "true");
+	return icon;
 }
 
 const polykit_settings_menu = document.querySelector(".polykit-setting");
@@ -482,16 +474,19 @@ function polykit_generate_settings_panel() {
 /**
  * Create the settings panel close control.
  *
- * @returns {HTMLAnchorElement}
+ * @returns {HTMLButtonElement}
  */
 function polykit_create_settings_close_button() {
-	const closeSettings = document.createElement("A");
+	const closeSettings = document.createElement("BUTTON");
+	closeSettings.type = "button";
 	closeSettings.classList.add("polykit-close-settings");
-	closeSettings.href = "#";
 	const icon = document.createElement("SPAN");
-	icon.classList.add("polykit-close-settings__icon");
+	icon.classList.add(
+		"dashicons",
+		"dashicons-no-alt",
+		"polykit-close-settings__icon",
+	);
 	icon.setAttribute("aria-hidden", "true");
-	icon.textContent = "\u00D7";
 	closeSettings.append(icon, document.createTextNode(polykit_t("close")));
 	closeSettings.addEventListener("click", (event) => {
 		event.preventDefault();
@@ -536,7 +531,6 @@ function polykit_build_settings_tabs(container, tab_defs) {
 		panel.classList.add("polykit-settings-panel");
 		panel.id = `polykit-settings-panel${tab_index}`;
 		panel.dataset.polykitSettingsPanel = tab_def.slug;
-		panel.appendChild(polykit_create_settings_close_button());
 		const panel_title = document.createElement("H2");
 		panel_title.classList.add("polykit-settings-panel__title");
 		panel_title.textContent = tab_def.label;
@@ -548,12 +542,15 @@ function polykit_build_settings_tabs(container, tab_defs) {
 		panels.appendChild(panel);
 
 		style_rules.push(
-			`#${radio.id}:checked ~ .polykit-settings-tabs #${tab.id}{background:var(--polykit-color-settings-tab-active-bg);color:var(--polykit-color-text);font-weight:600;border-color:var(--polykit-color-border);border-bottom:1px solid var(--polykit-color-settings-tab-active-bg);margin-bottom:-1px;}`,
+			`#${radio.id}:checked ~ .polykit-settings-header .polykit-settings-tabs #${tab.id}{background:var(--polykit-color-settings-tab-active-bg);color:var(--polykit-color-text);font-weight:600;border-color:var(--polykit-color-border);border-bottom:1px solid var(--polykit-color-settings-tab-active-bg);margin-bottom:-1px;}`,
 			`#${radio.id}:checked ~ .polykit-settings-panels #${panel.id}{display:flex;}`,
 		);
 	});
 
-	container.appendChild(tabs);
+	const header = document.createElement("DIV");
+	header.classList.add("polykit-settings-header");
+	header.append(tabs, polykit_create_settings_close_button());
+	container.appendChild(header);
 	container.appendChild(panels);
 
 	let style_el = document.getElementById("polykit-settings-tab-styles");

@@ -6,13 +6,12 @@
 }
 
 table.translations {
-	.actions{
-	a.action {
-		text-decoration: none;
-		display: block;
+	.actions {
+		a.action {
+			text-decoration: none;
+			display: block;
+		}
 	}
-	}
-
 
 	tr.preview {
 		&.polykit-has-check-warning {
@@ -549,6 +548,12 @@ li.consistency-header-index {
 }
 
 .polykit-arrow {
+	width: 1em;
+	height: 1em;
+	font-size: 1em;
+	line-height: 1;
+	margin-inline-start: 0.25em;
+	vertical-align: middle;
 	color: var(--polykit-color-danger-dark);
 }
 
@@ -731,7 +736,7 @@ li.consistency-header-index {
 
 .polykit-header-is-hidden {
 	#polykit-back-to-top {
-		display: inline-block;
+		display: inline-flex;
 	}
 }
 
@@ -740,9 +745,11 @@ li.consistency-header-index {
 	bottom: 2em;
 	left: 1em;
 	display: none;
+	align-items: center;
+	justify-content: center;
 	text-decoration: none;
 	font-size: var(--polykit-font-size-back-to-top);
-	line-height: 2em;
+	line-height: 1;
 	text-align: center;
 	width: 2em;
 	height: 2em;
@@ -755,6 +762,13 @@ li.consistency-header-index {
 	border-radius: var(--polykit-radius-round);
 	background-color: var(--polykit-color-white);
 	box-sizing: content-box;
+
+	.dashicons {
+		width: 1em;
+		height: 1em;
+		font-size: 1em;
+		line-height: 1;
+	}
 }
 
 #polykit-title-links {

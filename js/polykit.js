@@ -55,8 +55,12 @@ function polykit_init_back_to_top() {
 	}
 	const polykit_to_top = document.createElement("a");
 	polykit_to_top.id = "polykit-back-to-top";
-	polykit_to_top.textContent = "↑";
 	polykit_to_top.title = polykit_t("back_to_top");
+	polykit_to_top.setAttribute("aria-label", polykit_t("back_to_top"));
+	const to_top_icon = document.createElement("span");
+	to_top_icon.className = "dashicons dashicons-arrow-up-alt2";
+	to_top_icon.setAttribute("aria-hidden", "true");
+	polykit_to_top.appendChild(to_top_icon);
 	document.body.appendChild(polykit_to_top);
 
 	polykit_tag_target_when_source_outside_viewport(

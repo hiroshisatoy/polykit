@@ -281,8 +281,8 @@ async function polykit_do_consistency(el) {
 	});
 	const arrow = document.createElement("span");
 	arrow.title = polykit_t("consistency_arrow_title");
-	arrow.className = "polykit-arrow";
-	arrow.textContent = " ⟵";
+	arrow.className = "polykit-arrow dashicons dashicons-arrow-left-alt2";
+	arrow.setAttribute("aria-hidden", "true");
 
 	for (
 		let consistency_alternatives_i = 0;
