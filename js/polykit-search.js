@@ -174,7 +174,7 @@ function polykit_do_search(term, plugin_slugs) {
 			if ("" !== slug) {
 				polykit_search_tabs.push(
 					window.open(
-						`https://${hostname}/projects/${slug}/dev/${current_locale}${filters}&polykit_resultpage`,
+						`https://${hostname}/projects/wp-plugins/${slug}/dev/${current_locale}${filters}&polykit_resultpage`,
 						"_blank",
 					),
 				);

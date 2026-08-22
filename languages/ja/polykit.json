@@ -259,6 +259,7 @@
 	"bulk_empty_alternative": "候補が未選択です。",
 	"bulk_plural_mismatch": "複数形の数が一致しません。",
 	"bulk_empty_form": "空の翻訳フォームがあります。",
+	"bulk_editor_timeout": "翻訳エディターを読み込めませんでした。タブを閉じます。",
 	"bulk_danger_zone": "危険ゾーン: ",
 	"bulk_reject_all": "選択を一括却下",
 	"bulk_replace_save": "一括置換して保存",

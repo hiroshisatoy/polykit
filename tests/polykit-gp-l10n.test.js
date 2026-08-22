@@ -51,6 +51,11 @@ Deno.test("translates GlotPress UI strings", () => {
 		vm.runInContext("polykit_gp_translate_text( input )", context),
 		"プロジェクト用語集",
 	);
+	context.input = "Allow translation for all users";
+	assert.strictEqual(
+		vm.runInContext("polykit_gp_translate_text( input )", context),
+		"Allow translation for all users",
+	);
 });
 
 Deno.test("refreshes i18n data when asynchronous GlotPress strings are ready", () => {
