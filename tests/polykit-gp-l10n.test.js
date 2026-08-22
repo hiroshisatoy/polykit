@@ -6,8 +6,21 @@ import vm from "node:vm";
 const strings = JSON.parse(
 	Deno.readTextFileSync(new URL("../languages/ja/glotpress.json", import.meta.url)),
 );
+const listeners = {};
 const context = {
 	input: "\n\tSet / Sub Project\n",
+	i18n_force: null,
+	document: {
+		addEventListener(name, callback) {
+			listeners[name] = callback;
+		},
+	},
+	polykit_bootstrap_i18n(force) {
+		context.i18n_force = force;
+	},
+	polykit_get_setting() {
+		return false;
+	},
 	window: {
 		polykit_gp_strings: strings,
 	},
@@ -38,6 +51,12 @@ Deno.test("translates GlotPress UI strings", () => {
 		vm.runInContext("polykit_gp_translate_text( input )", context),
 		"プロジェクト用語集",
 	);
+});
+
+Deno.test("refreshes i18n data when asynchronous GlotPress strings are ready", () => {
+	assert.strictEqual(typeof listeners["polykit:gp-strings-ready"], "function");
+	listeners["polykit:gp-strings-ready"]();
+	assert.strictEqual(context.i18n_force, true);
 });
 
 Deno.test("skips only the expected GlotPress elements", () => {
