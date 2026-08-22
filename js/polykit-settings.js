@@ -56,6 +56,7 @@ function polykit_settings_caret_icon() {
 }
 
 const polykit_settings_menu = document.querySelector(".polykit-setting");
+let polykit_settings_ready = false;
 polykit_settings_menu && polykit_settings_menu.addEventListener("click", (event) => {
 	event.preventDefault();
 	if (
@@ -71,6 +72,29 @@ polykit_settings_menu && polykit_settings_menu.addEventListener("click", (event)
 	document.body.classList.toggle("polykit-settings-on-screen");
 	polykit_generate_settings_panel();
 });
+
+/**
+ * Open the settings panel once all page scripts are ready.
+ *
+ * @returns {void}
+ */
+function polykit_open_settings_panel() {
+	if (
+		!polykit_settings_ready || !polykit_settings_menu ||
+		"true" !== document.documentElement.dataset.polykitOpenSettings
+	) {
+		return;
+	}
+	delete document.documentElement.dataset.polykitOpenSettings;
+	if (!document.body.classList.contains("polykit-settings-on-screen")) {
+		polykit_settings_menu.click();
+	}
+	if ("#polykit-settings" === window.location.hash) {
+		history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
+	}
+}
+
+document.addEventListener("polykit:open-settings", polykit_open_settings_panel);
 
 function polykit_generate_settings_panel() {
 	const polykit_settings = document.querySelector(".polykit-settings");
