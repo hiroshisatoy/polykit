@@ -7,6 +7,7 @@
 
 let polykit_gp_strings_sorted = null;
 let polykit_gp_l10n_timer = null;
+let polykit_gp_l10n_initialized = false;
 
 const polykit_gp_skip_selector = [
 	"script",
@@ -163,9 +164,10 @@ function polykit_localize_glotpress(root = document.body) {
  * @returns {void}
  */
 function polykit_init_glotpress_l10n() {
-	if (!polykit_should_localize_glotpress()) {
+	if (polykit_gp_l10n_initialized || !polykit_should_localize_glotpress()) {
 		return;
 	}
+	polykit_gp_l10n_initialized = true;
 	const run = () => {
 		clearTimeout(polykit_gp_l10n_timer);
 		polykit_gp_l10n_timer = setTimeout(() => polykit_localize_glotpress(), 30);
@@ -190,3 +192,9 @@ function polykit_init_glotpress_l10n() {
 	});
 	jQuery(document).ajaxComplete(run);
 }
+
+document.addEventListener("polykit:gp-strings-ready", () => {
+	polykit_bootstrap_i18n(true);
+	polykit_gp_strings_sorted = null;
+	polykit_init_glotpress_l10n();
+});

@@ -8,11 +8,12 @@
 /**
  * Read translation payloads from #polykit-i18n-data (shared DOM, CSP-safe).
  *
+ * @param {boolean} force Refresh already initialized data.
  * @returns {void}
  */
-function polykit_bootstrap_i18n() {
+function polykit_bootstrap_i18n(force = false) {
 	if (
-		window.polykit_strings && Object.keys(window.polykit_strings).length > 0
+		!force && window.polykit_strings && Object.keys(window.polykit_strings).length > 0
 	) {
 		return;
 	}

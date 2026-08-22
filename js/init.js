@@ -37,34 +37,41 @@ function polykit_init_parse_json(value, fallback) {
 }
 
 /**
- * Load languages/ja/polykit.json and glotpress.json.
+ * Load PolyKit's own UI strings before page scripts start.
  *
- * @returns {Promise<void>}
+ * @returns {Promise<Record<string, string>>}
  */
-async function polykit_load_language_files() {
+async function polykit_load_polykit_strings() {
 	const strings = {};
-	const gp_strings = {};
 	const base = chrome.runtime.getURL("languages/ja/");
 	try {
-		const [polykit_response, gp_response] = await Promise.all([
-			fetch(`${base}polykit.json`),
-			fetch(`${base}glotpress.json`),
-		]);
+		const polykit_response = await fetch(`${base}polykit.json`);
 		if (polykit_response.ok) {
 			Object.assign(strings, await polykit_response.json());
-		}
-		if (gp_response.ok) {
-			Object.assign(gp_strings, await gp_response.json());
 		}
 	} catch (_error) {
 		// Keep empty strings; UI keys will fall back to raw keys.
 	}
+	return strings;
+}
 
-	polykit_publish_language_data({
-		polykit_strings: strings,
-		polykit_gp_strings: gp_strings,
-		polykit_ui_locale: "ja",
-	});
+/**
+ * Load GlotPress UI strings without blocking PolyKit startup.
+ *
+ * @returns {Promise<Record<string, string>>}
+ */
+async function polykit_load_glotpress_strings() {
+	const strings = {};
+	const base = chrome.runtime.getURL("languages/ja/");
+	try {
+		const response = await fetch(`${base}glotpress.json`);
+		if (response.ok) {
+			Object.assign(strings, await response.json());
+		}
+	} catch (_error) {
+		// GlotPress remains in English when its optional dictionary cannot load.
+	}
+	return strings;
 }
 
 /**
@@ -150,7 +157,33 @@ function polykit_record_extension_status() {
 		});
 }
 
+/**
+ * Start PolyKit, then apply the optional GlotPress UI dictionary when ready.
+ *
+ * @returns {Promise<void>}
+ */
+async function polykit_start() {
+	const gp_strings_promise = polykit_load_glotpress_strings();
+	const strings = await polykit_load_polykit_strings();
+	polykit_publish_language_data({
+		polykit_strings: strings,
+		polykit_gp_strings: {},
+		polykit_ui_locale: "ja",
+	});
+	try {
+		await script(jsScripts);
+	} catch (_error) {
+		return;
+	}
+
+	const gp_strings = await gp_strings_promise;
+	polykit_publish_language_data({
+		polykit_strings: strings,
+		polykit_gp_strings: gp_strings,
+		polykit_ui_locale: "ja",
+	});
+	document.dispatchEvent(new CustomEvent("polykit:gp-strings-ready"));
+}
+
 polykit_record_extension_status();
-polykit_load_language_files()
-	.then(() => script(jsScripts))
-	.catch(() => script(jsScripts));
+polykit_start();

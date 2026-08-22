@@ -70,15 +70,16 @@ Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(!("browser_specific_settings" in manifest));
 });
 
-Deno.test("init.js loads page scripts without waiting for changelog", () => {
+Deno.test("init.js loads page scripts without waiting for changelog or GlotPress strings", () => {
 	const init_source = Deno.readTextFileSync(new URL("js/init.js", root));
 	assert.ok(init_source.includes("polykit_record_extension_status();"));
+	assert.ok(init_source.includes("const gp_strings_promise = polykit_load_glotpress_strings();"));
+	assert.ok(init_source.includes("await script(jsScripts);"));
 	assert.ok(
-		init_source.includes(
-			"polykit_load_language_files()\n\t.then(() => script(jsScripts))",
-		),
+		init_source.indexOf("await script(jsScripts);") <
+			init_source.indexOf("const gp_strings = await gp_strings_promise;"),
 	);
-	assert.ok(!init_source.includes(".then(() => polykit_load_language_files())"));
+	assert.ok(init_source.includes('new CustomEvent("polykit:gp-strings-ready")'));
 });
 
 Deno.test("playground pages are excluded from content scripts", () => {
