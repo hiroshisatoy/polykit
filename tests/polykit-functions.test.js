@@ -25,6 +25,48 @@ Deno.test("polykit_occurrences counts case-insensitive occurrences", () => {
 	assert.strictEqual(context.polykit_occurrences("設定を開く", "表示"), 0);
 });
 
+Deno.test("glossary wave dash matches arbitrary translated text", () => {
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences(
+			"本当に削除してもよいですか ?",
+			"本当に〜してもよいですか ?",
+		),
+		1,
+	);
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences(
+			"本当に削除してもよいですか ? 本当に更新してもよいですか ?",
+			"本当に〜してもよいですか ?",
+		),
+		2,
+	);
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences(
+			"削除してもよいですか ?",
+			"本当に〜してもよいですか ?",
+		),
+		0,
+	);
+});
+
+Deno.test("glossary matching keeps literal behavior without a usable wildcard", () => {
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences(
+			"保存して保存します",
+			"保存",
+		),
+		2,
+	);
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences("任意の訳文", "〜"),
+		0,
+	);
+	assert.strictEqual(
+		context.polykit_glossary_translation_occurrences("〜", "〜"),
+		1,
+	);
+});
+
 Deno.test("polykit_is_uppercase", () => {
 	assert.strictEqual(context.polykit_is_uppercase("A"), true);
 	assert.strictEqual(context.polykit_is_uppercase("a"), false);
