@@ -918,6 +918,18 @@ function polykit_on_editor_row_added(el) {
 }
 
 /**
+ * Track edits from current and dynamically added translation fields.
+ *
+ * @param {Event} event
+ * @returns {void}
+ */
+function polykit_mark_user_edited(event) {
+	if (event.target?.matches?.("textarea")) {
+		polykit_user_edited = true;
+	}
+}
+
+/**
  * @returns {void}
  */
 function polykit_update_check_filters() {
@@ -1022,11 +1034,7 @@ function polykit_checks_init() {
 		polykit_ensure_review_summary();
 	}
 
-	document.querySelectorAll("textarea").forEach((el) => {
-		el.addEventListener("change", () => {
-			polykit_user_edited = true;
-		});
-	});
+	document.addEventListener("input", polykit_mark_user_edited);
 	window.addEventListener("beforeunload", (e) => {
 		if (!polykit_get_setting("prevent_unsaved") || !polykit_user_edited) {
 			return;
