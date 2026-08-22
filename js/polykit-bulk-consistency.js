@@ -1,6 +1,24 @@
 "use strict";
 
 const polykit_bulk_safe_limit = 25;
+const polykit_bulk_max_retries = 20;
+
+/**
+ * Validate all replacement values before changing any form.
+ *
+ * @param {NodeListOf<HTMLTextAreaElement>|HTMLTextAreaElement[]} forms
+ * @param {string[]} replacement
+ * @returns {boolean}
+ */
+function polykit_bulk_apply_replacement(forms, replacement) {
+	if (replacement.some((value) => "" === value)) {
+		return false;
+	}
+	forms.forEach((form, i) => {
+		form.value = replacement[i];
+	});
+	return true;
+}
 
 /**
  * @returns {void}
@@ -66,15 +84,7 @@ function polykit_bulk_magic_save() {
 		);
 		return;
 	}
-	let has_empty = false;
-	forms.forEach((form, i) => {
-		if ("" === replacement[i]) {
-			has_empty = true;
-			return;
-		}
-		form.value = replacement[i];
-	});
-	if (has_empty) {
+	if (!polykit_bulk_apply_replacement(forms, replacement)) {
 		warning.textContent = polykit_t("bulk_empty_form");
 		document.querySelector(".translation-wrapper")?.insertAdjacentElement(
 			"beforebegin",
@@ -98,11 +108,22 @@ function polykit_bulk_magic_reject() {
 
 /**
  * @param {string} action_type
+ * @param {number} attempt
  * @returns {void}
  */
-function polykit_bulk_gp_action(action_type) {
+function polykit_bulk_gp_action(action_type, attempt = 0) {
 	if (!$gp.editor.current) {
-		setTimeout(() => polykit_bulk_gp_action(action_type), 1000);
+		if (attempt >= polykit_bulk_max_retries) {
+			const warning = polykit_create_element("div", { class: "polykit-bulk-warning" });
+			warning.textContent = polykit_t("bulk_editor_timeout");
+			document.querySelector(".translation-wrapper")?.insertAdjacentElement(
+				"beforebegin",
+				warning,
+			);
+			setTimeout(() => window.close(), 5000);
+			return;
+		}
+		setTimeout(() => polykit_bulk_gp_action(action_type, attempt + 1), 1000);
 		return;
 	}
 	if ("save" === action_type) {
