@@ -14,3 +14,27 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 		return true;
 	}
 });
+
+/**
+ * Open PolyKit settings in a supported tab or create one.
+ *
+ * @param {chrome.tabs.Tab} tab
+ * @returns {void}
+ */
+function polykit_open_settings_from_action(tab) {
+	const settings_url = "https://translate.wordpress.org/#polykit-settings";
+	if (
+		tab.id && tab.url &&
+		tab.url.startsWith("https://translate.wordpress.org/")
+	) {
+		chrome.tabs.sendMessage(tab.id, "polykit-open-settings", () => {
+			if (chrome.runtime.lastError) {
+				chrome.tabs.create({ url: settings_url });
+			}
+		});
+		return;
+	}
+	chrome.tabs.create({ url: settings_url });
+}
+
+chrome.action.onClicked.addListener(polykit_open_settings_from_action);
