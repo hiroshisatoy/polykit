@@ -43,12 +43,26 @@ function polykit_should_localize_glotpress() {
 }
 
 /**
- * @returns {Array<[string, string]>}
+ * @param {string} source
+ * @returns {RegExp}
+ */
+function polykit_gp_create_string_pattern(source) {
+	const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const word_character = /[\p{L}\p{N}_]/u;
+	const start_boundary = word_character.test(source[0]) ? "(?<![\\p{L}\\p{N}_])" : "";
+	const end_boundary = word_character.test(source[source.length - 1]) ? "(?![\\p{L}\\p{N}_])" : "";
+	return new RegExp(`${start_boundary}${escaped}${end_boundary}`, "gu");
+}
+
+/**
+ * @returns {Array<[RegExp, string]>}
  */
 function polykit_gp_get_sorted_strings() {
 	if (!polykit_gp_strings_sorted) {
 		const map = window.polykit_gp_strings || {};
-		polykit_gp_strings_sorted = Object.entries(map).sort((a, b) => b[0].length - a[0].length);
+		polykit_gp_strings_sorted = Object.entries(map)
+			.sort((a, b) => b[0].length - a[0].length)
+			.map(([source, target]) => [polykit_gp_create_string_pattern(source), target]);
 	}
 	return polykit_gp_strings_sorted;
 }
@@ -62,10 +76,8 @@ function polykit_gp_translate_text(text) {
 		return text;
 	}
 	let translated = text;
-	polykit_gp_get_sorted_strings().forEach(([source, target]) => {
-		if (translated.includes(source)) {
-			translated = translated.split(source).join(target);
-		}
+	polykit_gp_get_sorted_strings().forEach(([pattern, target]) => {
+		translated = translated.replace(pattern, () => target);
 	});
 	return translated;
 }
