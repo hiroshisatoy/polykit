@@ -184,3 +184,5 @@ function polykit_init() {
 }
 
 polykit_init();
+polykit_settings_ready = true;
+polykit_open_settings_panel();

@@ -21,6 +21,26 @@ const jsScripts = [
 ];
 
 /**
+ * Persist a settings request in the shared DOM until page scripts are ready.
+ *
+ * @returns {void}
+ */
+function polykit_request_settings_panel() {
+	document.documentElement.dataset.polykitOpenSettings = "true";
+	document.dispatchEvent(new CustomEvent("polykit:open-settings"));
+}
+
+chrome.runtime.onMessage.addListener((request) => {
+	if ("polykit-open-settings" === request) {
+		polykit_request_settings_panel();
+	}
+});
+
+if ("#polykit-settings" === window.location.hash) {
+	polykit_request_settings_panel();
+}
+
+/**
  * @param {string|null} value
  * @param {*} fallback
  * @returns {*}
