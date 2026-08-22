@@ -962,6 +962,33 @@ function polykit_occurrences(string, subString) {
 	return n;
 }
 
+/**
+ * Count glossary translations, treating the wave dash as a wildcard.
+ *
+ * @param {string} translatedText
+ * @param {string} glossaryTranslation
+ * @returns {number}
+ */
+function polykit_glossary_translation_occurrences(
+	translatedText,
+	glossaryTranslation,
+) {
+	if (
+		!translatedText || !glossaryTranslation ||
+		!glossaryTranslation.includes("〜")
+	) {
+		return polykit_occurrences(translatedText, glossaryTranslation);
+	}
+
+	const parts = glossaryTranslation.split("〜");
+	if (!parts.some((part) => "" !== part)) {
+		return polykit_occurrences(translatedText, glossaryTranslation);
+	}
+	const escaped = parts.map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+	const pattern = escaped.join("[\\s\\S]+?");
+	return (String(translatedText).match(new RegExp(pattern, "gi")) || []).length;
+}
+
 function polykit_check_for_URL(word, translatedText) {
 	if (!word || !translatedText) return false;
 

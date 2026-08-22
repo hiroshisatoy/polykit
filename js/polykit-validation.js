@@ -206,7 +206,7 @@ function polykit_collect_glossary_warnings(selector, form_index) {
 				if ("N/A" === glossary_word_translations[index].translation) {
 					return true;
 				}
-				const translation_word_occurrence = polykit_occurrences(
+				const translation_word_occurrence = polykit_glossary_translation_occurrences(
 					translation.value,
 					glossary_word_translations[index].translation,
 				);
