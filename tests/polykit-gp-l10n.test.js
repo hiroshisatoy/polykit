@@ -33,6 +33,11 @@ Deno.test("translates GlotPress UI strings", () => {
 		vm.runInContext("polykit_gp_translate_text( input )", context),
 		"検索: 並び替え項目: 並び順:",
 	);
+	context.input = "Project Glossary";
+	assert.strictEqual(
+		vm.runInContext("polykit_gp_translate_text( input )", context),
+		"プロジェクト用語集",
+	);
 });
 
 Deno.test("skips only the expected GlotPress elements", () => {
