@@ -37,4 +37,11 @@ function polykit_open_settings_from_action(tab) {
 	chrome.tabs.create({ url: settings_url });
 }
 
-chrome.action.onClicked.addListener(polykit_open_settings_from_action);
+chrome.runtime.onMessage.addListener((request) => {
+	if ("polykit-open-settings-from-popup" !== request) {
+		return;
+	}
+	chrome.tabs.query({ active: true, currentWindow: true }).then(([tab]) => {
+		polykit_open_settings_from_action(tab || {});
+	});
+});

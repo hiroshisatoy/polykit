@@ -19,6 +19,7 @@ function file_exists(relative_path) {
 Deno.test("manifest referenced files exist", () => {
 	const files = [];
 	files.push(manifest.background.service_worker);
+	files.push(manifest.action.default_popup);
 	for (const content_script of manifest.content_scripts) {
 		if (content_script.js) {
 			files.push(...content_script.js);
@@ -65,7 +66,9 @@ Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(Array.isArray(manifest.permissions));
 	assert.ok(manifest.permissions.includes("storage"));
 	assert.strictEqual(manifest.background.service_worker, "js/background.js");
-	assert.strictEqual(manifest.action.default_title, "PolyKit の設定を開く");
+	assert.ok(manifest.permissions.includes("activeTab"));
+	assert.strictEqual(manifest.action.default_title, "PolyKit メニューを開く");
+	assert.strictEqual(manifest.action.default_popup, "popup.html");
 	assert.strictEqual(manifest.action.default_icon["16"], "icons/icon-16.png");
 	// Chrome は MV3 で background.scripts を拒否する。Firefox 向け差分は pack-ext.js が .xpi 生成時に適用する。
 	assert.ok(!("scripts" in manifest.background));

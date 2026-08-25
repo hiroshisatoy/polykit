@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>PolyKit</title>
+		<link rel="stylesheet" href="css/popup.css">
+	</head>
+	<body>
+		<main class="popup">
+			<header class="popup__header">
+				<img src="icons/icon-32.png" width="32" height="32" alt="">
+				<div>
+					<h1>PolyKit</h1>
+					<p>翻訳ツールキット</p>
+				</div>
+			</header>
+
+			<div class="popup__menu">
+				<label class="setting" for="translate-interface">
+					<span>
+						<strong>UI を日本語に翻訳</strong>
+						<small id="translation-help">translate.wordpress.org の画面に反映します</small>
+					</span>
+					<input id="translate-interface" type="checkbox" role="switch" checked>
+				</label>
+
+				<button id="open-settings" type="button">
+					<span>
+						<strong>設定を開く</strong>
+						<small>チェック項目やツールを設定</small>
+					</span>
+					<span aria-hidden="true">›</span>
+				</button>
+			</div>
+			<p id="status" class="status" role="status" aria-live="polite"></p>
+		</main>
+		<script src="js/popup.js"></script>
+	</body>
+</html>

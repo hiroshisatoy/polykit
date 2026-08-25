@@ -47,7 +47,10 @@ function polykit_should_localize_glotpress() {
  * @returns {RegExp}
  */
 function polykit_gp_create_string_pattern(source) {
-	const escaped = source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const escaped = source
+		.split(/\s+/)
+		.map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+		.join("\\s+");
 	const word_character = /[\p{L}\p{N}_]/u;
 	const start_boundary = word_character.test(source[0]) ? "(?<![\\p{L}\\p{N}_])" : "";
 	const end_boundary = word_character.test(source[source.length - 1]) ? "(?![\\p{L}\\p{N}_])" : "";

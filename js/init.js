@@ -30,9 +30,23 @@ function polykit_request_settings_panel() {
 	document.dispatchEvent(new CustomEvent("polykit:open-settings"));
 }
 
-chrome.runtime.onMessage.addListener((request) => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 	if ("polykit-open-settings" === request) {
 		polykit_request_settings_panel();
+		return;
+	}
+	if ("polykit-get-translate-interface" === request) {
+		sendResponse({
+			enabled: "false" !== localStorage.getItem("polykit_translate_interface"),
+		});
+		return;
+	}
+	if (
+		request && "polykit-set-translate-interface" === request.type &&
+		"boolean" === typeof request.enabled
+	) {
+		localStorage.setItem("polykit_translate_interface", request.enabled);
+		window.location.reload();
 	}
 });
 
@@ -183,6 +197,15 @@ function polykit_record_extension_status() {
  * @returns {Promise<void>}
  */
 async function polykit_start() {
+	const shared_settings = await chrome.storage.local.get(
+		"polykit_translate_interface",
+	);
+	if ("boolean" === typeof shared_settings.polykit_translate_interface) {
+		localStorage.setItem(
+			"polykit_translate_interface",
+			shared_settings.polykit_translate_interface,
+		);
+	}
 	const gp_strings_promise = polykit_load_glotpress_strings();
 	const strings = await polykit_load_polykit_strings();
 	polykit_publish_language_data({

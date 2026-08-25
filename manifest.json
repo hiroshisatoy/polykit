@@ -11,7 +11,8 @@
 		"128": "icons/icon-128.png"
 	},
 	"action": {
-		"default_title": "PolyKit の設定を開く",
+		"default_title": "PolyKit メニューを開く",
+		"default_popup": "popup.html",
 		"default_icon": {
 			"16": "icons/icon-16.png",
 			"32": "icons/icon-32.png"
@@ -21,6 +22,7 @@
 		"service_worker": "js/background.js"
 	},
 	"permissions": [
+		"activeTab",
 		"storage"
 	],
 	"content_scripts": [
