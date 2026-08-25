@@ -40,7 +40,13 @@ deno task pack
 ## 注意
 
 - **GlotDict 本体とは併用しないでください**（DOM 操作が重複します）
-- 設定は `polykit_` 接頭辞の `localStorage` に保存されます
+- ページ内設定は `polykit_` 接頭辞の `localStorage` に保存されます
+- ポップアップと共有する設定は `chrome.storage.local` を正本とします
+
+## 設計資料
+
+- [システム全体の設計](docs/architecture.md)
+- [ポップアップと画面翻訳設定の設計](docs/popup-and-interface-translation-design.md)
 
 ## ライセンス
 
