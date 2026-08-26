@@ -766,7 +766,7 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 		btn.addEventListener("click", (e) => {
 			const force = btn.classList.contains("forcesubmit");
 			if (force) {
-				// One-shot bypass added by the force-save hotkey / bulk copy.
+				// One-shot bypass added by bulk copy.
 				btn.classList.remove("forcesubmit");
 			} else if (
 				!polykit_editor_save_warnings_ignored(editor_id) &&

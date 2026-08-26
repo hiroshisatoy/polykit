@@ -227,7 +227,6 @@ function polykit_generate_settings_panel() {
 					translate_interface: polykit_t("setting_translate_interface"),
 					search_enabled: polykit_t("setting_search_enabled"),
 					google_translate: polykit_t("setting_google_translate"),
-					shortcuts_alt: polykit_t("setting_shortcuts_alt"),
 					prevent_unsaved: polykit_t("setting_prevent_unsaved"),
 					header_is_sticky: polykit_t("setting_header_is_sticky"),
 				},
@@ -247,30 +246,6 @@ function polykit_generate_settings_panel() {
 				},
 			},
 		],
-	};
-
-	const hotkeys = {
-		[polykit_t("hk_glossary_rightclick")]: polykit_t(
-			"hk_glossary_rightclick_key",
-		),
-		[polykit_t("hk_space_boundary")]: "Ctrl+Shift+X",
-		[polykit_t("hk_wrap_corner")]: "Ctrl+Shift+[",
-		[polykit_t("hk_wrap_double_corner")]: "Ctrl+Shift+]",
-		[polykit_t("hk_approve")]: "Ctrl+Shift+A",
-		[polykit_t("hk_cancel")]: "Ctrl+Shift+Z",
-		[polykit_t("hk_copy_original")]: "Ctrl+Shift+B",
-		[polykit_t("hk_dismiss_current")]: "Ctrl+D",
-		[polykit_t("hk_dismiss_all")]: "Ctrl+Shift+D",
-		[polykit_t("hk_force_save")]: "Ctrl+Shift+Enter",
-		[polykit_t("hk_fuzzy")]: "Ctrl+Shift+F",
-		[polykit_t("hk_consistency")]: "Alt+C",
-		[polykit_t("hk_consistency_num")]: "Alt+1〜9",
-		[polykit_t("hk_google_translate")]: "Alt+G",
-		[polykit_t("hk_search_focus")]: "Alt+S / Alt+P",
-		[polykit_t("hk_next")]: "Page Down",
-		[polykit_t("hk_prev")]: "Page Up",
-		[polykit_t("hk_reject")]: "Ctrl+Shift+R",
-		[polykit_t("hk_save")]: "Ctrl+Enter",
 	};
 
 	const container = document.createElement("DIV");
@@ -361,36 +336,6 @@ function polykit_generate_settings_panel() {
 				backup_link.addEventListener("click", () => {
 					alert(polykit_t("backup_restore_hint"));
 				});
-			},
-		},
-		{
-			slug: "hotkeys",
-			label: polykit_t("hotkeys_title"),
-			render: (panel) => {
-				const hotkeysFragment = document.createDocumentFragment();
-				const hotkeysHeader = document.createElement("TR");
-				hotkeysHeader.appendChild(document.createElement("TH")).appendChild(
-					document.createTextNode(polykit_t("settings_col_item")),
-				);
-				hotkeysHeader.appendChild(document.createElement("TH")).appendChild(
-					document.createTextNode(polykit_t("hotkey_key")),
-				);
-				hotkeysFragment.appendChild(hotkeysHeader);
-				Object.entries(hotkeys).forEach((hotkey) => {
-					const [key, value] = hotkey;
-					const tr = document.createElement("TR");
-					tr.appendChild(document.createElement("TD")).appendChild(
-						document.createTextNode(`${key}`),
-					);
-					tr.appendChild(document.createElement("TD")).appendChild(
-						document.createTextNode(`${value}`),
-					);
-					hotkeysFragment.appendChild(tr);
-				});
-				const hotkeysTable = document.createElement("TABLE");
-				hotkeysTable.classList.add("polykit-settings-table");
-				hotkeysTable.appendChild(hotkeysFragment);
-				panel.appendChild(hotkeysTable);
 			},
 		},
 		{
@@ -593,7 +538,6 @@ const polykit_setting_defaults = {
 	search_enabled: true,
 	translate_interface: true,
 	google_translate: true,
-	shortcuts_alt: true,
 	prevent_unsaved: true,
 	header_is_sticky: true,
 	bulk_consistency: false,

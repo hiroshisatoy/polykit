@@ -1,12 +1,10 @@
 const jsScripts = [
 	"jquery.bind-first",
 	"dompurify",
-	"keymaster",
 	"polykit-functions",
 	"polykit-i18n",
 	"polykit-gp-l10n",
 	"polykit-settings",
-	"polykit-hotkey",
 	"polykit-validation",
 	"polykit-locale-validation",
 	"polykit-column",

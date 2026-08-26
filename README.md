@@ -14,7 +14,6 @@ PolyKit は [GlotDict](https://github.com/Mte90/GlotDict)
 - クイック Approve / Reject / Fuzzy
 - 文字数カウント（日本語向け）
 - 日本語ハンドブック・スタイルガイド・用語集へのクイックリンク
-- ショートカットキー（「」『』挿入、全角/半角境界スペースなど）
 
 ## インストール（開発版）
 

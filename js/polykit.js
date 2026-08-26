@@ -84,7 +84,6 @@ function polykit_init_translation_table() {
 	window.polykit_filter_bar = jQuery(polykit_get_filters_toolbar_row());
 
 	if (window.polykit_filter_bar.length > 0) {
-		polykit_hotkeys();
 		if (jQuery("#bulk-actions-toolbar-top").length > 0) {
 			polykit_add_column();
 			if (0 === jQuery("#bulk-actions-toolbar-bottom").length) {

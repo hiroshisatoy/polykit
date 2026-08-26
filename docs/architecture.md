@@ -26,7 +26,6 @@ GlotPress が提供する翻訳画面を置き換えず、既存画面へ次の�
 - Approve、Reject、Fuzzy などのレビュー操作の効率化
 - 複数文字列に対する一括操作
 - 文字数、語数、メタ情報、補助リンクの表示
-- 翻訳作業向けショートカット
 - GlotPress 画面と PolyKit 独自 UI の日本語化
 - 利用者ごとの設定とチェック重要度の保存
 
@@ -217,7 +216,6 @@ DOM へのラベル追加、ハイライト、保存制御は収集結果を受�
 | `js/polykit-bulk.js` | 原文からの一括コピー |
 | `js/polykit-column.js` | 行単位の Approve、Reject、Fuzzy 操作 |
 | `js/polykit-meta.js` | 文字数、語数、複数形、日付情報 |
-| `js/polykit-hotkey.js` | 編集操作のキーボードショートカット |
 | `js/polykit-search.js` | 他プロジェクト検索と外部翻訳導線 |
 | `js/polykit-notices.js` | 選択数と処理件数の通知 |
 

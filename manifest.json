@@ -64,7 +64,6 @@
 			"resources": [
 				"js/polykit.js",
 				"js/polykit-functions.js",
-				"js/polykit-hotkey.js",
 				"js/polykit-validation.js",
 				"js/polykit-locale-validation.js",
 				"js/polykit-i18n.js",
@@ -79,7 +78,6 @@
 				"js/polykit-search.js",
 				"js/polykit-bulk-consistency.js",
 				"js/polykit-settings.js",
-				"js/keymaster.js",
 				"js/jquery.bind-first.js",
 				"js/dompurify.js",
 				"CHANGELOG.md",
