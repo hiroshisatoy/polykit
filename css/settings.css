@@ -52,19 +52,6 @@
 .polykit-settings {
 	margin-bottom: var(--polykit-space-lg);
 
-	&::before {
-		content: '';
-		display: block;
-		background: var(--polykit-color-primary);
-		left: 0;
-		position: absolute;
-		z-index: var(--polykit-z-below);
-		max-width: 100vw;
-		right: 0;
-		margin-top: calc(-1 * var(--polykit-space-settings-header-offset));
-		height: var(--polykit-size-settings-header);
-	}
-
 	@media screen and (min-width: 1200px) {
 		fieldset {
 			border: 0 !important;
@@ -172,6 +159,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--polykit-space-tab-gap);
+		align-self: stretch;
 	}
 
 	.polykit-settings__radio {
@@ -182,7 +170,8 @@
 		cursor: pointer;
 		padding: var(--polykit-space-tab-padding-y) var(--polykit-space-tab-padding-x);
 		background: var(--polykit-color-settings-tab);
-		display: inline-block;
+		display: flex;
+		align-items: center;
 		color: var(--polykit-color-text);
 		border: 1px solid var(--polykit-color-border);
 		border-bottom: none;
