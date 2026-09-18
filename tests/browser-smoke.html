@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>PolyKit browser smoke tests</title>
+	<link rel="stylesheet" href="../css/common.css">
+	<link rel="stylesheet" href="../css/translation.css">
+	<link rel="stylesheet" href="../css/settings.css">
+	<style>
+		body { margin: 24px; font: 14px/1.5 system-ui; }
+		#test-results { white-space: pre-wrap; }
+		.fixture { max-width: 1000px; margin: 1em 0; }
+	</style>
+</head>
+<body>
+	<h1>PolyKit browser smoke tests</h1>
+	<pre id="test-results" data-polykit-no-l10n>Running…</pre>
+	<nav><ul id="menu-headline-nav"></ul></nav>
+	<main class="gp-content fixture">
+		<section id="settings-fixture" class="polykit-settings"></section>
+		<div id="dynamic-fixture"></div>
+		<table id="translations"><tbody>
+			<tr class="editor" id="editor-test"><td>
+				<div class="editor-panel__right"><div class="meta"><dl><dt>Date</dt><dd>2026-09-18 00:00:00 UTC</dd></dl></div></div>
+				<div><span class="original">Search</span></div>
+				<div class="textareas"><span class="translation">保存済み</span><textarea class="foreign-text">現在の入力</textarea></div>
+			</td></tr>
+		</tbody></table>
+		<details class="polykit-consistency" open><summary>候補</summary><ul class="polykit-suggestions-list"><li>候補の表示</li></ul></details>
+		<div class="polykit-bulk-warning">一括操作の通知</div>
+		<div class="polykit-loader">Loading</div>
+	</main>
+	<script src="browser-smoke.js"></script>
+</body>
+</html>

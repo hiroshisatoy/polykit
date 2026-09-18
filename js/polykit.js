@@ -165,7 +165,8 @@ function polykit_init() {
 	polykit_current_locale_first();
 
 	if (has_translations || document.querySelector(".polykit-setting")) {
-		polykit_get_glossary_global_data();
+		// GTE 判定は用語集の取得後に確定する。通常の画面初期化は待たせない。
+		polykit_get_glossary_global_data().then(polykit_bulk_consistency_init);
 	}
 
 	polykit_add_project_links();

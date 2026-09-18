@@ -6,7 +6,6 @@
  */
 
 let polykit_gp_strings_sorted = null;
-let polykit_gp_l10n_timer = null;
 let polykit_gp_l10n_initialized = false;
 
 const polykit_gp_skip_selector = [
@@ -93,11 +92,6 @@ function polykit_gp_should_skip_element(element) {
 	if (!element) {
 		return true;
 	}
-	if (element.closest(".suggestions-wrapper")) {
-		return Boolean(element.closest(
-			".translation-suggestion__translation, .translation-suggestion__translation-raw, .translation-suggestion__original-diff",
-		));
-	}
 	return Boolean(element.closest(polykit_gp_skip_selector));
 }
 
@@ -128,7 +122,11 @@ function polykit_gp_localize_attributes(root) {
 		["[aria-label]", "aria-label"],
 	];
 	attribute_targets.forEach(([selector, attribute]) => {
-		root.querySelectorAll(selector).forEach((element) => {
+		const elements = Array.from(root.querySelectorAll(selector));
+		if (root.matches(selector)) {
+			elements.unshift(root);
+		}
+		elements.forEach((element) => {
 			if (polykit_gp_should_skip_element(element)) {
 				return;
 			}
@@ -145,15 +143,26 @@ function polykit_gp_localize_attributes(root) {
 }
 
 /**
- * @param {Element|Document} root
+ * @param {Element|Document|Text} root
  * @returns {void}
  */
 function polykit_localize_glotpress(root = document.body) {
-	if (!polykit_should_localize_glotpress()) {
+	if (!root || !polykit_should_localize_glotpress()) {
 		return;
 	}
-	const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+	if (root.nodeType === 3) {
+		polykit_gp_localize_text_node(root);
+		return;
+	}
+	if (root instanceof Element && polykit_gp_should_skip_element(root)) {
+		return;
+	}
+	// 要素も走査し、原文・訳文などの対象外サブツリーには入らない。
+	const walker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT, {
 		acceptNode(node) {
+			if (node.nodeType === 1) {
+				return polykit_gp_should_skip_element(node) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+			}
 			if (!node.data || !node.data.trim()) {
 				return NodeFilter.FILTER_REJECT;
 			}
@@ -183,29 +192,50 @@ function polykit_init_glotpress_l10n() {
 		return;
 	}
 	polykit_gp_l10n_initialized = true;
-	const run = () => {
-		clearTimeout(polykit_gp_l10n_timer);
-		polykit_gp_l10n_timer = setTimeout(() => polykit_localize_glotpress(), 30);
-	};
-	const run_now = () => polykit_localize_glotpress();
-	run_now();
-	if ("complete" === document.readyState) {
-		setTimeout(run_now, 100);
-		setTimeout(run_now, 500);
-	} else {
-		window.addEventListener("load", () => {
-			run_now();
-			setTimeout(run_now, 100);
-		}, { once: true });
-	}
-	const root = document.querySelector(".gp-content") || document.body;
-	const observer = new MutationObserver(run);
-	observer.observe(root, {
+	const root = document.body;
+	const pending = new Set();
+	let timer = null;
+	const options = {
 		childList: true,
 		subtree: true,
 		characterData: true,
+		attributes: true,
+		attributeFilter: ["title", "aria-label", "placeholder", "value"],
+	};
+	const collect = (records) => {
+		for (const record of records) {
+			const nodes = record.type === "childList" ? record.addedNodes : [record.target];
+			for (const node of nodes) {
+				const element = node.nodeType === 1 ? node : node.parentElement;
+				if ((node.nodeType === 1 || node.nodeType === 3) && !polykit_gp_should_skip_element(element)) {
+					pending.add(node);
+				}
+			}
+		}
+	};
+	const observer = new MutationObserver((records) => {
+		collect(records);
+		if (!pending.size || timer !== null) return;
+		timer = setTimeout(() => {
+			timer = null;
+			collect(observer.takeRecords());
+			// 自身の翻訳による変更通知を再処理しない。
+			observer.disconnect();
+			try {
+				for (const node of pending) {
+					if (!node.isConnected) continue;
+					let ancestor = node.parentNode;
+					while (ancestor && !pending.has(ancestor)) ancestor = ancestor.parentNode;
+					if (!ancestor) polykit_localize_glotpress(node);
+				}
+			} finally {
+				pending.clear();
+				observer.observe(root, options);
+			}
+		}, 30);
 	});
-	jQuery(document).ajaxComplete(run);
+	polykit_localize_glotpress(root);
+	observer.observe(root, options);
 }
 
 document.addEventListener("polykit:gp-strings-ready", () => {

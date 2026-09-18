@@ -29,7 +29,7 @@ deno task pack
 2. 「デベロッパーモード」を有効化
 3. 「パッケージ化されていない拡張機能を読み込む」でこのプロジェクトフォルダを選択
 
-または生成された `PolyKit_v1.0.0.zip` を読み込む。
+または生成された ZIP を展開し、そのフォルダを読み込む。
 
 ### Firefox
 
@@ -41,6 +41,22 @@ deno task pack
 - **GlotDict 本体とは併用しないでください**（DOM 操作が重複します）
 - ページ内設定は `polykit_` 接頭辞の `localStorage` に保存されます
 - ポップアップと共有する設定は `chrome.storage.local` を正本とします
+
+## 開発時の確認
+
+```sh
+deno task check
+```
+
+コード整形、全 JavaScript の構文、辞書、機能の回帰テストを確認します。
+
+ブラウザーの DOM・CSS・キーボード操作を確認する場合は、リポジトリ直下で
+`python3 -m http.server 8766 --bind 127.0.0.1` を実行し、
+[ブラウザーテスト](http://127.0.0.1:8766/tests/browser-smoke.html)を開いてください。
+結果はページと `window.polykitSmokeResult` に表示されます。
+このテストは専用のローカル画面を使い、実サイトの保存や承認は行いません。
+文字数表示の jQuery イベント登録部分のみスタブを使います。
+実サイトでの保存・承認と Chrome / Firefox の拡張機能としての確認は別途必要です。
 
 ## 設計資料
 

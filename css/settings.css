@@ -162,11 +162,10 @@
 		align-self: stretch;
 	}
 
-	.polykit-settings__radio {
-		display: none !important;
-	}
-
 	.polykit-settings-tab {
+		appearance: none;
+		font-family: inherit;
+		box-shadow: none;
 		cursor: pointer;
 		padding: var(--polykit-space-tab-padding-y) var(--polykit-space-tab-padding-x);
 		background: var(--polykit-color-settings-tab);
@@ -179,6 +178,18 @@
 		font-weight: normal;
 		font-size: var(--polykit-font-size-sm);
 		line-height: var(--polykit-line-height-tight);
+
+		&[aria-selected="true"] {
+			background: var(--polykit-color-settings-tab-active-bg);
+			font-weight: 600;
+			border-bottom: 1px solid var(--polykit-color-settings-tab-active-bg);
+			margin-bottom: -1px;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--polykit-color-primary);
+			outline-offset: -3px;
+		}
 	}
 
 	.polykit-settings-panel {
@@ -186,8 +197,11 @@
 		flex-direction: column;
 		flex-wrap: wrap;
 		box-sizing: content-box;
-		display: none;
-		animation: fadein var(--polykit-duration-slow);
+		display: flex;
+
+		&[hidden] {
+			display: none;
+		}
 
 		table {
 			font-size: var(--polykit-font-size-md);

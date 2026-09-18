@@ -175,7 +175,7 @@
  * - & の直後に識別子を続けてクラス名を作ることはできない → クラス名をそのまま書く
  */
 
-code {
+:where(.polykit-settings, .polykit-checks-list, .polykit-check-label, #polykit-notices-container) code {
 	padding: 0.2em 0.4em;
 	margin: 0 2px;
 	font-size: var(--polykit-font-size-code);

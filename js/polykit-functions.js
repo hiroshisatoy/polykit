@@ -364,7 +364,7 @@ function polykit_add_scroll_buttons() {
 		if (!target.textContent.includes("➤")) {
 			target.textContent = `➤ ${target.textContent}`;
 		}
-		row.scrollIntoView({ block: "start", behavior: "smooth" });
+		row.scrollIntoView({ block: "start", behavior: polykit_scroll_behavior() });
 	});
 }
 
@@ -458,14 +458,17 @@ function polykit_get_global_glossary_url() {
 /**
  * Get Locale glossary page HTML, treat data and populate polykit_glossary global constant
  *
- * @return string HTML of glossary page
+ * @returns {Promise<void>}
  */
 function polykit_get_glossary_global_data() {
 	polykit_get_handbook_link();
 	const global_glossary_url = polykit_get_global_glossary_url();
 
-	fetch(global_glossary_url)
-		.then((response) => response.text())
+	return fetch(global_glossary_url)
+		.then((response) => {
+			if (!response.ok) throw new Error("Glossary unavailable");
+			return response.text();
+		})
 		.then((glossary_data) => {
 			polykit_glossary.glossary_url = global_glossary_url;
 			return glossary_data;
@@ -776,12 +779,16 @@ function polykit_tag_target_when_source_outside_viewport(
  *
  * @returns {void}
  */
+function polykit_scroll_behavior() {
+	return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth";
+}
+
 function polykit_scroll_to_top() {
 	const masthead = document.querySelector("#masthead");
 	if (!masthead) return;
 	masthead.scrollIntoView({
 		block: "start",
-		behavior: "smooth",
+		behavior: polykit_scroll_behavior(),
 	});
 }
 

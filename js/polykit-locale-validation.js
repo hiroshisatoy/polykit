@@ -1,15 +1,16 @@
 "use strict";
 
 // 日本語スタイルガイド 3-6「漢字よりひらがなを使う」の代表例。
-// exclude に一致する訳文はルールごとスキップする。
+// exclude に一致する部分だけを検査対象から除外する。
 const polykit_locale_terminology_rules = [
-	{ wrong: "下さい", right: "ください", exclude: /差し下さい/ },
+	{ wrong: "下さい", right: "ください", exclude: /差し下さい/g },
 	{ wrong: "全て", right: "すべて" },
 	{ wrong: "既に", right: "すでに" },
-	{ wrong: "更に", right: "さらに" },
+	// 「変更に」に含まれる「更に」は対象外。同じ訳文内の別の「更に」は検出する。
+	{ wrong: "更に", right: "さらに", pattern: /(?:^|[^変])更に/ },
 	{ wrong: "但し", right: "ただし" },
 	{ wrong: "予め", right: "あらかじめ" },
-	{ wrong: "出来", right: "でき", exclude: /出来事|上出来|出来栄え/ },
+	{ wrong: "出来", right: "でき", exclude: /出来事|上出来|出来栄え/g },
 ];
 
 // 4-1 / 4-2: 長音記号の表記（スタイルガイドの例と WordPress 用語集の定訳）。
@@ -337,10 +338,8 @@ function polykit_collect_locale_checks(original, text) {
 
 	if (polykit_is_check_enabled("ja_terminology")) {
 		for (const rule of polykit_locale_terminology_rules) {
-			if (rule.exclude && rule.exclude.test(text)) {
-				continue;
-			}
-			if (text.includes(rule.wrong)) {
+			const candidate = rule.exclude ? text.replace(rule.exclude, "\x01") : text;
+			if (rule.pattern ? rule.pattern.test(candidate) : candidate.includes(rule.wrong)) {
 				push(
 					"ja_terminology",
 					polykit_t("ja_terminology_wrong", rule.wrong, rule.right),

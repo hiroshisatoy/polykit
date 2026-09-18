@@ -1,203 +1,110 @@
+"use strict";
+
 function polykit_add_meta() {
-	jQuery("#translations tr.editor").each(function () {
-		polykit_add_string_counts(this);
-	});
+	document.querySelectorAll("#translations tr.editor").forEach(polykit_add_string_counts);
 }
 
+/** 原文・現在の入力値・保存済み訳文の文字数を表示する。 */
 function polykit_add_string_counts(row) {
-	if (jQuery(".meta .polykit-counts", row).length) {
-		jQuery(".meta .polykit-counts", row).remove();
-	}
-	if (jQuery(".original", row).length) {
-		jQuery(".meta dl:last-of-type", row).before(
-			'<div class="polykit-counts" style="margin-top: 20px;"></div>',
+	const editor = typeof row === "string" ? document.querySelector(row) : row;
+	if (!editor) return;
+	const originals = editor.querySelectorAll(".original");
+	editor.querySelector(".polykit-counts")?.remove();
+	const meta = editor.querySelector(".meta dl:last-of-type");
+	if (!originals.length || !meta) return;
+	const counts = polykit_create_element("div", { class: "polykit-counts" });
+	meta.before(counts);
+	const has_plural = originals.length > 1;
+	const forms = editor.querySelectorAll(".textareas");
+	originals.forEach((original) => {
+		const prefix = has_plural ? `${original.parentElement.textContent.split(":")[0]} ` : "";
+		polykit_add_count(counts, original.textContent, "original-count", `${prefix}${polykit_t("meta_original")}`);
+	});
+	forms.forEach((form, index) => {
+		const textarea = form.querySelector("textarea.foreign-text");
+		if (!textarea) return;
+		const prefix = has_plural && forms.length <= 2
+			? `${polykit_t(index === 0 ? "meta_singular" : "meta_plural")} `
+			: "";
+		if (has_plural && forms.length > 2) {
+			const definition = editor.querySelector(`.translation-form-list button[data-plural-index="${index}"]`)
+				?.getAttribute("aria-label") || "";
+			const heading = polykit_create_element("dl", { class: "plural-heading" });
+			heading.append(
+				polykit_create_element("dt", {}, polykit_t("meta_plural_label")),
+				polykit_create_element("dd", {}, definition),
+			);
+			counts.append(heading);
+		}
+		const translation = form.querySelector(".translation");
+		if (translation?.textContent.trim()) {
+			polykit_add_count(
+				counts,
+				translation.textContent,
+				`translated-count-${index}`,
+				`${prefix}${polykit_t("meta_translated")}`,
+			);
+		}
+		textarea.dataset.polykitCountClass = `current-count-${index}`;
+		polykit_add_count(
+			counts,
+			textarea.value,
+			textarea.dataset.polykitCountClass,
+			`${prefix}${polykit_t("meta_current")}`,
 		);
-
-		if (jQuery(".original", row).length > 1) {
-			// Plurals
-			jQuery(".original", row).each(function () {
-				const parts = jQuery(this).parent().text().split(":");
-				const type = parts[0];
-				polykit_add_count(
-					row,
-					jQuery(this),
-					"original-count",
-					`${type} ${polykit_t("meta_original")}`,
-				);
-			});
-			if (jQuery(".textareas", row).length > 2) {
-				// Multi-Plural
-				jQuery(".textareas", row).each(function (index) {
-					polykit_add_plural_definition(row, index, "plural-heading");
-					if (jQuery(this).find(".translation").text().trim().length) {
-						polykit_add_count(
-							row,
-							jQuery(this).find(".translation"),
-							`translated-count-${index}`,
-							polykit_t("meta_translated"),
-						);
-					}
-
-					polykit_add_count(
-						row,
-						jQuery(this).find("textarea.foreign-text"),
-						`current-count-${index}`,
-						polykit_t("meta_current"),
-					);
-
-					jQuery(this).on(
-						"change keyup paste focus",
-						"textarea.foreign-text",
-						function () {
-							polykit_update_count(
-								row,
-								jQuery(this),
-								`current-count-${index}`,
-								true,
-							);
-						},
-					);
-				});
-			} else {
-				// Singular + Plural
-				jQuery(".textareas", row).each(function (index) {
-					let prefix = `${polykit_t("meta_singular")} `;
-					if (index > 0) prefix = `${polykit_t("meta_plural")} `;
-					if (jQuery(this).find(".translation").text().trim().length) {
-						polykit_add_count(
-							row,
-							jQuery(this).find(".translation"),
-							`translated-count-${index}`,
-							`${prefix}${polykit_t("meta_translated")}`,
-						);
-					}
-
-					polykit_add_count(
-						row,
-						jQuery(this).find("textarea.foreign-text"),
-						`current-count-${index}`,
-						`${prefix}${polykit_t("meta_current")}`,
-					);
-
-					jQuery(this).on(
-						"change keyup paste focus",
-						"textarea.foreign-text",
-						function () {
-							polykit_update_count(
-								row,
-								jQuery(this),
-								`current-count-${index}`,
-								true,
-							);
-						},
-					);
-				});
-			}
-		} else {
-			// Singular
-			polykit_add_count(
-				row,
-				jQuery(".original", row),
-				"original-count",
-				polykit_t("meta_original"),
-			);
-			if (jQuery(".translation", row).text().trim().length) {
-				polykit_add_count(
-					row,
-					jQuery(".translation", row),
-					"translated-count",
-					polykit_t("meta_translated"),
-				);
-			}
-
-			polykit_add_count(
-				row,
-				jQuery(".textareas textarea.foreign-text", row),
-				"current-count",
-				polykit_t("meta_current"),
-			);
-
-			jQuery(row).on(
-				"change keyup paste focus",
-				".textareas textarea.foreign-text",
-				function () {
-					polykit_update_count(row, jQuery(this), "current-count", true);
-				},
-			);
-		}
-	}
-}
-
-function polykit_add_count(row, element, countclass, label, textarea = false) {
-	let string = "";
-	if (textarea) {
-		string = element.val();
-	} else {
-		string = element.text();
-	}
-	const characterCount = string.length;
-	let wordCount = 0;
-	if (characterCount > 0) {
-		if (string.indexOf(" ") !== -1) {
-			const words = string.split(" ");
-			wordCount = words.length;
-		} else {
-			wordCount = 1;
-		}
-	}
-	jQuery(".polykit-counts", row).append(
-		`<dl class="${countclass}"><dt>${label}:</dt><dd><span class="characters">${characterCount} ${
-			polykit_t("characters")
-		}</span> (<span class="words">${wordCount} ${polykit_t("words_ref")}</span>)</dl>`,
+	});
+	// input は貼り付け・IME・音声入力にも対応。名前空間で再初期化時の重複登録を防ぐ。
+	jQuery(editor).off("input.polykitCounts change.polykitCounts").on(
+		"input.polykitCounts change.polykitCounts",
+		"textarea.foreign-text",
+		function () {
+			const counter = counts.querySelector(`.${this.dataset.polykitCountClass}`);
+			if (counter) polykit_update_count(counter, this.value);
+		},
 	);
 }
 
-function polykit_update_count(row, element, countclass, textarea = false) {
-	let string = "";
-	if (textarea) {
-		string = element.val();
-	} else {
-		string = element.text();
-	}
-	const characterCount = string.length;
-	let wordCount = 0;
-	if (characterCount > 0) {
-		if (string.indexOf(" ") !== -1) {
-			const words = string.split(" ");
-			wordCount = words.length;
-		} else {
-			wordCount = 1;
-		}
-	}
-	jQuery(`.polykit-counts .${countclass} dd .characters`, row).text(
-		`${characterCount} ${polykit_t("characters")}`,
-	);
-	jQuery(`.polykit-counts .${countclass} dd .words`, row).text(
-		`${wordCount} ${polykit_t("words_ref")}`,
-	);
+/** 空白区切りの語数は参考値。文字数は従来どおり UTF-16 の長さを使う。 */
+function polykit_text_counts(text) {
+	return { characters: text.length, words: (text.match(/\S+/g) || []).length };
 }
 
-function polykit_add_plural_definition(row, index, pluralclass) {
-	const definition = jQuery(
-		`.translation-form-list button[data-plural-index="${index}"]`,
-		row,
-	).attr("aria-label");
-	jQuery(".polykit-counts", row).append(
-		`<dl class="${pluralclass}" style="margin-top: 20px;"><dt>${
-			polykit_t("meta_plural_label")
-		}</dt><dd>${definition}</dl>`,
+function polykit_add_count(container, text, countclass, label) {
+	const counter = polykit_create_element("dl", { class: countclass });
+	const value = document.createElement("dd");
+	value.append(
+		polykit_create_element("span", { class: "characters" }),
+		" (",
+		polykit_create_element("span", { class: "words" }),
+		")",
 	);
+	counter.append(polykit_create_element("dt", {}, `${label}:`), value);
+	polykit_update_count(counter, text);
+	container.append(counter);
 }
+
+function polykit_update_count(counter, text) {
+	const counts = polykit_text_counts(text);
+	counter.querySelector(".characters").textContent = `${counts.characters} ${polykit_t("characters")}`;
+	counter.querySelector(".words").textContent = `${counts.words} ${polykit_t("words_ref")}`;
+}
+
+const polykit_date_formatter = new Intl.DateTimeFormat(undefined, {
+	year: "numeric",
+	month: "numeric",
+	day: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+	timeZoneName: "short",
+});
 
 function polykit_localize_date(current_editor = ".editor") {
-	const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-	const locale = Intl.DateTimeFormat().resolvedOptions().locale;
 	const localized_date = polykit_create_element("span", {
 		"class": "localized_date",
 	});
 	document.querySelectorAll(`${current_editor} .editor-panel__right .meta dd`)
 		.forEach((dd) => {
-			if (19 === dd.textContent.indexOf(" UTC")) {
+			if (19 === dd.textContent.indexOf(" UTC") && !dd.nextElementSibling?.classList.contains("localized_date")) {
 				const date_data = dd.textContent.split(" ", 3);
 				const date_date = date_data[0].split("-", 3);
 				const date_time = date_data[1].split(":", 3);
@@ -212,19 +119,8 @@ function polykit_localize_date(current_editor = ".editor") {
 					),
 				);
 				const this_localized_date = localized_date.cloneNode(true);
-				this_localized_date.prepend(
-					`${
-						new_date.toLocaleDateString(locale, {
-							timeZone: tz,
-							year: "numeric",
-							month: "numeric",
-							day: "numeric",
-							hour: "2-digit",
-							minute: "2-digit",
-							timeZoneName: "short",
-						})
-					}`,
-				);
+				if (Number.isNaN(new_date.getTime())) return;
+				this_localized_date.textContent = polykit_date_formatter.format(new_date);
 				dd.insertAdjacentElement("afterend", this_localized_date);
 				dd.style.display = "none";
 			}

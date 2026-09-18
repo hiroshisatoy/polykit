@@ -465,7 +465,7 @@ function polykit_create_settings_close_button() {
 }
 
 /**
- * Build settings tabs, radio inputs, and panels.
+ * Build keyboard-accessible settings tabs and panels.
  *
  * @param {HTMLElement} container
  * @param {object[]} tab_defs
@@ -474,31 +474,37 @@ function polykit_create_settings_close_button() {
 function polykit_build_settings_tabs(container, tab_defs) {
 	const tabs = document.createElement("DIV");
 	tabs.classList.add("polykit-settings-tabs");
+	tabs.setAttribute("role", "tablist");
+	tabs.setAttribute("aria-label", "PolyKit");
 	const panels = document.createElement("DIV");
 	panels.classList.add("polykit-settings-panels");
-	const style_rules = [];
+	const items = [];
+	const activate = (index, focus = false) => {
+		items.forEach(({ tab, panel }, i) => {
+			const selected = i === index;
+			tab.setAttribute("aria-selected", String(selected));
+			tab.tabIndex = selected ? 0 : -1;
+			panel.hidden = !selected;
+		});
+		if (focus) items[index].tab.focus();
+	};
 
 	tab_defs.forEach((tab_def, index) => {
 		const tab_index = index + 1;
-		const radio = document.createElement("INPUT");
-		radio.classList.add("polykit-settings__radio");
-		radio.type = "radio";
-		radio.name = "polykit-settings-group";
-		radio.id = `polykit-settings__radio${tab_index}`;
-		if (0 === index) {
-			radio.checked = true;
-		}
-
-		const tab = document.createElement("LABEL");
+		const tab = document.createElement("BUTTON");
+		tab.type = "button";
+		tab.setAttribute("role", "tab");
 		tab.classList.add("polykit-settings-tab");
 		tab.id = `polykit-settings-tab-${tab_def.slug}`;
 		tab.dataset.polykitSettingsTab = tab_def.slug;
-		tab.htmlFor = radio.id;
 		tab.textContent = tab_def.label;
 
 		const panel = document.createElement("DIV");
 		panel.classList.add("polykit-settings-panel");
 		panel.id = `polykit-settings-panel${tab_index}`;
+		panel.setAttribute("role", "tabpanel");
+		panel.setAttribute("aria-labelledby", tab.id);
+		tab.setAttribute("aria-controls", panel.id);
 		panel.dataset.polykitSettingsPanel = tab_def.slug;
 		const panel_title = document.createElement("H2");
 		panel_title.classList.add("polykit-settings-panel__title");
@@ -506,29 +512,39 @@ function polykit_build_settings_tabs(container, tab_defs) {
 		panel.appendChild(panel_title);
 		tab_def.render(panel);
 
-		container.appendChild(radio);
 		tabs.appendChild(tab);
 		panels.appendChild(panel);
-
-		style_rules.push(
-			`#${radio.id}:checked ~ .polykit-settings-header .polykit-settings-tabs #${tab.id}{background:var(--polykit-color-settings-tab-active-bg);color:var(--polykit-color-text);font-weight:600;border-color:var(--polykit-color-border);border-bottom:1px solid var(--polykit-color-settings-tab-active-bg);margin-bottom:-1px;}`,
-			`#${radio.id}:checked ~ .polykit-settings-panels #${panel.id}{display:flex;}`,
-		);
+		items.push({ tab, panel });
+		tab.addEventListener("click", () => activate(index));
+		tab.addEventListener("keydown", (event) => {
+			let next;
+			switch (event.key) {
+				case "ArrowRight":
+					next = (index + 1) % items.length;
+					break;
+				case "ArrowLeft":
+					next = (index + items.length - 1) % items.length;
+					break;
+				case "Home":
+					next = 0;
+					break;
+				case "End":
+					next = items.length - 1;
+					break;
+				default:
+					return;
+			}
+			event.preventDefault();
+			activate(next, true);
+		});
 	});
+	activate(0);
 
 	const header = document.createElement("DIV");
 	header.classList.add("polykit-settings-header");
 	header.append(tabs, polykit_create_settings_close_button());
 	container.appendChild(header);
 	container.appendChild(panels);
-
-	let style_el = document.getElementById("polykit-settings-tab-styles");
-	if (!style_el) {
-		style_el = document.createElement("STYLE");
-		style_el.id = "polykit-settings-tab-styles";
-		document.head.appendChild(style_el);
-	}
-	style_el.textContent = style_rules.join("\n");
 }
 
 const polykit_setting_defaults = {

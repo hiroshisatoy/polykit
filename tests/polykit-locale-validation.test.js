@@ -79,10 +79,33 @@ Deno.test("terminology rules with exclusions", () => {
 		"ja_terminology_wrong|出来|でき",
 	]);
 	assert.deepStrictEqual(collect("最近の出来事。"), []);
+	assert.deepStrictEqual(collect("出来事も上出来も出来栄えも確認します。"), []);
+	assert.deepStrictEqual(collect("出来事を確認出来ます。"), ["ja_terminology_wrong|出来|でき"]);
+	assert.deepStrictEqual(collect("お差し下さい。確認して下さい。"), ["ja_terminology_wrong|下さい|ください"]);
 	assert.deepStrictEqual(collect("但し書きは有効です。"), [
 		"ja_terminology_wrong|但し|ただし",
 	]);
 	assert.deepStrictEqual(collect("あらかじめご了承ください。"), []);
+});
+
+Deno.test("更に terminology excludes 変更に without hiding other occurrences", () => {
+	const integration = makeIntegrationContext(["ja_terminology"]);
+	const collect = (text) => Array.from(integration.polykit_collect_locale_warnings("", text));
+	for (
+		const text of ["変更に", "設定の変更に失敗しました。", "変更に伴う通知と変更について。", "さらに確認します。"]
+	) {
+		assert.deepStrictEqual(collect(text), [], text);
+	}
+	for (
+		const text of [
+			"更に確認します。",
+			"設定を更に確認します。",
+			"変更に伴い、更に確認します。",
+			"更に変更について確認します。",
+		]
+	) {
+		assert.deepStrictEqual(collect(text), ["ja_terminology_wrong|更に|さらに"], text);
+	}
 });
 
 Deno.test("katakana choon rules (4-1 / 4-2)", () => {

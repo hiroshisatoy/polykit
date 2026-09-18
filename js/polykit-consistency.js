@@ -162,7 +162,7 @@ function polykit_do_quicklinks(event) {
 			btn_target.setAttribute("aria-label", current_aria_label);
 		}, 2000);
 	} else {
-		if (!polykit_quicklinks_window.closed) {
+		if (polykit_quicklinks_window && !polykit_quicklinks_window.closed) {
 			polykit_quicklinks_window.close();
 		}
 		polykit_quicklinks_window = window.open(
@@ -207,7 +207,7 @@ function polykit_consistency(current_editor = ".editor") {
 
 	polykit_consistency_output.append(polykit_consistency_summary);
 	polykit_consistency_loading &&
-		polykit_consistency_output.append(polykit_consistency_loading);
+		polykit_consistency_output.append(polykit_consistency_loading.cloneNode(true));
 	polykit_add_elements(
 		`${current_editor} .editor-panel__left .suggestions-wrapper .suggestions__translation-memory`,
 		"afterEnd",
@@ -297,11 +297,19 @@ async function polykit_do_consistency(el) {
 			"arrow": arrow,
 		};
 		if (translation_forms.length > 1) {
+			const string_link = consistency_alternatives[consistency_alternatives_i]
+				.closest("tr")?.nextElementSibling?.querySelectorAll("td .meta a")[1];
+			if (!string_link) {
+				polykit_consistency_end(el, polykit_t("consistency_error"));
+				return;
+			}
 			const string_page = await polykit_consistency_get_page(
-				consistency_alternatives[consistency_alternatives_i].parentNode
-					.parentNode.nextSibling.querySelectorAll("td .meta a")[1].href
-					.replace("?filters", "/?filters"),
+				string_link.href.replace("?filters", "/?filters"),
 			);
+			if (false === string_page) {
+				polykit_consistency_end(el, polykit_t("consistency_error"));
+				return;
+			}
 			const consistency_textareas = string_page.querySelectorAll(
 				".translation-wrapper .textareas textarea",
 			);
@@ -356,9 +364,10 @@ async function polykit_do_consistency(el) {
 
 async function polykit_consistency_get_page(url) {
 	try {
-		const res = await fetch(url, {
-			headers: new Headers({ "User-agent": "Mozilla/4.0 Custom User Agent" }),
-		});
+		const res = await fetch(url);
+		if (!res.ok) {
+			return false;
+		}
 		const txt = await res.text();
 		const consistency_parser = new DOMParser();
 		return consistency_parser.parseFromString(txt, "text/html");

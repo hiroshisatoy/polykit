@@ -2,6 +2,7 @@
 
 const polykit_bulk_safe_limit = 25;
 const polykit_bulk_max_retries = 20;
+let polykit_bulk_consistency_initialized = false;
 
 /**
  * Validate all replacement values before changing any form.
@@ -11,7 +12,11 @@ const polykit_bulk_max_retries = 20;
  * @returns {boolean}
  */
 function polykit_bulk_apply_replacement(forms, replacement) {
-	if (replacement.some((value) => "" === value)) {
+	if (
+		!Array.isArray(replacement) || !forms.length ||
+		forms.length !== replacement.length ||
+		Array.from(replacement).some((value) => "string" !== typeof value || "" === value.trim())
+	) {
 		return false;
 	}
 	forms.forEach((form, i) => {
@@ -24,9 +29,10 @@ function polykit_bulk_apply_replacement(forms, replacement) {
  * @returns {void}
  */
 function polykit_bulk_consistency_init() {
-	if (!polykit_get_setting("bulk_consistency") || !polykit_user.is_gte) {
+	if (polykit_bulk_consistency_initialized || !polykit_get_setting("bulk_consistency") || !polykit_user.is_gte) {
 		return;
 	}
+	polykit_bulk_consistency_initialized = true;
 	if (window.location.href.includes("#polykit_magicsaveclose")) {
 		polykit_bulk_magic_save();
 		return;

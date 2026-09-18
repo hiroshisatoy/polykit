@@ -370,7 +370,9 @@ function polykit_run_extra_checks(original, translated) {
 	}
 
 	const double_level = polykit_get_check_level("check_double_spaces", "warning");
-	const double_spaces = polykit_check_double_spaces(translated, original);
+	const double_spaces = "off" === double_level
+		? { msg: "", arr: [] }
+		: polykit_check_double_spaces(translated, original);
 	if (double_spaces.arr.length) {
 		polykit_push_check_result(
 			double_level,
@@ -822,9 +824,10 @@ function polykit_check_this_translation(editor_id, preview_id) {
  * @param {string} editor_id
  * @param {string} preview_id
  * @param {object} state
+ * @param {boolean} [update_filters] 一括レビューでは全行の処理後に件数を更新する。
  * @returns {void}
  */
-function polykit_display_check_results(editor_id, preview_id, state) {
+function polykit_display_check_results(editor_id, preview_id, state, update_filters = true) {
 	const editor = polykit_query_selector_safe(editor_id);
 	const preview = polykit_query_selector_safe(preview_id);
 	if (!editor || !preview) {
@@ -870,7 +873,9 @@ function polykit_display_check_results(editor_id, preview_id, state) {
 			);
 		});
 	}
-	polykit_update_check_filters();
+	if (update_filters) {
+		polykit_update_check_filters();
+	}
 }
 
 /**
@@ -893,9 +898,10 @@ function polykit_check_all_translations(force = false) {
 				return;
 			}
 			const state = polykit_prepare_row_checks(editor_id, true);
-			polykit_display_check_results(editor_id, preview_id, state);
+			polykit_display_check_results(editor_id, preview_id, state, false);
 		},
 	);
+	polykit_update_check_filters();
 }
 
 /**
