@@ -7,13 +7,13 @@
 
 ## 機能
 
-- 半角と全角、スペース、括弧、訳語の統一など、日本語スタイルガイドに基づくチェック
-- 用語集の確認と、既存訳から選ぶ Consistency 候補
-- Approve、Reject、Fuzzy のクイック操作
-- 原文の一括コピーと、複数候補の置き換え
-- 日本語向けの文字数表示
-- ハンドブック、スタイルガイド、用語集へのリンク
-- 翻訳画面と PolyKit の表示を日本語にする設定
+- 半角と全角、スペース、括弧、訳語の統一などを、日本語スタイルガイドに基づいてチェックします。
+- 用語集を確認し、既存訳から Consistency 候補を選べます。
+- Approve、Reject、Fuzzy をすばやく操作できます。
+- 原文を一括でコピーし、複数の候補を置き換えられます。
+- 日本語向けに文字数を表示します。
+- ハンドブック、スタイルガイド、用語集へのリンクを用意しています。
+- 翻訳画面と PolyKit の表示を日本語にできます。
 
 ## 動作環境
 
@@ -28,30 +28,30 @@ GlotDict とは同時に有効にしないでください。
 
 ## インストール
 
-パッケージは [Releases][] から入手します。
+パッケージは [Releases][] から入手できます。
 
 ### Chrome
 
-1. `PolyKit_vX.Y.Z.zip` を展開する。
-1. `chrome://extensions/` を開く。
-1. デベロッパーモードを有効にする。
-1. 「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選ぶ。
+1. `PolyKit_vX.Y.Z.zip` を展開します。
+1. `chrome://extensions/` を開きます。
+1. デベロッパーモードを有効にします。
+1. 「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選びます。
 
-`PolyKit_vX.Y.Z.crx` は、デベロッパーモードを有効にして Chrome を再起動したあと、`chrome://extensions/` にドロップして読み込めます。
-Chrome は Chrome ウェブストア以外の CRX を拒否することがあります。
-その場合は ZIP を使ってください。
+CRX をこのページへドロップすると、Chrome はパッケージを一時フォルダへコピーできず `FAILED_TO_COPY_EXTENSION_FILE_TO_TEMP_DIRECTORY` になることがあります。
+インストールには、ZIP を展開して使ってください。
+`PolyKit_vX.Y.Z.crx` は、ポリシーで配布する場合のパッケージです。
 
 ### Firefox
 
-1. `about:debugging` を開く。
-1. 「この Firefox」から「一時的なアドオンを読み込む」を選ぶ。
-1. `PolyKit_vX.Y.Z.xpi` を選ぶ。
+1. `about:debugging` を開きます。
+1. 「この Firefox」から「一時的なアドオンを読み込む」を選びます。
+1. `PolyKit_vX.Y.Z.xpi` を選びます。
 
 ## 使い方
 
-1. 拡張機能を読み込んだ状態で、translate.wordpress.org の翻訳画面を開く。
-1. ツールバーの PolyKit アイコンから、画面の日本語化と設定を開く。
-1. 翻訳行で、チェック結果、文字数、レビューボタン、用語や既存訳の候補を確認する。
+1. 拡張機能を読み込んだ状態で、translate.wordpress.org の翻訳画面を開きます。
+1. ツールバーの PolyKit アイコンから、画面の日本語化と設定を開きます。
+1. 翻訳行で、チェック結果、文字数、レビューボタン、用語や既存訳の候補を確認します。
 
 設定では、チェック項目の有無と重要度を変えられます。
 
@@ -65,15 +65,15 @@ deno task check
 
 整形、JavaScript の構文、辞書、回帰テストを確認します。
 
-パッケージを手元で作る場合は、次を実行します。
+パッケージを手元で作る場合は、次のコマンドを実行してください。
 
 ```sh
 deno task pack
 ```
 
 Chrome 用の ZIP と CRX、Firefox 用の XPI がリポジトリ直下にできます。
-初回は署名鍵 `key.pem` も作ります。
-拡張機能 ID を維持するため、このファイルは保管し、リポジトリには含めないでください。
+初回は署名鍵 `key.pem` も作成します。
+拡張機能 ID を維持するため、このファイルを保管し、リポジトリには含めないでください。
 
 ブラウザ上の表示と操作は、次のローカルページで確認できます。
 
@@ -82,14 +82,14 @@ python3 -m http.server 8766 --bind 127.0.0.1
 ```
 
 <http://127.0.0.1:8766/tests/browser-smoke.html> を開きます。
-このページは保存や承認を行いません。
-実サイトでの確認は別途必要です。
+このページでは、保存や承認を行いません。
+実サイトでの確認は、別途必要です。
 
 ### リリース
 
 `manifest.json` の `version` に `v` を付けたタグ（例: `v1.0.1`）を push すると、GitHub Actions が Release を作成します。
 添付されるファイルは `PolyKit_vX.Y.Z.zip`、`PolyKit_vX.Y.Z.crx`、`PolyKit_vX.Y.Z.xpi` です。
-CRX を付けるには、`key.pem` の内容を secret `CRX_PRIVATE_KEY` に登録します。
+CRX を付けるには、`key.pem` の内容を secret `CRX_PRIVATE_KEY` に登録してください。
 
 ## ドキュメント
 
@@ -98,7 +98,7 @@ CRX を付けるには、`key.pem` の内容を secret `CRX_PRIVATE_KEY` に登�
 
 ## ライセンス
 
-[GPL-2.0](LICENSE)。
+[GPL-2.0](LICENSE) です。
 GlotDict 由来のコードを含みます（[GlotDict][]）。
 
 [translate.wordpress.org]: https://translate.wordpress.org/
