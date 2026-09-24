@@ -771,17 +771,6 @@ button {
 	.glossary-link:first-child {
 		margin-right: 26px;
 
-		&::after {
-			position: absolute;
-			content: '';
-			display: inline-block;
-			height: 36px;
-			width: 1px;
-			background: var(--polykit-color-border-light);
-			margin-left: 13px;
-			margin-top: -7px;
-		}
-
 		@media screen and (min-width: 1920px) {
 			margin-right: 54px;
 
