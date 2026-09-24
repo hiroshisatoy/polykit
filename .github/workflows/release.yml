@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Package and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          cache: true
+
+      - name: Cache dependencies
+        run: deno cache --frozen pack-ext.js
+
+      - name: Check
+        run: deno task check
+
+      - name: Ensure tag matches manifest version
+        run: |
+          version="$(jq -r .version manifest.json)"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$version" != "$tag" ]; then
+            echo "タグ ${GITHUB_REF_NAME} と manifest.json の version ${version} が一致しません。"
+            exit 1
+          fi
+
+      - name: Pack extension
+        env:
+          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
+        run: deno task pack
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            PolyKit_v*.zip
+            PolyKit_v*.crx
+            PolyKit_v*.xpi

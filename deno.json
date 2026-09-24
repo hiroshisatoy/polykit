@@ -4,7 +4,7 @@
 		"jszip": "npm:jszip@^3.10.1"
 	},
 	"tasks": {
-		"pack": "deno run --allow-read --allow-write --allow-env=READABLE_STREAM pack-ext.js .",
+		"pack": "deno run --allow-read --allow-write --allow-env=READABLE_STREAM,CRX_PRIVATE_KEY,GITHUB_ACTIONS pack-ext.js .",
 		"test": "deno test --allow-read",
 		"check": "deno fmt --check && deno task test",
 		"fmt": "deno fmt"

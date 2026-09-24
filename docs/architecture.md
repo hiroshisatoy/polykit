@@ -422,7 +422,8 @@ JavaScript から style 要素を生成しない。
 
 ### 14.3 パッケージ
 
-次のコマンドで Chrome 用 ZIP と Firefox 用 XPI を生成する。
+次のコマンドで Chrome 用 ZIP、同じ内容に署名した CRX3、Firefox 用 XPI を生成する。
+CRX の拡張機能 ID は `key.pem` または環境変数 `CRX_PRIVATE_KEY` の秘密鍵から決まる。
 
 ```sh
 deno task pack
