@@ -37,8 +37,6 @@ jobs:
           fi
 
       - name: Pack extension
-        env:
-          CRX_PRIVATE_KEY: ${{ secrets.CRX_PRIVATE_KEY }}
         run: deno task pack
 
       - name: Publish GitHub Release
@@ -48,5 +46,4 @@ jobs:
           fail_on_unmatched_files: true
           files: |
             PolyKit_v*.zip
-            PolyKit_v*.crx
             PolyKit_v*.xpi

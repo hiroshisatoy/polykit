@@ -75,7 +75,7 @@ Deno.test("background is Chrome MV3 compatible", () => {
 	assert.ok(!("browser_specific_settings" in manifest));
 });
 
-Deno.test("init.js loads page scripts without waiting for changelog or GlotPress strings", () => {
+Deno.test("init.js loads page scripts without waiting for extension status or GlotPress strings", () => {
 	const init_source = Deno.readTextFileSync(new URL("js/init.js", root));
 	assert.ok(init_source.includes("polykit_record_extension_status();"));
 	assert.ok(init_source.includes("const gp_strings_promise = polykit_load_glotpress_strings();"));

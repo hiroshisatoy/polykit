@@ -80,7 +80,6 @@
 				"js/polykit-settings.js",
 				"js/jquery.bind-first.js",
 				"js/dompurify.js",
-				"CHANGELOG.md",
 				"css/common.css",
 				"css/translation.css",
 				"css/settings.css",

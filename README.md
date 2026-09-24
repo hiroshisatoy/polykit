@@ -37,10 +37,6 @@ GlotDict とは同時に有効にしないでください。
 1. デベロッパーモードを有効にします。
 1. 「パッケージ化されていない拡張機能を読み込む」で、展開したフォルダを選びます。
 
-CRX をこのページへドロップすると、Chrome はパッケージを一時フォルダへコピーできず `FAILED_TO_COPY_EXTENSION_FILE_TO_TEMP_DIRECTORY` になることがあります。
-インストールには、ZIP を展開して使ってください。
-`PolyKit_vX.Y.Z.crx` は、ポリシーで配布する場合のパッケージです。
-
 ### Firefox
 
 1. `about:debugging` を開きます。
@@ -71,9 +67,7 @@ deno task check
 deno task pack
 ```
 
-Chrome 用の ZIP と CRX、Firefox 用の XPI がリポジトリ直下にできます。
-初回は署名鍵 `key.pem` も作成します。
-拡張機能 ID を維持するため、このファイルを保管し、リポジトリには含めないでください。
+Chrome 用の ZIP と Firefox 用の XPI がリポジトリ直下にできます。
 
 ブラウザ上の表示と操作は、次のローカルページで確認できます。
 
@@ -88,8 +82,7 @@ python3 -m http.server 8766 --bind 127.0.0.1
 ### リリース
 
 `manifest.json` の `version` に `v` を付けたタグ（例: `v1.0.1`）を push すると、GitHub Actions が Release を作成します。
-添付されるファイルは `PolyKit_vX.Y.Z.zip`、`PolyKit_vX.Y.Z.crx`、`PolyKit_vX.Y.Z.xpi` です。
-CRX を付けるには、`key.pem` の内容を secret `CRX_PRIVATE_KEY` に登録してください。
+添付されるファイルは `PolyKit_vX.Y.Z.zip` と `PolyKit_vX.Y.Z.xpi` です。
 
 ## ドキュメント
 

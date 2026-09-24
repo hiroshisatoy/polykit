@@ -152,41 +152,29 @@ function script(urls) {
  * @returns {void}
  */
 function polykit_record_extension_status() {
-	const changelog = chrome.runtime.getURL("CHANGELOG.md");
-	fetch(changelog)
-		.then((response) => response.text())
-		.then((changelogData) => {
-			chrome.runtime.sendMessage(
-				"polykit-status",
-				(response) => {
-					if (chrome.runtime.lastError) {
-						return;
-					}
-					const stored = polykit_init_parse_json(
-						localStorage.getItem("polykit_extension_status"),
-						{},
-					);
-					if (
-						response &&
-						("install" === response.reason ||
-							"update" === response.reason) &&
-						stored.currentVersion !== response.currentVersion
-					) {
-						const lastChange = changelogData.match(/(\* [\s\S]*?)(?=#)/);
-						localStorage.setItem(
-							"polykit_extension_status",
-							JSON.stringify({
-								...response,
-								changelog: (null !== lastChange) ? lastChange[1] : "",
-							}),
-						);
-					}
-				},
+	chrome.runtime.sendMessage(
+		"polykit-status",
+		(response) => {
+			if (chrome.runtime.lastError) {
+				return;
+			}
+			const stored = polykit_init_parse_json(
+				localStorage.getItem("polykit_extension_status"),
+				{},
 			);
-		})
-		.catch(() => {
-			// Changelog is optional; page scripts must still load.
-		});
+			if (
+				response &&
+				("install" === response.reason ||
+					"update" === response.reason) &&
+				stored.currentVersion !== response.currentVersion
+			) {
+				localStorage.setItem(
+					"polykit_extension_status",
+					JSON.stringify(response),
+				);
+			}
+		},
+	);
 }
 
 /**

@@ -18,7 +18,7 @@
 	try {
 		const strings = await (await fetch("../languages/ja/polykit.json")).json();
 		window.polykit_t = (key) => strings[key] || key;
-		window.polykit_extension = { currentVersion: "1", previousVersion: "1", changelog: "" };
+		window.polykit_extension = { currentVersion: "1", previousVersion: "1" };
 		await load("polykit-functions");
 		await load("polykit-settings");
 		const container = document.querySelector("#settings-fixture");

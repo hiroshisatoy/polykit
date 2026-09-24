@@ -1,7 +1,5 @@
 *.zip
 *.xpi
-*.crx
-*.pem
 .vscode/
 .vs/
 .DS_Store

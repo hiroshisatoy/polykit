@@ -6,7 +6,6 @@ const polykit_extension_storage = polykit_parse_json(
 	{},
 );
 const polykit_extension = {
-	changelog: polykit_extension_storage.changelog || "",
 	currentVersion: polykit_extension_storage.currentVersion || "0",
 	previousVersion: polykit_extension_storage.previousVersion || "0",
 	reason: polykit_extension_storage.reason || "",

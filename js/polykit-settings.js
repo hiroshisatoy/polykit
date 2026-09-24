@@ -409,23 +409,16 @@ function polykit_generate_settings_panel() {
 					document.createTextNode(polykit_t("welcome_enjoy")),
 				);
 
-				const has_changelog = Boolean(
-					polykit_extension.changelog &&
-						"" !== polykit_extension.changelog.trim(),
-				);
-				if (has_changelog || "update" === polykit_extension.reason) {
+				if ("update" === polykit_extension.reason) {
 					changelog.appendChild(document.createElement("H3")).appendChild(
 						document.createTextNode(
 							polykit_t("welcome_update_title", currentVersion),
 						),
 					);
-					if (has_changelog) {
-						changelog.appendChild(document.createElement("DIV")).appendChild(
-							document.createTextNode(polykit_extension.changelog),
-						);
-					}
 					const link = document.createElement("A");
-					link.href = "https://github.com/hiroshisatoy/polykit/blob/main/CHANGELOG.md";
+					link.href = currentVersion
+						? `https://github.com/hiroshisatoy/polykit/releases/tag/v${currentVersion}`
+						: "https://github.com/hiroshisatoy/polykit/releases";
 					link.textContent = polykit_t("check_changelog");
 					link.target = "_blank";
 					link.rel = "noreferrer noopener";

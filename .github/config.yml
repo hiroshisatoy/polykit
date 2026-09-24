@@ -2,8 +2,7 @@
 
 # Comment to be posted to on PRs that don't update documentation
 updateDocsComment: >
-  Thanks for opening this pull request! Make sure `CHANGELOG.md` or `README.md` gets updated with this change (if needed).
+  Thanks for opening this pull request! Make sure `README.md` gets updated with this change (if needed).
 
 updateDocsTargetFiles:
-  - CHANGELOG.md
   - README.md
