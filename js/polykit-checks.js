@@ -461,7 +461,7 @@ function polykit_highlight_terms(container, terms, highlight_class) {
 /**
  * @param {string} editor_id
  * @param {boolean} highlight_spaces
- * @returns {{ has_warning: boolean, has_notice: boolean, check_results: HTMLElement, preview_class: string, preview_status: HTMLElement, labels: object[], highlights: string[][] }}
+ * @returns {{ has_warning: boolean, has_notice: boolean, check_results: HTMLElement, preview_class: string, labels: object[], highlights: string[][] }}
  */
 function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 	const state = {
@@ -471,17 +471,6 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 		check_warnings: [],
 		check_notices: [],
 		preview_class: "polykit-has-check-passed",
-		preview_status: (() => {
-			const status = polykit_create_element("span", {
-				class: "polykit-check-preview polykit-check-preview-status-passed",
-				title: polykit_t("check_all_passed"),
-			});
-			status.appendChild(polykit_create_element("span", {
-				class: "dashicons dashicons-yes-alt",
-				"aria-hidden": "true",
-			}));
-			return status;
-		})(),
 		labels: [],
 		highlights: [],
 		ignore_status: "none",
@@ -588,24 +577,8 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 	if (state.has_warning) {
 		state.ignore_status = "block";
 		state.preview_class = "polykit-has-check-warning";
-		state.preview_status = polykit_create_element("span", {
-			class: "polykit-check-preview polykit-check-preview-status-warning",
-			title: polykit_t("check_has_warning"),
-		});
-		state.preview_status.appendChild(polykit_create_element("span", {
-			class: "dashicons dashicons-warning",
-			"aria-hidden": "true",
-		}));
 	} else if (state.has_notice) {
 		state.preview_class = "polykit-has-check-notice";
-		state.preview_status = polykit_create_element("span", {
-			class: "polykit-check-preview polykit-check-preview-status-notice",
-			title: polykit_t("check_has_notice"),
-		});
-		state.preview_status.appendChild(polykit_create_element("span", {
-			class: "dashicons dashicons-info",
-			"aria-hidden": "true",
-		}));
 	}
 
 	return state;
@@ -852,11 +825,6 @@ function polykit_display_check_results(editor_id, preview_id, state, update_filt
 		".editor-panel__right .panel-content .meta dl",
 	);
 	meta && meta.insertAdjacentElement("beforebegin", state.check_results);
-
-	const status_el = preview.querySelector(".polykit-check-preview");
-	status_el && status_el.remove();
-	const edit_btn = preview.querySelector(".actions .action.edit");
-	edit_btn && edit_btn.insertAdjacentElement("afterbegin", state.preview_status);
 
 	if (polykit_get_setting("checks_labels")) {
 		const translation_p_text = preview.querySelectorAll(".translation-text");

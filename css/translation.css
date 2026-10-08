@@ -6,13 +6,6 @@
 }
 
 table.translations {
-	.actions {
-		a.action {
-			text-decoration: none;
-			display: block;
-		}
-	}
-
 	tr.preview {
 		&.polykit-has-check-warning {
 			outline: 2px solid var(--polykit-color-check-warning);
@@ -22,40 +15,6 @@ table.translations {
 		&.polykit-has-check-notice {
 			outline: 2px solid var(--polykit-color-check-notice);
 			outline-offset: -2px;
-		}
-
-		.polykit-check-preview {
-			display: flex;
-			flex-flow: column;
-			align-items: center;
-			justify-content: center;
-			padding: 3px 8px;
-			font-size: var(--polykit-font-size-xs);
-			line-height: 1.45;
-			border: 1px solid transparent;
-			border-radius: 0;
-			vertical-align: middle;
-
-			/* チェックが合格している場合 */
-			&.polykit-check-preview-status-passed {
-				color: var(--polykit-color-check-passed);
-				background: var(--polykit-color-label-passed-bg);
-				border-color: color-mix(in srgb, var(--polykit-color-check-passed) 40%, transparent);
-			}
-
-			/* チェックが警告している場合 */
-			&.polykit-check-preview-status-warning {
-				color: var(--polykit-color-check-warning);
-				background: var(--polykit-color-label-error-bg);
-				border-color: color-mix(in srgb, var(--polykit-color-check-warning) 40%, transparent);
-			}
-
-			/* チェックが注意している場合 */
-			&.polykit-check-preview-status-notice {
-				color: var(--polykit-color-check-notice);
-				background: var(--polykit-color-label-notice-bg);
-				border-color: color-mix(in srgb, var(--polykit-color-check-notice) 40%, transparent);
-			}
 		}
 
 		.polykit-check-highlight {
@@ -126,13 +85,6 @@ table.translations {
 
 		.polykit-check-label--notice .dashicons {
 			color: var(--polykit-color-check-notice);
-		}
-
-		.polykit-check-preview .dashicons {
-			width: 1em;
-			height: 1em;
-			font-size: var(--polykit-font-size-sm);
-			line-height: 1;
 		}
 
 		.polykit-check-label code {
