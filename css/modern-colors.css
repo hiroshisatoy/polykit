@@ -5,20 +5,20 @@ html.polykit-modern-colors {
 	--wp--preset--color--blueberry-4: #eff2ff;
 
 	--gp-color-fg-default: #000000;
-	--gp-color-accent-fg: #2271b1;
-	--gp-color-accent-emphasis: #135e96;
-	--gp-color-border-default: #72777c;
-	--gp-color-border-muted: #b1b8c1;
-	--gp-color-btn-text: #2271b1;
-	--gp-color-btn-border: #2271b1;
-	--gp-color-btn-hover-text: #135e96;
-	--gp-color-btn-hover-border: #135e96;
+	--gp-color-accent-fg: var(--wp--preset--color--blueberry-1);
+	--gp-color-accent-emphasis: color-mix(in srgb, var(--wp--preset--color--blueberry-1) 82%, #000);
+	--gp-color-border-default: var(--wp--preset--color--blueberry-1);
+	--gp-color-border-muted: var(--wp--preset--color--blueberry-2);
+	--gp-color-btn-text: var(--wp--preset--color--blueberry-1);
+	--gp-color-btn-border: var(--wp--preset--color--blueberry-1);
+	--gp-color-btn-hover-text: color-mix(in srgb, var(--wp--preset--color--blueberry-1) 82%, #000);
+	--gp-color-btn-hover-border: color-mix(in srgb, var(--wp--preset--color--blueberry-1) 82%, #000);
 	--gp-color-btn-primary-text: #fff;
-	--gp-color-btn-primary-bg: #2271b1;
-	--gp-color-btn-primary-border: #2271b1;
+	--gp-color-btn-primary-bg: var(--wp--preset--color--blueberry-1);
+	--gp-color-btn-primary-border: var(--wp--preset--color--blueberry-1);
 	--gp-color-btn-primary-hover-text: #fff;
-	--gp-color-btn-primary-hover-bg: #135e96;
-	--gp-color-btn-primary-hover-border: #135e96;
+	--gp-color-btn-primary-hover-bg: color-mix(in srgb, var(--wp--preset--color--blueberry-1) 82%, #000);
+	--gp-color-btn-primary-hover-border: color-mix(in srgb, var(--wp--preset--color--blueberry-1) 82%, #000);
 }
 
 html.polykit-modern-colors .site-header {

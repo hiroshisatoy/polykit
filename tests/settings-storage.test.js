@@ -132,7 +132,19 @@ Deno.test("modern palette defines the requested colors only behind the opt-in cl
 	assert.match(css, /^html\.polykit-modern-colors \{/);
 	assert.match(css, /--wp--preset--color--blueberry-1: #3858e9;/);
 	assert.match(css, /--wp--preset--color--blueberry-4: #eff2ff;/);
-	assert.match(css, /--gp-color-btn-primary-hover-bg: #135e96;/);
+	assert.match(css, /--gp-color-accent-fg: var\(--wp--preset--color--blueberry-1\);/);
+	assert.match(css, /--gp-color-btn-primary-bg: var\(--wp--preset--color--blueberry-1\);/);
+	assert.match(
+		css,
+		/--gp-color-btn-primary-hover-bg: color-mix\(in srgb, var\(--wp--preset--color--blueberry-1\) 82%, #000\);/,
+	);
+	const chromaticColors = css.split("\n").filter((line) =>
+		line.includes("--gp-color-") &&
+		!/(--gp-color-fg-default|--gp-color-btn-primary-(?:hover-)?text):/.test(line)
+	);
+	assert.equal(chromaticColors.length, 12);
+	assert.ok(chromaticColors.every((line) => line.includes("--wp--preset--color--blueberry-")));
+	assert.doesNotMatch(css, /#2271b1|#135e96/);
 	assert.match(
 		css,
 		/html\.polykit-modern-colors \.site-header \{\s*background: var\(--wp--preset--color--blueberry-1\);/,
