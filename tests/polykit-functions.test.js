@@ -284,3 +284,83 @@ Deno.test("does not change titles outside plugin translation pages", () => {
 	assert.strictEqual(timer, null);
 	assert.strictEqual(document.title, "Projects");
 });
+
+Deno.test("bulk actions lead the review and paging row", () => {
+	class Element {
+		children = [];
+		parentNode = null;
+		className = "";
+
+		get firstChild() {
+			return this.children[0] || null;
+		}
+
+		get firstElementChild() {
+			return this.firstChild;
+		}
+
+		closest(selector) {
+			let node = this.parentNode;
+			while (node) {
+				if (selector === ".polykit-review-paging-row" && node.className === "polykit-review-paging-row") {
+					return node;
+				}
+				node = node.parentNode;
+			}
+			return null;
+		}
+
+		appendChild(node) {
+			return this.insertBefore(node, null);
+		}
+
+		insertBefore(node, reference) {
+			if (node.parentNode) {
+				const oldIndex = node.parentNode.children.indexOf(node);
+				node.parentNode.children.splice(oldIndex, 1);
+			}
+			const index = reference ? this.children.indexOf(reference) : this.children.length;
+			this.children.splice(index, 0, node);
+			node.parentNode = this;
+			return node;
+		}
+	}
+
+	for (const alreadyWrapped of [false, true]) {
+		const parent = new Element();
+		const bulk = new Element();
+		const review = new Element();
+		const paging = new Element();
+		parent.appendChild(bulk);
+		if (alreadyWrapped) {
+			const row = new Element();
+			row.className = "polykit-review-paging-row";
+			parent.appendChild(row);
+			row.appendChild(review);
+			row.appendChild(paging);
+		} else {
+			parent.appendChild(review);
+			parent.appendChild(paging);
+		}
+		const document = {
+			querySelector(selector) {
+				return {
+					"#bulk-actions-toolbar-top": bulk,
+					".polykit-review-toolbar": review,
+					".paging": paging,
+				}[selector] || null;
+			},
+			createElement: () => new Element(),
+		};
+		const testContext = { document };
+		vm.createContext(testContext);
+		vm.runInContext(
+			Deno.readTextFileSync(new URL("../js/polykit-functions.js", import.meta.url)),
+			testContext,
+		);
+		const row = testContext.polykit_wrap_review_paging_row();
+		assert.deepStrictEqual(row.children, [bulk, review, paging]);
+		assert.strictEqual(testContext.polykit_wrap_review_paging_row(), row);
+		assert.deepStrictEqual(row.children, [bulk, review, paging]);
+	}
+});

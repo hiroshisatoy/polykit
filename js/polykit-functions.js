@@ -261,29 +261,45 @@ function polykit_ensure_notices_container(toolbar) {
 }
 
 /**
- * Place review toolbar and top paging on one row (space-between).
+ * Place bulk actions, review toolbar, and top paging on one row.
  *
  * @returns {HTMLElement|null}
  */
 function polykit_wrap_review_paging_row() {
+	const bulk_actions = document.querySelector("#bulk-actions-toolbar-top");
 	const review_toolbar = document.querySelector(".polykit-review-toolbar");
 	const paging = document.querySelector(".paging");
-	if (!review_toolbar && !paging) {
+	if (!bulk_actions && !review_toolbar && !paging) {
 		return null;
 	}
-	const existing = review_toolbar?.closest(".polykit-review-paging-row") ||
+	const existing = bulk_actions?.closest(".polykit-review-paging-row") ||
+		review_toolbar?.closest(".polykit-review-paging-row") ||
 		paging?.closest(".polykit-review-paging-row");
 	if (existing) {
+		if (bulk_actions && existing.firstElementChild !== bulk_actions) {
+			if (typeof existing.moveBefore === "function") {
+				existing.moveBefore(bulk_actions, existing.firstChild);
+			} else {
+				existing.insertBefore(bulk_actions, existing.firstChild);
+			}
+		}
 		return existing;
 	}
 	const row = document.createElement("div");
 	row.className = "polykit-review-paging-row";
-	const parent = review_toolbar?.parentNode || paging?.parentNode;
+	const anchor = bulk_actions || review_toolbar || paging;
+	const parent = anchor.parentNode;
 	if (!parent) {
 		return null;
 	}
-	const anchor = review_toolbar || paging;
 	parent.insertBefore(row, anchor);
+	if (bulk_actions) {
+		if (typeof row.moveBefore === "function") {
+			row.moveBefore(bulk_actions, null);
+		} else {
+			row.appendChild(bulk_actions);
+		}
+	}
 	if (review_toolbar) {
 		row.appendChild(review_toolbar);
 	}
@@ -806,24 +822,12 @@ function polykit_build_sticky_header() {
 
 	const title = document.querySelector(".gp-content .breadcrumb+h2");
 	const filter_toolbar = polykit_get_filter_toolbar();
-	const bulk_actions = document.querySelector("#bulk-actions-toolbar-top");
-	const polykit_review_toolbar = document.querySelector(
-		".polykit-review-toolbar",
-	);
-	const paging_top = document.querySelector(".paging");
+	const review_paging_row = polykit_wrap_review_paging_row();
 
 	const fragment = document.createDocumentFragment();
 	title && fragment.appendChild(title);
 	filter_toolbar && fragment.appendChild(filter_toolbar);
-	bulk_actions && fragment.appendChild(bulk_actions);
-	if (polykit_review_toolbar || paging_top) {
-		const review_paging_row = document.createElement("div");
-		review_paging_row.className = "polykit-review-paging-row";
-		polykit_review_toolbar &&
-			review_paging_row.appendChild(polykit_review_toolbar);
-		paging_top && review_paging_row.appendChild(paging_top);
-		fragment.appendChild(review_paging_row);
-	}
+	review_paging_row && fragment.appendChild(review_paging_row);
 
 	const polykit_sticky_header_container = document.createElement("DIV");
 	polykit_sticky_header_container.id = "polykit-sticky-header-container";
