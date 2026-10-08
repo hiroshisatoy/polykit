@@ -121,6 +121,17 @@ table.translations {
 	white-space: nowrap;
 }
 
+.polykit-check-badge,
+.polykit-guideline-number {
+	color: var(--polykit-color-white);
+	background: var(--polykit-color-check-warning);
+}
+
+.polykit-check-notices-list :is(.polykit-check-badge, .polykit-guideline-number),
+.polykit-check-label--notice :is(.polykit-check-badge, .polykit-guideline-number) {
+	background: var(--polykit-color-check-notice);
+}
+
 .polykit-layover {
 	height: 100%;
 	width: 100%;
