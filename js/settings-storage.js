@@ -8,6 +8,7 @@ const polykitSettingsStorage = (() => {
 		"checks_block_notices",
 		"search_enabled",
 		"translate_interface",
+		"modern_colors",
 		"google_translate",
 		"prevent_unsaved",
 		"header_is_sticky",

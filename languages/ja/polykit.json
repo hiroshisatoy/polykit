@@ -179,6 +179,7 @@
 	"setting_checks_block_notices": "通知も保存をブロック",
 	"tools_title": "ツール",
 	"setting_translate_interface": "インターフェースを翻訳する (変更後はページを再読み込み)",
+	"setting_modern_colors": "モダンな配色を使用する",
 	"setting_search_enabled": "エディター内マルチプロジェクト検索",
 	"setting_google_translate": "Google 翻訳ボタン",
 	"setting_prevent_unsaved": "未保存の離脱警告",

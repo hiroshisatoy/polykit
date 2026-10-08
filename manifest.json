@@ -33,6 +33,7 @@
 			],
 			"css": [
 				"css/common.css",
+				"css/modern-colors.css",
 				"css/translation.css",
 				"css/settings.css"
 			],

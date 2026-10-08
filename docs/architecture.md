@@ -399,6 +399,7 @@ GlotPress の一般クラスへの広範な上書きを避ける。
 | ファイル | 対象 |
 | --- | --- |
 | `css/common.css` | 共通トークンとページ全体の補助 UI |
+| `css/modern-colors.css` | 設定が有効な場合だけ適用する GlotPress の配色 |
 | `css/translation.css` | 翻訳テーブルと編集行 |
 | `css/settings.css` | ページ内設定パネル |
 | `css/wp-plugins.css` | プラグイン翻訳ページ固有の表示 |
@@ -407,6 +408,11 @@ GlotPress の一般クラスへの広範な上書きを避ける。
 操作要素にはキーボードフォーカスを表示する。
 状態は色だけに依存せず、テキスト、ラベル、形状のいずれかを併用する。
 ポップアップは OS の配色設定に追従する。
+
+「モダンな配色を使用する」は既定で無効にする。
+有効時だけ `html.polykit-modern-colors` を付け、GlotPress の色変数と
+`.site-header` の背景色を指定の青系パレットに切り替える。
+設定変更時はクラスを即時更新し、次回のページ読み込みでも同期設定を反映する。
 
 設定タブは `button[role="tab"]` と `role="tabpanel"` を関連付け、
 `aria-selected`・`tabindex`・`hidden` を同時に更新する。

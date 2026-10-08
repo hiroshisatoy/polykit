@@ -1,0 +1,26 @@
+html.polykit-modern-colors {
+	--wp--preset--color--blueberry-1: #3858e9;
+	--wp--preset--color--blueberry-2: #9fb1ff;
+	--wp--preset--color--blueberry-3: #c7d1ff;
+	--wp--preset--color--blueberry-4: #eff2ff;
+
+	--gp-color-fg-default: #000000;
+	--gp-color-accent-fg: #2271b1;
+	--gp-color-accent-emphasis: #135e96;
+	--gp-color-border-default: #72777c;
+	--gp-color-border-muted: #b1b8c1;
+	--gp-color-btn-text: #2271b1;
+	--gp-color-btn-border: #2271b1;
+	--gp-color-btn-hover-text: #135e96;
+	--gp-color-btn-hover-border: #135e96;
+	--gp-color-btn-primary-text: #fff;
+	--gp-color-btn-primary-bg: #2271b1;
+	--gp-color-btn-primary-border: #2271b1;
+	--gp-color-btn-primary-hover-text: #fff;
+	--gp-color-btn-primary-hover-bg: #135e96;
+	--gp-color-btn-primary-hover-border: #135e96;
+}
+
+html.polykit-modern-colors .site-header {
+	background: var(--wp--preset--color--blueberry-1);
+}

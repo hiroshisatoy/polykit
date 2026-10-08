@@ -9,8 +9,16 @@ const initSource = Deno.readTextFileSync(new URL("js/init.js", root));
 
 function contextWithSettings(initial = {}) {
 	const values = new Map(Object.entries(initial));
+	const classes = new Set();
 	const context = vm.createContext({
 		TextEncoder,
+		document: {
+			documentElement: {
+				classList: {
+					toggle: (name, enabled) => enabled ? classes.add(name) : classes.delete(name),
+				},
+			},
+		},
 		localStorage: {
 			getItem: (key) => values.has(key) ? values.get(key) : null,
 			setItem: (key, value) => values.set(key, String(value)),
@@ -18,7 +26,10 @@ function contextWithSettings(initial = {}) {
 		},
 	});
 	vm.runInContext(storageSource, context);
-	return { context, values, settings: vm.runInContext("polykitSettingsStorage", context) };
+	const applyStart = initSource.indexOf("function polykit_apply_modern_colors()");
+	const applyEnd = initSource.indexOf("\n\npolykit_apply_modern_colors();", applyStart);
+	vm.runInContext(initSource.slice(applyStart, applyEnd), context);
+	return { context, values, classes, settings: vm.runInContext("polykitSettingsStorage", context) };
 }
 
 Deno.test("settings export accepts only known settings and safe values", () => {
@@ -28,11 +39,13 @@ Deno.test("settings export accepts only known settings and safe values", () => {
 		version: 1,
 		settings: {
 			polykit_translate_interface: false,
+			polykit_modern_colors: true,
 			polykit_ja_nakaguro: "notice",
 			polykit_warning_words: "foo, bar",
 		},
 	}));
 	assert.equal(imported.polykit_translate_interface, false);
+	assert.equal(imported.polykit_modern_colors, true);
 	assert.equal(imported.polykit_ja_nakaguro, "notice");
 	assert.throws(() => settings.parseExport('{"format":"other","version":1,"settings":{}}'));
 	assert.throws(() => settings.clean({ polykit_extension_status: "private" }));
@@ -75,7 +88,10 @@ Deno.test("first sync preserves remote settings and migrates only missing local 
 });
 
 Deno.test("after migration missing sync values clear old page settings", async () => {
-	const { context, values } = contextWithSettings({ polykit_match_words: "stale" });
+	const { context, values, classes } = contextWithSettings({
+		polykit_match_words: "stale",
+		polykit_modern_colors: "true",
+	});
 	context.chrome = {
 		storage: {
 			sync: { get: async () => ({ polykit_checks_enabled: false }) },
@@ -88,4 +104,37 @@ Deno.test("after migration missing sync values clear old page settings", async (
 	await vm.runInContext("polykit_sync_settings()", context);
 	assert.equal(values.get("polykit_checks_enabled"), "false");
 	assert.ok(!values.has("polykit_match_words"));
+	assert.ok(!values.has("polykit_modern_colors"));
+	assert.ok(!classes.has("polykit-modern-colors"));
+});
+
+Deno.test("modern colors follow the saved setting and remain opt in", async () => {
+	const { context, values, classes } = contextWithSettings();
+	context.chrome = {
+		storage: {
+			sync: { get: async () => ({ polykit_modern_colors: true }) },
+			local: { get: async () => ({ polykit_sync_migrated: true }) },
+		},
+	};
+	const start = initSource.indexOf("async function polykit_sync_settings()");
+	const end = initSource.indexOf("async function polykit_start()", start);
+	vm.runInContext(initSource.slice(start, end), context);
+	await vm.runInContext("polykit_sync_settings()", context);
+	assert.equal(values.get("polykit_modern_colors"), "true");
+	assert.ok(classes.has("polykit-modern-colors"));
+	values.set("polykit_modern_colors", "false");
+	vm.runInContext("polykit_apply_modern_colors()", context);
+	assert.ok(!classes.has("polykit-modern-colors"));
+});
+
+Deno.test("modern palette defines the requested colors only behind the opt-in class", () => {
+	const css = Deno.readTextFileSync(new URL("css/modern-colors.css", root));
+	assert.match(css, /^html\.polykit-modern-colors \{/);
+	assert.match(css, /--wp--preset--color--blueberry-1: #3858e9;/);
+	assert.match(css, /--wp--preset--color--blueberry-4: #eff2ff;/);
+	assert.match(css, /--gp-color-btn-primary-hover-bg: #135e96;/);
+	assert.match(
+		css,
+		/html\.polykit-modern-colors \.site-header \{\s*background: var\(--wp--preset--color--blueberry-1\);/,
+	);
 });

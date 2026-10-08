@@ -225,6 +225,7 @@ function polykit_generate_settings_panel() {
 				controlColumn: "enabled",
 				settings: {
 					translate_interface: polykit_t("setting_translate_interface"),
+					modern_colors: polykit_t("setting_modern_colors"),
 					search_enabled: polykit_t("setting_search_enabled"),
 					google_translate: polykit_t("setting_google_translate"),
 					prevent_unsaved: polykit_t("setting_prevent_unsaved"),
@@ -520,6 +521,7 @@ const polykit_setting_defaults = {
 	checks_block_notices: false,
 	search_enabled: true,
 	translate_interface: true,
+	modern_colors: false,
 	google_translate: true,
 	prevent_unsaved: true,
 	header_is_sticky: true,
@@ -696,6 +698,12 @@ function polykit_append_settings_category(parent, category, asterisk) {
 					if ("header_is_sticky" === setting_slug) {
 						document.body.classList.toggle(
 							"polykit-header-is-sticky",
+							event.target.checked,
+						);
+					}
+					if ("modern_colors" === setting_slug) {
+						document.documentElement.classList.toggle(
+							"polykit-modern-colors",
 							event.target.checked,
 						);
 					}

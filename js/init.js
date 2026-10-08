@@ -18,6 +18,15 @@ const jsScripts = [
 	"polykit",
 ];
 
+function polykit_apply_modern_colors() {
+	document.documentElement.classList.toggle(
+		"polykit-modern-colors",
+		"true" === localStorage.getItem("polykit_modern_colors"),
+	);
+}
+
+polykit_apply_modern_colors();
+
 /**
  * Persist a settings request in the shared DOM until page scripts are ready.
  *
@@ -224,6 +233,7 @@ async function polykit_sync_settings() {
 			await chrome.storage.local.remove("polykit_translate_interface");
 		}
 		polykitSettingsStorage.mirror(synced);
+		polykit_apply_modern_colors();
 	} catch (_error) {
 		// Keep the existing page settings when extension storage is unavailable.
 	}
