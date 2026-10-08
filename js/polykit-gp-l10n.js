@@ -8,6 +8,13 @@
 let polykit_gp_strings_sorted = null;
 let polykit_gp_l10n_initialized = false;
 
+// URL はクエリを除いた完全一致。classes は翻訳対象領域の CSS クラス。
+const polykit_gp_l10n_whitelist = {
+	urls: ["https://translate.wordpress.org/"],
+	classes: [".gp-content", ".site-header", ".site-footer"],
+};
+const polykit_gp_l10n_class_selector = polykit_gp_l10n_whitelist.classes.join(", ");
+
 const polykit_gp_skip_selector = [
 	"script",
 	"style",
@@ -96,12 +103,26 @@ function polykit_gp_should_skip_element(element) {
 }
 
 /**
+ * @param {Element} element
+ * @returns {boolean}
+ */
+function polykit_gp_is_translation_target(element) {
+	if (!element || polykit_gp_should_skip_element(element)) {
+		return false;
+	}
+	const location = window.location;
+	const page_url = location && `${location.origin}${location.pathname}`;
+	return polykit_gp_l10n_whitelist.urls.includes(page_url) ||
+		Boolean(element.closest(polykit_gp_l10n_class_selector));
+}
+
+/**
  * @param {Text} textNode
  * @returns {void}
  */
 function polykit_gp_localize_text_node(textNode) {
 	const parent = textNode.parentElement;
-	if (!parent || polykit_gp_should_skip_element(parent)) {
+	if (!polykit_gp_is_translation_target(parent)) {
 		return;
 	}
 	const translated = polykit_gp_translate_text(textNode.data);
@@ -127,7 +148,7 @@ function polykit_gp_localize_attributes(root) {
 			elements.unshift(root);
 		}
 		elements.forEach((element) => {
-			if (polykit_gp_should_skip_element(element)) {
+			if (!polykit_gp_is_translation_target(element)) {
 				return;
 			}
 			const current = element.getAttribute(attribute);
@@ -166,9 +187,9 @@ function polykit_localize_glotpress(root = document.body) {
 			if (!node.data || !node.data.trim()) {
 				return NodeFilter.FILTER_REJECT;
 			}
-			return polykit_gp_should_skip_element(node.parentElement)
-				? NodeFilter.FILTER_REJECT
-				: NodeFilter.FILTER_ACCEPT;
+			return polykit_gp_is_translation_target(node.parentElement)
+				? NodeFilter.FILTER_ACCEPT
+				: NodeFilter.FILTER_REJECT;
 		},
 	});
 	let textNode = walker.nextNode();
@@ -200,7 +221,7 @@ function polykit_init_glotpress_l10n() {
 		subtree: true,
 		characterData: true,
 		attributes: true,
-		attributeFilter: ["title", "aria-label", "placeholder", "value"],
+		attributeFilter: ["title", "aria-label", "placeholder", "value", "class"],
 	};
 	const collect = (records) => {
 		for (const record of records) {
