@@ -520,7 +520,7 @@ const polykit_check_level_defaults = {
 	check_placeholder_order: "notice",
 	check_double_spaces: "warning",
 	check_tag_spaces: "notice",
-	no_glossary_term_check: "warning",
+	no_glossary_term_check: "notice",
 	no_initial_uppercase: "off",
 	no_initial_space: "warning",
 	no_trailing_space: "warning",
