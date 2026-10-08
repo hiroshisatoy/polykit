@@ -26,34 +26,14 @@ jQuery("thead th.checkbox input").on("change", function () {
 jQuery(".bulk-actions").on("click", ".button", (e) => {
 	if ("copy-from-original" === jQuery(".bulk-action option:selected").val()) {
 		let copied_count = 0;
-		let timeout = 0;
 		$gp.editor.hide(); // Avoid validation on open editors that are empty.
 		polykit_checked_rows.forEach((row) => {
 			const checkbox = jQuery(`#preview-${row} th.checkbox input`);
-			if (polykit_get_setting("autosubmit_bulk_copy_from_original")) {
-				setTimeout(() => {
-					$gp.editor.show(checkbox);
-					jQuery(`#editor-${row} .translation-actions__copy`).trigger("click");
-					jQuery(`#editor-${row} textarea.foreign-text`).trigger("change");
-					if (polykit_get_setting("force_autosubmit_bulk_copy_from_original")) {
-						jQuery(`#editor-${row} button.translation-actions__save`).addClass(
-							"forcesubmit",
-						);
-					}
-					jQuery(`#editor-${row} button.translation-actions__save`).trigger(
-						"click",
-					);
-					copied_count++;
-					polykit_copied_count_notice(copied_count);
-				}, timeout);
-				timeout += 2000;
-			} else {
-				$gp.editor.show(checkbox);
-				jQuery(`#editor-${row} .translation-actions__copy`).trigger("click");
-				jQuery(`#editor-${row} textarea.foreign-text`).trigger("change");
-				copied_count++;
-				polykit_copied_count_notice(copied_count);
-			}
+			$gp.editor.show(checkbox);
+			jQuery(`#editor-${row} .translation-actions__copy`).trigger("click");
+			jQuery(`#editor-${row} textarea.foreign-text`).trigger("change");
+			copied_count++;
+			polykit_copied_count_notice(copied_count);
 		});
 		polykit_checked_rows.splice(0, polykit_checked_rows.length);
 		e.preventDefault();

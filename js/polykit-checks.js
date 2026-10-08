@@ -766,11 +766,7 @@ function polykit_editor_checks_init(editor_id, preview_id) {
 
 	editor.querySelectorAll(".translation-actions__save, .approve").forEach((btn) => {
 		btn.addEventListener("click", (e) => {
-			const force = btn.classList.contains("forcesubmit");
-			if (force) {
-				// One-shot bypass added by bulk copy.
-				btn.classList.remove("forcesubmit");
-			} else if (
+			if (
 				!polykit_editor_save_warnings_ignored(editor_id) &&
 				!polykit_check_this_translation(editor_id, preview_id)
 			) {

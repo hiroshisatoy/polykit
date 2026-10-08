@@ -390,7 +390,3 @@
 	color: var(--polykit-color-text);
 	margin: 1em 0;
 }
-
-.polykit-asterisk {
-	color: var(--polykit-color-error);
-}

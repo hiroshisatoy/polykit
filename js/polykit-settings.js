@@ -237,12 +237,6 @@ function polykit_generate_settings_panel() {
 				controlColumn: "enabled",
 				settings: {
 					no_non_breaking_space: polykit_t("setting_no_non_breaking_space"),
-					autosubmit_bulk_copy_from_original: polykit_t(
-						"setting_autosubmit_bulk",
-					),
-					force_autosubmit_bulk_copy_from_original: polykit_t(
-						"setting_force_autosubmit_bulk",
-					),
 				},
 			},
 		],
@@ -250,10 +244,6 @@ function polykit_generate_settings_panel() {
 
 	const container = document.createElement("DIV");
 	container.classList.add("polykit-settings");
-
-	const asterisk = document.createElement("SPAN");
-	asterisk.classList.add("polykit-asterisk");
-	asterisk.textContent = "*";
 
 	const tab_defs = [
 		{
@@ -263,7 +253,6 @@ function polykit_generate_settings_panel() {
 				polykit_append_settings_group(
 					panel,
 					general_checks_group,
-					asterisk,
 					{ showTitle: false },
 				);
 			},
@@ -275,7 +264,6 @@ function polykit_generate_settings_panel() {
 				polykit_append_settings_group(
 					panel,
 					ja_style_guide_group,
-					asterisk,
 					{ showTitle: false },
 				);
 			},
@@ -299,14 +287,8 @@ function polykit_generate_settings_panel() {
 				polykit_append_settings_group(
 					panel,
 					tools_group,
-					asterisk,
 					{ showTitle: false },
 				);
-				const caution_note = document.createElement("SPAN");
-				caution_note.style.fontWeight = "bold";
-				caution_note.style.margin = "1em 0 .2em";
-				caution_note.append(asterisk.cloneNode(true), polykit_t("caution_note"));
-				panel.appendChild(caution_note);
 				const backup_note = document.createElement("P");
 				backup_note.textContent = polykit_t("backup_settings_note");
 				panel.appendChild(backup_note);
@@ -579,12 +561,11 @@ const polykit_inverted_check_keys = {
  *
  * @param {DocumentFragment|HTMLElement} parent
  * @param {object} group
- * @param {HTMLSpanElement} asterisk
  * @param {object} [options]
  * @param {boolean} [options.showTitle]
  * @returns {void}
  */
-function polykit_append_settings_group(parent, group, asterisk, options = {}) {
+function polykit_append_settings_group(parent, group, options = {}) {
 	const showTitle = false !== options.showTitle;
 	const section = document.createElement("SECTION");
 	section.classList.add("polykit-settings-group", group.groupClass);
@@ -603,7 +584,7 @@ function polykit_append_settings_group(parent, group, asterisk, options = {}) {
 
 	const inner = document.createDocumentFragment();
 	group.categories.forEach((category) => {
-		polykit_append_settings_category(inner, category, asterisk);
+		polykit_append_settings_category(inner, category);
 	});
 	section.appendChild(inner);
 	parent.appendChild(section);
@@ -635,32 +616,21 @@ function polykit_create_settings_table(controlColumn) {
 /**
  * @param {HTMLTableCellElement} cell
  * @param {string} text
- * @param {HTMLSpanElement} asterisk
  * @returns {void}
  */
-function polykit_fill_settings_description_cell(cell, text, asterisk) {
-	let desc = text;
-	let has_asterisk = false;
-	if (/\s*\*$/.test(desc)) {
-		has_asterisk = true;
-		desc = desc.replace(/\s*\*$/, "");
-	}
+function polykit_fill_settings_description_cell(cell, text) {
 	const wrapper = document.createElement("DIV");
 	wrapper.classList.add("polykit-settings-table__desc-text");
-	polykit_append_setting_label_content(wrapper, desc);
+	polykit_append_setting_label_content(wrapper, text);
 	cell.appendChild(wrapper);
-	if (has_asterisk) {
-		cell.appendChild(asterisk.cloneNode(true));
-	}
 }
 
 /**
  * @param {DocumentFragment|HTMLElement} parent
  * @param {object} category
- * @param {HTMLSpanElement} asterisk
  * @returns {void}
  */
-function polykit_append_settings_category(parent, category, asterisk) {
+function polykit_append_settings_category(parent, category) {
 	parent.appendChild(document.createElement("H3")).appendChild(
 		document.createTextNode(polykit_t(category.title)),
 	);
@@ -676,7 +646,7 @@ function polykit_append_settings_category(parent, category, asterisk) {
 			const row = document.createElement("TR");
 			const descCell = document.createElement("TD");
 			descCell.classList.add("polykit-settings-table__desc");
-			polykit_fill_settings_description_cell(descCell, setting_desc, asterisk);
+			polykit_fill_settings_description_cell(descCell, setting_desc);
 			const controlCell = document.createElement("TD");
 			controlCell.classList.add("polykit-settings-table__control");
 			if (is_severity) {
