@@ -130,7 +130,6 @@ function polykit_generate_settings_panel() {
 					),
 					check_double_spaces: polykit_t("setting_check_double_spaces"),
 					check_tag_spaces: polykit_t("setting_check_tag_spaces"),
-					no_glossary_term_check: polykit_t("setting_no_glossary_term_check"),
 					no_initial_uppercase: polykit_t("setting_no_initial_uppercase"),
 					no_initial_space: polykit_t("setting_no_initial_space"),
 					no_trailing_space: polykit_t("setting_no_trailing_space"),
@@ -192,8 +191,11 @@ function polykit_generate_settings_panel() {
 			},
 			{
 				title: "ja_style_section3_title",
+				titleHref:
+					"https://ja.wordpress.org/team/handbook/translation/translation-style-guide/#3-%e8%a8%b3%e8%aa%9e%e3%81%ae%e7%b5%b1%e4%b8%80",
 				controlColumn: "severity",
 				settings: {
+					no_glossary_term_check: polykit_t("setting_no_glossary_term_check"),
 					ja_view_terminology: polykit_t("setting_ja_view_terminology"),
 					ja_not_allowed_terminology: polykit_t(
 						"setting_ja_not_allowed_terminology",
@@ -631,9 +633,18 @@ function polykit_fill_settings_description_cell(cell, text) {
  * @returns {void}
  */
 function polykit_append_settings_category(parent, category) {
-	parent.appendChild(document.createElement("H3")).appendChild(
-		document.createTextNode(polykit_t(category.title)),
-	);
+	const heading = document.createElement("H3");
+	if (category.titleHref) {
+		const link = document.createElement("A");
+		link.href = category.titleHref;
+		link.target = "_blank";
+		link.rel = "noopener noreferrer";
+		link.textContent = polykit_t(category.title);
+		heading.appendChild(link);
+	} else {
+		heading.textContent = polykit_t(category.title);
+	}
+	parent.appendChild(heading);
 	const controlColumn = category.controlColumn || "enabled";
 	const table = polykit_create_settings_table(controlColumn);
 	const tbody = table.querySelector("tbody");
