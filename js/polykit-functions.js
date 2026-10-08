@@ -680,8 +680,6 @@ function polykit_wait_table_alter() {
 						polykit_quicklinks(editor_id);
 						polykit_consistency(editor_id);
 						polykit_localize_date(editor_id);
-						polykit_search_init(editor_id);
-						polykit_google_translate_init(editor_id);
 						polykit_notify_editor_added(addedNode);
 					}
 				});
@@ -846,17 +844,17 @@ function polykit_build_sticky_header() {
  */
 function polykit_anonymous() {
 	const user_filter_el = document.getElementById("filters[user_login]");
-	if (!user_filter_el || document.getElementById("polykit-search-anonymous")) {
+	if (!user_filter_el || document.getElementById("polykit-filter-anonymous")) {
 		return;
 	}
 	const anonymous = document.createElement("div");
 	anonymous.className = "polykit-anonymous-filter";
 	const anonymous_input = polykit_create_element("input", {
 		"type": "checkbox",
-		"id": "polykit-search-anonymous",
+		"id": "polykit-filter-anonymous",
 	});
 	const anonymous_label = polykit_create_element("label", {
-		"for": "polykit-search-anonymous",
+		"for": "polykit-filter-anonymous",
 	}, polykit_t("anonymous_author"));
 	anonymous.append(anonymous_input, anonymous_label);
 	const next = user_filter_el.nextElementSibling;

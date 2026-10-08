@@ -6,10 +6,8 @@ const polykitSettingsStorage = (() => {
 		"checks_enabled",
 		"checks_labels",
 		"checks_block_notices",
-		"search_enabled",
 		"translate_interface",
 		"modern_colors",
-		"google_translate",
 		"prevent_unsaved",
 		"header_is_sticky",
 		"bulk_consistency",
@@ -83,6 +81,8 @@ const polykitSettingsStorage = (() => {
 		for (const [key, value] of Object.entries(settings)) {
 			if (
 				[
+					"polykit_search_enabled",
+					"polykit_google_translate",
 					"polykit_autocopy_string_on_translation_opened",
 					"polykit_autosubmit_bulk_copy_from_original",
 					"polykit_force_autosubmit_bulk_copy_from_original",

@@ -77,7 +77,6 @@
 				"js/polykit-meta.js",
 				"js/polykit-consistency.js",
 				"js/polykit-checks.js",
-				"js/polykit-search.js",
 				"js/polykit-bulk-consistency.js",
 				"js/polykit-settings.js",
 				"js/jquery.bind-first.js",

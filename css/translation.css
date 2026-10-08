@@ -177,7 +177,7 @@ table.translations {
 	display: block;
 	margin-top: 0.35em;
 
-	#polykit-search-anonymous {
+	#polykit-filter-anonymous {
 		margin-right: 5px;
 	}
 }
@@ -769,42 +769,6 @@ button {
 	background: var(--polykit-color-warning-bg);
 	border: 1px solid var(--polykit-color-warning-border);
 	border-radius: var(--polykit-radius-xs);
-}
-
-.polykit-search {
-	/* margin-top: 0; */
-	padding: 0.5em;
-	background: var(--polykit-color-surface-panel);
-	border-radius: var(--polykit-radius-xs);
-
-	label {
-		margin-right: 0.5em;
-		font-size: var(--polykit-font-size-xs);
-	}
-
-	.polykit-search-word {
-		min-width: var(--polykit-size-search-input-min);
-	}
-
-	.polykit-search-plugin-slug.hidden {
-		display: none;
-	}
-
-	.polykit-search-error {
-		color: var(--polykit-color-danger);
-		font-size: var(--polykit-font-size-xs);
-	}
-}
-
-.polykit-get-gt {
-	display: inline-block;
-	margin-top: 0.5em;
-}
-
-.polykit-results-notice {
-	padding: 0.5em 1em;
-	background: var(--polykit-color-results-bg);
-	border-left: var(--polykit-size-border-results) solid var(--polykit-color-info);
 }
 
 .polykit-bulk-warning,

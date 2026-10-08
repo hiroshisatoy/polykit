@@ -28,7 +28,6 @@
 	--polykit-color-border-light: #c4c4c4;
 	--polykit-color-border-separator: #c3c0c0;
 	--polykit-color-surface-muted: #f0f0f1;
-	--polykit-color-surface-panel: #f6f7f7;
 	--polykit-color-surface-code: #e4e4e4;
 	--polykit-color-surface-inactive: #888;
 	--polykit-color-toggle-on: #0085ba;
@@ -52,7 +51,6 @@
 	--polykit-color-warning-highlight-border: #dba617;
 	--polykit-color-check-warning-outline: #f0a0a0;
 	--polykit-color-check-notice-outline: #a0c4f0;
-	--polykit-color-results-bg: #f0f6fc;
 	--polykit-color-label-error-bg: #fce4e4;
 	--polykit-color-label-notice-bg: #e8f4fc;
 	--polykit-color-label-passed-bg: #e6f6e8;
@@ -94,7 +92,6 @@
 	--polykit-size-border-accent: 2px;
 	--polykit-size-border-notice: 3px;
 	--polykit-size-border-toolbar: 4px;
-	--polykit-size-border-results: 4px;
 	--polykit-size-action-button: 32px;
 	--polykit-size-action-button-min-height: 28px;
 	--polykit-size-action-icon: 32px;
@@ -102,7 +99,6 @@
 	--polykit-size-inline-actions-width: 130px;
 	--polykit-size-glossary-divider-height: 36px;
 	--polykit-size-suggestions-max-height: 300px;
-	--polykit-size-search-input-min: 120px;
 	--polykit-size-settings-table-text-max: 320px;
 	--polykit-size-settings-header: 55px;
 	--polykit-size-toggle-width: 34px;

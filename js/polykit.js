@@ -147,7 +147,6 @@ function polykit_init_translation_table() {
 	polykit_pagination();
 	polykit_checks_init();
 	polykit_wrap_review_paging_row();
-	polykit_search_events();
 }
 
 /**
@@ -173,7 +172,6 @@ function polykit_init() {
 		polykit_init_translation_table();
 	} else {
 		window.polykit_filter_bar = jQuery();
-		polykit_search_page_notice();
 	}
 }
 

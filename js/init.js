@@ -12,7 +12,6 @@ const jsScripts = [
 	"polykit-bulk",
 	"polykit-notices",
 	"polykit-checks",
-	"polykit-search",
 	"polykit-bulk-consistency",
 	"polykit-consistency",
 	"polykit",

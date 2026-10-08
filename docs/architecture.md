@@ -215,7 +215,6 @@ DOM へのラベル追加、ハイライト、保存制御は収集結果を受�
 | `js/polykit-bulk.js` | 原文からの一括コピー |
 | `js/polykit-column.js` | 行単位の Approve、Reject、Fuzzy 操作 |
 | `js/polykit-meta.js` | 文字数、語数、複数形、日付情報 |
-| `js/polykit-search.js` | 他プロジェクト検索と外部翻訳導線 |
 | `js/polykit-notices.js` | 選択数と処理件数の通知 |
 
 これらの処理は、GlotPress の既存編集行と `$gp.editor` を正本として扱う。

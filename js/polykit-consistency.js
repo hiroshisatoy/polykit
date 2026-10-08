@@ -4,8 +4,6 @@ let polykit_quicklinks_window = { "closed": true };
 if (typeof $gp_editor_options !== "undefined") {
 	polykit_quicklinks();
 	polykit_consistency();
-	polykit_search_init();
-	polykit_google_translate_init();
 }
 
 function polykit_quicklinks(current_editor = ".editor") {

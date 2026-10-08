@@ -52,16 +52,22 @@ Deno.test("settings export accepts only known settings and safe values", () => {
 		version: 1,
 		settings: {
 			polykit_translate_interface: true,
+			polykit_search_enabled: true,
+			polykit_google_translate: true,
 			polykit_autocopy_string_on_translation_opened: true,
 			polykit_autosubmit_bulk_copy_from_original: true,
 			polykit_force_autosubmit_bulk_copy_from_original: true,
 		},
 	}));
 	assert.equal(legacy.polykit_translate_interface, true);
+	assert.ok(!Object.hasOwn(legacy, "polykit_search_enabled"));
+	assert.ok(!Object.hasOwn(legacy, "polykit_google_translate"));
 	assert.ok(!Object.hasOwn(legacy, "polykit_autocopy_string_on_translation_opened"));
 	assert.ok(!Object.hasOwn(legacy, "polykit_autosubmit_bulk_copy_from_original"));
 	assert.ok(!Object.hasOwn(legacy, "polykit_force_autosubmit_bulk_copy_from_original"));
 	assert.ok(!settings.keys.includes("polykit_autocopy_string_on_translation_opened"));
+	assert.ok(!settings.keys.includes("polykit_search_enabled"));
+	assert.ok(!settings.keys.includes("polykit_google_translate"));
 	assert.ok(!settings.keys.includes("polykit_autosubmit_bulk_copy_from_original"));
 	assert.ok(!settings.keys.includes("polykit_force_autosubmit_bulk_copy_from_original"));
 	assert.throws(() => settings.parseExport('{"format":"other","version":1,"settings":{}}'));

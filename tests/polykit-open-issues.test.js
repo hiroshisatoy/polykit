@@ -5,52 +5,6 @@ import vm from "node:vm";
 
 const root = new URL("../", import.meta.url);
 
-Deno.test("other-plugin search uses the wp-plugins project path", () => {
-	const opened = [];
-	const storage = {
-		polykit_search: JSON.stringify({
-			this_project: false,
-			wp: false,
-			consistency: false,
-			plugin: true,
-			plugin_slug: "",
-		}),
-	};
-	const context = {
-		document: {
-			querySelectorAll() {
-				return [];
-			},
-		},
-		localStorage: {
-			getItem(key) {
-				return storage[key] || null;
-			},
-			setItem(key, value) {
-				storage[key] = value;
-			},
-		},
-		polykit_parse_json(value, fallback) {
-			return value ? JSON.parse(value) : fallback;
-		},
-		window: {
-			location: {
-				hostname: "translate.wordpress.org",
-				pathname: "/projects/wp-plugins/polykit/dev/ja/default/",
-			},
-			open(url) {
-				opened.push(url);
-				return {};
-			},
-		},
-	};
-	vm.createContext(context);
-	vm.runInContext(Deno.readTextFileSync(new URL("js/polykit-search.js", root)), context);
-	vm.runInContext('polykit_do_search("glossary", "akismet")', context);
-	assert.strictEqual(opened.length, 1);
-	assert.ok(opened[0].includes("/projects/wp-plugins/akismet/dev/ja/default?"));
-});
-
 Deno.test("bulk replacement validates every plural form before mutation", () => {
 	const context = {};
 	vm.createContext(context);
