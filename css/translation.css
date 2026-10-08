@@ -111,6 +111,16 @@ table.translations {
 	}
 }
 
+.polykit-check-badge {
+	display: inline-block;
+	margin-inline-end: 0.45em;
+	padding: 0 0.4em;
+	border: 1px solid currentColor;
+	border-radius: 2px;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
 .polykit-layover {
 	height: 100%;
 	width: 100%;

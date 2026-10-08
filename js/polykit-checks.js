@@ -297,11 +297,15 @@ function polykit_check_tag_spaces(translated) {
 /**
  * @param {HTMLElement[]} target
  * @param {string[]} messages
+ * @param {string} [guideline]
  * @returns {void}
  */
-function polykit_push_messages_as_items(target, messages) {
+function polykit_push_messages_as_items(target, messages, guideline = "") {
 	messages.forEach((message) => {
 		const li = document.createElement("li");
+		if (guideline) {
+			li.dataset.polykitGuideline = guideline;
+		}
 		if (message.includes("<")) {
 			li.appendChild(polykit_trusted_inline_fragment(message));
 		} else {
@@ -309,6 +313,31 @@ function polykit_push_messages_as_items(target, messages) {
 		}
 		target.push(li);
 	});
+}
+
+/**
+ * Put a rule number, or a generic marker, before every displayed check.
+ *
+ * @param {HTMLElement} element
+ * @param {string} [guideline]
+ * @returns {void}
+ */
+function polykit_add_check_badge(element, guideline = "") {
+	if (element.querySelector(".polykit-check-badge, .polykit-guideline-number")) {
+		return;
+	}
+	const last = element.lastChild;
+	if (last && 3 === last.nodeType) {
+		const match = last.nodeValue.match(/\s+\((\d+(?:-\d+)?(?:\s*[・/]\s*\d+(?:-\d+)?)*)\)(。?)$/);
+		if (match) {
+			guideline = match[1];
+			last.nodeValue = last.nodeValue.slice(0, -match[0].length) + match[2];
+		}
+	}
+	const badge = document.createElement("span");
+	badge.className = "polykit-check-badge";
+	badge.textContent = guideline || polykit_t("check_generic_label");
+	element.insertBefore(badge, element.firstChild);
 }
 
 /**
@@ -323,13 +352,13 @@ function polykit_run_all_checks(original, translated, editor_id, form_index) {
 	if ("" === translated) {
 		return results;
 	}
-	const merge_buckets = (buckets) => {
-		polykit_push_messages_as_items(results.warning, buckets.warning || []);
-		polykit_push_messages_as_items(results.notice, buckets.notice || []);
+	const merge_buckets = (buckets, guideline = "") => {
+		polykit_push_messages_as_items(results.warning, buckets.warning || [], guideline);
+		polykit_push_messages_as_items(results.notice, buckets.notice || [], guideline);
 	};
 	merge_buckets(polykit_collect_general_checks(original, translated));
 	merge_buckets(polykit_collect_locale_checks(original, translated));
-	merge_buckets(polykit_collect_glossary_warnings(editor_id, form_index));
+	merge_buckets(polykit_collect_glossary_warnings(editor_id, form_index), "3");
 	if (0 === form_index) {
 		merge_buckets(polykit_collect_gp_warning_messages(editor_id));
 	}
@@ -572,6 +601,9 @@ function polykit_prepare_row_checks(editor_id, highlight_spaces) {
 	const final_list = document.createElement("div");
 	final_list.className = "polykit-checks-list";
 	final_list.appendChild(state.check_results);
+	final_list.querySelectorAll("li").forEach((item) => {
+		polykit_add_check_badge(item, item.dataset.polykitGuideline);
+	});
 	state.check_results = final_list;
 
 	if (state.has_warning) {
@@ -614,6 +646,7 @@ function polykit_create_check_label(el, type) {
 	} else {
 		message.textContent = el.textContent;
 	}
+	polykit_add_check_badge(message, el.dataset.polykitGuideline);
 	label.appendChild(message);
 	if (full_text.length > 72) {
 		label.title = full_text;
