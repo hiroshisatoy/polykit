@@ -28,6 +28,7 @@
 	"content_scripts": [
 		{
 			"js": [
+				"js/settings-storage.js",
 				"js/init.js"
 			],
 			"css": [

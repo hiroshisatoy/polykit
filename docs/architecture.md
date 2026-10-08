@@ -87,7 +87,6 @@ https://translate.wordpress.org/*/playground/*
 - WordPress.org の認証や権限管理
 - GlotPress サーバー API の提供または変更
 - 翻訳内容の自動生成
-- 複数端末間の設定同期
 - GlotDict との同時利用
 
 GlotDict と同時に利用すると、同一 DOM への追加処理やイベント登録が重複する。
@@ -116,7 +115,7 @@ Chrome では Manifest V3 のサービスワーカーとして実行する。
 ### 5.2 拡張機能 UI
 
 ツールバーアイコンから独立したポップアップ文書を開く。
-ポップアップは `chrome.storage.local` と Tabs API を利用するが、
+ポップアップは `chrome.storage.sync` と Tabs API を利用するが、
 対象ページの DOM へ直接アクセスしない。
 
 ### 5.3 コンテンツスクリプトとページスクリプト
@@ -140,8 +139,8 @@ GlotPress の `$gp`、`$gp_editor_options`、jQuery、DOM にアクセスする�
 
 対象ページでは次の順序で起動する。
 
-1. ブラウザーが `js/init.js` と基本 CSS を読み込む
-2. 共有設定をページ側 `localStorage` へ反映する
+1. ブラウザーが `js/settings-storage.js`、`js/init.js` と基本 CSS を読み込む
+2. 同期設定をページ側 `localStorage` へ反映する
 3. PolyKit 独自 UI 用辞書の読み込みを開始する
 4. GlotPress 画面翻訳辞書の読み込みを並行して開始する
 5. JSON データを `#polykit-i18n-data` へ公開する
@@ -270,13 +269,21 @@ AJAX 完了や起動後の固定タイマーによる全体の再走査は行わ
 | 保存領域 | 用途 | 有効期間 |
 | --- | --- | --- |
 | `chrome.storage.session` | インストール・更新情報 | ブラウザーセッション |
-| `chrome.storage.local` | 拡張機能 UI と共有する設定 | 拡張機能の削除まで |
-| ページ `localStorage` | ページスクリプト設定と作業補助状態 | オリジン単位 |
+| `chrome.storage.sync` | PolyKit の設定の正本 | 同期が有効なら同一ブラウザーアカウント間 |
+| `chrome.storage.local` | 既存設定の移行済みフラグ | 拡張機能の削除まで |
+| ページ `localStorage` | ページスクリプト用の設定ミラーと作業補助状態 | オリジン単位 |
 | DOM | 辞書データと一時的な UI 状態 | ページ読み込み中 |
 
-画面翻訳設定は `chrome.storage.local` を正本とし、ページ起動時に
-同名の `localStorage` キーへミラーする。
-その他の既存設定は `polykit_` 接頭辞のページ `localStorage` に保存する。
+設定は `chrome.storage.sync` を正本とし、ページ起動時に同名の
+`localStorage` キーへミラーする。初回起動時は既存のページ `localStorage` と
+画面翻訳用 `chrome.storage.local` から、同期領域にない設定だけを移行する。
+ページ内での設定変更はコンテンツスクリプトを経由して同期領域へ保存する。
+同期容量を超えるなどして保存に失敗した場合、現在のページの設定値は維持する。
+同期先の設定は翻訳ページの次回読み込み時に反映される。
+
+ポップアップから設定を JSON ファイルへ書き出し、別の利用者が読み込める。
+読み込み時は形式、バージョン、設定キーと値を検証し、既存設定を置き換える。
+インストール・更新情報や作業補助状態は共有しない。
 
 ### 8.2 設定の既定値
 
@@ -309,6 +316,7 @@ AJAX 完了や起動後の固定タイマーによる全体の再走査は行わ
 | `polykit-open-settings` | バックグラウンド | `js/init.js` | 現在のページで設定を開く |
 | `polykit-get-translate-interface` | ポップアップ | `js/init.js` | ページ側ミラー値の取得 |
 | `polykit-set-translate-interface` | ポップアップ | `js/init.js` | 画面翻訳設定の変更 |
+| `polykit-reload-settings` | ポップアップ | `js/init.js` | 設定ファイル読み込み後にページを再読み込みする |
 
 オブジェクト形式のメッセージは型を検証する。
 対象外のメッセージは副作用なく無視する。
@@ -319,6 +327,7 @@ AJAX 完了や起動後の固定タイマーによる全体の再走査は行わ
 | --- | --- |
 | `polykit:open-settings` | 初期化済みページへ設定画面表示を要求する |
 | `polykit:gp-strings-ready` | GlotPress 辞書の準備完了を通知する |
+| `polykit:setting-changed` | ページ内設定の変更をコンテンツスクリプトへ知らせる |
 
 設定画面要求はデータ属性にも保持し、ページスクリプトの初期化前に
 イベントを受信しても失われないようにする。
@@ -368,7 +377,7 @@ GlotPress は編集行を動的に表示または追加する。
 
 | Manifest 項目 | 目的 |
 | --- | --- |
-| `storage` | セッション情報と共有設定の保存 |
+| `storage` | セッション情報と設定の同期・移行 |
 | `activeTab` | ポップアップ操作時の対象タブ判定 |
 | `host_permissions` | 対象サイトでの動作 |
 | `web_accessible_resources` | ページコンテキスト用コードと辞書の読み込み |
@@ -501,7 +510,8 @@ DOM から分離できる関数は、VM コンテキストまたは最小の DOM
 2. 既定値と値の型を定義する
 3. 設定画面のラベルと説明を辞書へ追加する
 4. 破損値と旧形式からの移行方法を定義する
-5. ポップアップと共有する場合は `chrome.storage.local` を正本にする
+5. `js/settings-storage.js` の同期対象キーと型を更新する
+6. `chrome.storage.sync` を正本にし、ページ側へミラーする
 
 ### 16.3 新しい検証ルール
 
@@ -515,7 +525,7 @@ DOM から分離できる関数は、VM コンテキストまたは最小の DOM
 
 - GlotPress の DOM 構造とグローバル JavaScript API に依存する
 - ページスクリプトは共有グローバル名前空間を使用する
-- ページ設定の多くは WordPress.org オリジンの `localStorage` に保存される
+- ページスクリプトは設定ミラーとして WordPress.org オリジンの `localStorage` を利用する
 - DOM 文字列置換による画面翻訳は、GlotPress 側の文言変更に追随する必要がある
 - 実ブラウザーを使う End-to-End テストは現在のテスト構成に含まれない
 

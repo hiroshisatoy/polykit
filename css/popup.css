@@ -105,6 +105,37 @@ input[role="switch"] {
 	font-size: 11px;
 }
 
+.popup__transfer {
+	margin-top: 14px;
+}
+
+.popup__transfer p {
+	margin: 0 2px 8px;
+	color: #646970;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+.popup__transfer-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.popup__transfer-actions button {
+	min-height: 40px;
+	justify-content: center;
+	padding: 8px;
+	border: 1px solid #dcdcde;
+	border-radius: 6px;
+	background: #fff;
+	font-size: 12px;
+	text-align: center;
+}
+
+.popup__file {
+	display: none;
+}
+
 @media (prefers-color-scheme: dark) {
 	body {
 		background: #1d2327;
@@ -127,7 +158,13 @@ input[role="switch"] {
 
 	.popup__header p,
 	small,
+	.popup__transfer p,
 	.status {
 		color: #c3c4c7;
+	}
+
+	.popup__transfer-actions button {
+		border-color: #50575e;
+		background: #2c3338;
 	}
 }

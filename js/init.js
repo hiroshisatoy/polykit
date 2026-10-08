@@ -46,6 +46,19 @@ chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
 		localStorage.setItem("polykit_translate_interface", request.enabled);
 		window.location.reload();
 	}
+	if ("polykit-reload-settings" === request) {
+		window.location.reload();
+	}
+});
+
+document.addEventListener("polykit:setting-changed", () => {
+	const key = document.documentElement.dataset.polykitSettingChanged;
+	const value = polykitSettingsStorage.normalize(key, localStorage.getItem(key));
+	if (null !== value) {
+		chrome.storage.sync.set({ [key]: value }).catch(() => {
+			// The current page retains its local setting if the sync quota is reached.
+		});
+	}
 });
 
 if ("#polykit-settings" === window.location.hash) {
@@ -182,16 +195,42 @@ function polykit_record_extension_status() {
  *
  * @returns {Promise<void>}
  */
-async function polykit_start() {
-	const shared_settings = await chrome.storage.local.get(
-		"polykit_translate_interface",
-	);
-	if ("boolean" === typeof shared_settings.polykit_translate_interface) {
-		localStorage.setItem(
-			"polykit_translate_interface",
-			shared_settings.polykit_translate_interface,
-		);
+async function polykit_sync_settings() {
+	try {
+		const keys = polykitSettingsStorage.keys;
+		const [synced, legacy] = await Promise.all([
+			chrome.storage.sync.get(keys),
+			chrome.storage.local.get(["polykit_sync_migrated", "polykit_translate_interface"]),
+		]);
+		if (!legacy.polykit_sync_migrated) {
+			const migrated = {};
+			for (const key of keys) {
+				if (Object.hasOwn(synced, key)) continue;
+				const localValue = localStorage.getItem(key);
+				const value = polykitSettingsStorage.normalize(
+					key,
+					"polykit_translate_interface" === key &&
+						"boolean" === typeof legacy.polykit_translate_interface
+						? legacy.polykit_translate_interface
+						: localValue,
+				);
+				if (null !== value) migrated[key] = value;
+			}
+			if (Object.keys(migrated).length) {
+				await chrome.storage.sync.set(migrated);
+				Object.assign(synced, migrated);
+			}
+			await chrome.storage.local.set({ polykit_sync_migrated: true });
+			await chrome.storage.local.remove("polykit_translate_interface");
+		}
+		polykitSettingsStorage.mirror(synced);
+	} catch (_error) {
+		// Keep the existing page settings when extension storage is unavailable.
 	}
+}
+
+async function polykit_start() {
+	await polykit_sync_settings();
 	const gp_strings_promise = polykit_load_glotpress_strings();
 	const strings = await polykit_load_polykit_strings();
 	polykit_publish_language_data({

@@ -308,34 +308,8 @@ function polykit_generate_settings_panel() {
 				caution_note.append(asterisk.cloneNode(true), polykit_t("caution_note"));
 				panel.appendChild(caution_note);
 				const backup_note = document.createElement("P");
-				const backup_link = document.createElement("A");
-				backup_link.id = "polykit-backup";
-				backup_link.href = "#";
-				backup_link.textContent = polykit_t("backup_settings");
-				backup_link.title = polykit_t("backup_settings_hint");
-				backup_note.append(
-					backup_link,
-					document.createTextNode(` ${polykit_t("backup_settings_note")}`),
-				);
+				backup_note.textContent = polykit_t("backup_settings_note");
 				panel.appendChild(backup_note);
-				backup_link.addEventListener("mousedown", (ev) => {
-					ev.preventDefault();
-					const settings = {};
-					for (let i = 0; i < localStorage.length; i++) {
-						const key = localStorage.key(i);
-						if (key && key.startsWith("polykit_")) {
-							settings[key] = localStorage.getItem(key);
-						}
-					}
-					ev.target.href = `javascript:(function(){const s=${
-						JSON.stringify(settings)
-					};Object.keys(s).forEach(k=>localStorage.setItem(k,s[k]));alert("${
-						polykit_t("backup_restored")
-					}");})();`;
-				});
-				backup_link.addEventListener("click", () => {
-					alert(polykit_t("backup_restore_hint"));
-				});
 			},
 		},
 		{
@@ -718,10 +692,7 @@ function polykit_append_settings_category(parent, category, asterisk) {
 					polykit_t(`settings_col_${controlColumn}`),
 				);
 				input.addEventListener("click", (event) => {
-					localStorage.setItem(
-						"polykit_" + setting_slug,
-						event.target.checked,
-					);
+					polykit_save_setting("polykit_" + setting_slug, event.target.checked);
 					if ("header_is_sticky" === setting_slug) {
 						document.body.classList.toggle(
 							"polykit-header-is-sticky",
@@ -746,13 +717,14 @@ function polykit_append_settings_category(parent, category, asterisk) {
 			controlCell.classList.add("polykit-settings-table__control");
 			const input = document.createElement("INPUT");
 			input.type = "text";
+			input.maxLength = 2000;
 			input.id = `polykit_${field.id}`;
 			input.name = field.id;
 			input.placeholder = field.placeholder;
 			input.classList.add("polykit-settings-table__text");
 			input.value = polykit_get_text_setting(field.id, "");
 			input.addEventListener("change", (event) => {
-				localStorage.setItem(`polykit_${field.id}`, event.target.value);
+				polykit_save_setting(`polykit_${field.id}`, event.target.value);
 			});
 			controlCell.appendChild(input);
 			row.append(descCell, controlCell);
@@ -794,7 +766,7 @@ function polykit_create_check_level_radios(setting_slug) {
 		input.checked = value === current;
 		input.addEventListener("change", (event) => {
 			if (event.target.checked) {
-				localStorage.setItem(`polykit_${setting_slug}`, event.target.value);
+				polykit_save_setting(`polykit_${setting_slug}`, event.target.value);
 			}
 		});
 		label.append(input, document.createTextNode(polykit_t(label_key)));
@@ -963,4 +935,11 @@ function polykit_get_setting(key) {
 function polykit_get_text_setting(key, defaultValue = "") {
 	const stored = localStorage.getItem(`polykit_${key}`);
 	return null === stored ? defaultValue : stored;
+}
+
+function polykit_save_setting(key, value) {
+	localStorage.setItem(key, String(value));
+	document.documentElement.dataset.polykitSettingChanged = key;
+	document.dispatchEvent(new Event("polykit:setting-changed"));
+	delete document.documentElement.dataset.polykitSettingChanged;
 }

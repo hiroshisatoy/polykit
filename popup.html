@@ -33,8 +33,17 @@
 					<span aria-hidden="true">›</span>
 				</button>
 			</div>
+			<section class="popup__transfer" aria-label="設定の共有">
+				<p>Chrome 同期が有効なら同じアカウントの端末へ設定が届きます。別の人には JSON ファイルで渡せます。</p>
+				<div class="popup__transfer-actions">
+					<button id="export-settings" type="button">設定を書き出す</button>
+					<button id="import-settings" type="button">設定を読み込む</button>
+				</div>
+				<input id="settings-file" class="popup__file" type="file" accept=".json,application/json" aria-label="設定ファイル">
+			</section>
 			<p id="status" class="status" role="status" aria-live="polite"></p>
 		</main>
+		<script src="js/settings-storage.js"></script>
 		<script src="js/popup.js"></script>
 	</body>
 </html>

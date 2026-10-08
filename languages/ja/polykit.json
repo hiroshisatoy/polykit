@@ -191,7 +191,7 @@
 	"setting_words_placeholder": "例: link, URL",
 	"backup_settings": "設定をバックアップ",
 	"backup_settings_hint": "ブックマークバーへドラッグして保存",
-	"backup_settings_note": "(ブックマークを translate.w.org で開くと復元)",
+	"backup_settings_note": "設定の書き出し・読み込みはツールバーの PolyKit アイコンから行えます。",
 	"backup_restored": "設定を復元しました !",
 	"backup_restore_hint": "復元するには translate.w.org でこのブックマークをクリックしてください。",
 	"save_with_warnings": "警告付きで保存 / 承認",
