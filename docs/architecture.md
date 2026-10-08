@@ -410,8 +410,9 @@ GlotPress の一般クラスへの広範な上書きを避ける。
 ポップアップは OS の配色設定に追従する。
 
 「モダンな配色を使用する」は既定で無効にする。
-有効時だけ `html.polykit-modern-colors` を付け、GlotPress の色変数が
-Blueberry パレットを参照するようにし、`.site-header` の背景色も切り替える。
+有効時だけ `html.polykit-modern-colors` を付け、GlotPress のアクセントと
+ボタン背景を Blueberry パレットへ、枠線を無彩色へ切り替える。
+`.site-header` の背景色も Blueberry パレットを参照する。
 設定変更時はクラスを即時更新し、次回のページ読み込みでも同期設定を反映する。
 
 設定タブは `button[role="tab"]` と `role="tabpanel"` を関連付け、

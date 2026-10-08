@@ -138,11 +138,17 @@ Deno.test("modern palette defines the requested colors only behind the opt-in cl
 		css,
 		/--gp-color-btn-primary-hover-bg: color-mix\(in srgb, var\(--wp--preset--color--blueberry-1\) 82%, #000\);/,
 	);
+	const borderColors = css.split("\n").filter((line) =>
+		/--gp-color-(?:border|btn-(?:primary-)?(?:hover-)?border)/.test(line)
+	);
+	assert.equal(borderColors.length, 6);
+	assert.ok(borderColors.every((line) => /: #[0-9a-f]{6};/.test(line)));
 	const chromaticColors = css.split("\n").filter((line) =>
 		line.includes("--gp-color-") &&
-		!/(--gp-color-fg-default|--gp-color-btn-primary-(?:hover-)?text):/.test(line)
+		!/(--gp-color-fg-default|--gp-color-btn-primary-(?:hover-)?text|--gp-color-(?:border|btn-(?:primary-)?(?:hover-)?border))/
+			.test(line)
 	);
-	assert.equal(chromaticColors.length, 12);
+	assert.equal(chromaticColors.length, 6);
 	assert.ok(chromaticColors.every((line) => line.includes("--wp--preset--color--blueberry-")));
 	assert.doesNotMatch(css, /#2271b1|#135e96/);
 	assert.match(
