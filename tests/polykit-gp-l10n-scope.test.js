@@ -32,7 +32,7 @@ function element(classes = [], excluded = false) {
 	};
 }
 
-Deno.test("GlotPress translation uses exact URL or allowed class", () => {
+Deno.test("GlotPress translation includes exact URL or class and respects exclude", () => {
 	const { context, location } = loadTranslator();
 	const outside = element();
 	const content = element(["gp-content"]);
@@ -52,7 +52,7 @@ Deno.test("GlotPress translation uses exact URL or allowed class", () => {
 	assert.equal(vm.runInContext("polykit_gp_is_translation_target(target)", context), false);
 });
 
-Deno.test("GlotPress text stays unchanged outside allowed areas", () => {
+Deno.test("GlotPress text stays unchanged outside include areas", () => {
 	const { context, location } = loadTranslator();
 	const textNode = { data: "Save Settings", parentElement: element() };
 	context.textNode = textNode;
@@ -68,7 +68,7 @@ Deno.test("GlotPress text stays unchanged outside allowed areas", () => {
 	assert.equal(textNode.data, "設定を保存");
 });
 
-Deno.test("GlotPress attributes stay unchanged outside allowed areas", () => {
+Deno.test("GlotPress attributes stay unchanged outside include areas", () => {
 	const { context } = loadTranslator();
 	let classes = [];
 	let title = "Save Settings";

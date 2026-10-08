@@ -8,34 +8,37 @@
 let polykit_gp_strings_sorted = null;
 let polykit_gp_l10n_initialized = false;
 
-// URL はクエリを除いた完全一致。classes は翻訳対象領域の CSS クラス。
-const polykit_gp_l10n_whitelist = {
-	urls: ["https://translate.wordpress.org/"],
-	classes: [".gp-content", ".site-header", ".site-footer"],
+// include.urls はクエリを除いた完全一致。include.classes は対象領域の CSS クラス。
+// exclude は include に一致しても翻訳しない CSS セレクター。
+const polykit_gp_l10n_scope = {
+	include: {
+		urls: ["https://translate.wordpress.org/"],
+		classes: [".gp-content", ".site-header", ".site-footer"],
+	},
+	exclude: [
+		"script",
+		"style",
+		"textarea",
+		"code",
+		"tr.preview .original",
+		"tr.preview .translation",
+		".editor .original",
+		".editor .original-raw",
+		".foreign-text",
+		".translation-suggestion__translation",
+		".translation-suggestion__translation-raw",
+		".translation-suggestion__original-diff",
+		".gp-content .breadcrumb",
+		".project-top",
+		"#glossary tbody",
+		".polykit-settings",
+		"#polykit-i18n-data",
+		"#polykit-notices-container",
+		"[data-polykit-no-l10n]",
+	],
 };
-const polykit_gp_l10n_class_selector = polykit_gp_l10n_whitelist.classes.join(", ");
-
-const polykit_gp_skip_selector = [
-	"script",
-	"style",
-	"textarea",
-	"code",
-	"tr.preview .original",
-	"tr.preview .translation",
-	".editor .original",
-	".editor .original-raw",
-	".foreign-text",
-	".translation-suggestion__translation",
-	".translation-suggestion__translation-raw",
-	".translation-suggestion__original-diff",
-	".gp-content .breadcrumb",
-	".project-top",
-	"#glossary tbody",
-	".polykit-settings",
-	"#polykit-i18n-data",
-	"#polykit-notices-container",
-	"[data-polykit-no-l10n]",
-].join(", ");
+const polykit_gp_include_selector = polykit_gp_l10n_scope.include.classes.join(", ");
+const polykit_gp_exclude_selector = polykit_gp_l10n_scope.exclude.join(", ");
 
 /**
  * @returns {boolean}
@@ -99,7 +102,7 @@ function polykit_gp_should_skip_element(element) {
 	if (!element) {
 		return true;
 	}
-	return Boolean(element.closest(polykit_gp_skip_selector));
+	return Boolean(element.closest(polykit_gp_exclude_selector));
 }
 
 /**
@@ -112,8 +115,8 @@ function polykit_gp_is_translation_target(element) {
 	}
 	const location = window.location;
 	const page_url = location && `${location.origin}${location.pathname}`;
-	return polykit_gp_l10n_whitelist.urls.includes(page_url) ||
-		Boolean(element.closest(polykit_gp_l10n_class_selector));
+	return polykit_gp_l10n_scope.include.urls.includes(page_url) ||
+		Boolean(element.closest(polykit_gp_include_selector));
 }
 
 /**

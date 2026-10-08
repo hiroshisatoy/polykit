@@ -238,12 +238,14 @@ GTE 権限は用語集の取得完了後に確定するため、一括操作の�
 `js/polykit-gp-l10n.js` は、`languages/ja/glotpress.json` の英日対応を使い、
 既存 DOM のテキストノードと表示属性を翻訳する。
 
-翻訳対象は同ファイルの `polykit_gp_l10n_whitelist` で指定する。
-`urls` はクエリを除いた URL の完全一致、`classes` は対象領域のクラスであり、
-いずれかに一致した領域だけを翻訳する。初期値はトップページの URL と
+翻訳範囲は同ファイルの `polykit_gp_l10n_scope` にある
+`include` と `exclude` で指定する。
+`include.urls` はクエリを除いた URL の完全一致、`include.classes` は
+対象領域のクラスであり、いずれかに一致した領域だけを翻訳する。
+初期値はトップページの URL と
 `.gp-content`、`.site-header`、`.site-footer` とする。
 動的にクラスが付与された領域も監視対象にする。
-次の除外領域は許可リストに一致しても翻訳しない。
+`exclude` に指定した次の領域は `include` に一致しても翻訳しない。
 
 - 原文と訳文
 - テキスト入力欄
