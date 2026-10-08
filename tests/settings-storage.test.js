@@ -47,6 +47,17 @@ Deno.test("settings export accepts only known settings and safe values", () => {
 	assert.equal(imported.polykit_translate_interface, false);
 	assert.equal(imported.polykit_modern_colors, true);
 	assert.equal(imported.polykit_ja_nakaguro, "notice");
+	const legacy = settings.parseExport(JSON.stringify({
+		format: "polykit-settings",
+		version: 1,
+		settings: {
+			polykit_translate_interface: true,
+			polykit_autocopy_string_on_translation_opened: true,
+		},
+	}));
+	assert.equal(legacy.polykit_translate_interface, true);
+	assert.ok(!Object.hasOwn(legacy, "polykit_autocopy_string_on_translation_opened"));
+	assert.ok(!settings.keys.includes("polykit_autocopy_string_on_translation_opened"));
 	assert.throws(() => settings.parseExport('{"format":"other","version":1,"settings":{}}'));
 	assert.throws(() => settings.clean({ polykit_extension_status: "private" }));
 	assert.throws(() => settings.clean({ polykit_warning_words: "あ".repeat(3000) }));

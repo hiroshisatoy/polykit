@@ -237,7 +237,6 @@ function polykit_generate_settings_panel() {
 				controlColumn: "enabled",
 				settings: {
 					no_non_breaking_space: polykit_t("setting_no_non_breaking_space"),
-					autocopy_string_on_translation_opened: polykit_t("setting_autocopy"),
 					autosubmit_bulk_copy_from_original: polykit_t(
 						"setting_autosubmit_bulk",
 					),

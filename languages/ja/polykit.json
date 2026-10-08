@@ -110,7 +110,6 @@
 	"ja_avoid_anata": "「あなた」が含まれています。「自分の」「お使いの」などのより自然な言い回しか、省略を検討してください (3-5)。",
 	"ja_nakaguro": "カタカナ複合語に中点「・」が含まれています。原則使用しません (区切りが分かりにくい場合は例外可) (5)。",
 	"setting_no_non_breaking_space": "ノンブレークスペースのハイライトを非表示",
-	"setting_autocopy": "エディター開時に原文をクリップボードへコピー",
 	"setting_autosubmit_bulk": "一括「原文からコピー」後に自動保存 *",
 	"setting_force_autosubmit_bulk": "一括コピー時の警告を無視して自動保存 *",
 	"scroll_to": "日本語へスクロール",

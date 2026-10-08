@@ -841,18 +841,6 @@ function polykit_build_sticky_header() {
 }
 
 /**
- * Copy the original string using Clipboard API
- *
- * @returns {void}
- */
-function polykit_copy_visible_original_string() {
-	const original = polykit_query_visible_editor(".original-raw");
-	if (original) {
-		polykit_copy_to_clipboard(original.textContent);
-	}
-}
-
-/**
  * Adds an anonimous check next to the author filter field
  * @returns {void}
  */

@@ -14,7 +14,6 @@ const polykitSettingsStorage = (() => {
 		"header_is_sticky",
 		"bulk_consistency",
 		"no_non_breaking_space",
-		"autocopy_string_on_translation_opened",
 		"autosubmit_bulk_copy_from_original",
 		"force_autosubmit_bulk_copy_from_original",
 	];
@@ -84,6 +83,7 @@ const polykitSettingsStorage = (() => {
 		}
 		const result = {};
 		for (const [key, value] of Object.entries(settings)) {
+			if ("polykit_autocopy_string_on_translation_opened" === key) continue;
 			const normalized = normalize(key, value);
 			if (null === normalized) throw new Error(`無効な設定項目: ${key}`);
 			result[key] = normalized;
